@@ -1,20 +1,24 @@
-# Starlight Starter Kit: Basics
+# Seafoam Labs
+
+Website for Seafoam Labs, built with [Astro](https://github.com/withastro/astro) and [Starlight](https://github.com/withastro/starlight).
 
 ## Project Structure
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+Inside of the project, you'll see the following folders and files:
 
 ```
 .
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+├─ public/
+├─ src/
+│  ├─ assets/
+│  ├─ content/
+│  │  └── docs/
+│  └─ content.config.ts
+├─ astro.config.mjs
+├─ eslint.config.mjs
+├─ prettier.config.mjs
+├─ package.json
+└─ tsconfig.json
 ```
 
 Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
@@ -28,21 +32,15 @@ Static assets, like favicons, can be placed in the `public/` directory.
 All commands are run from the root of the project, from a terminal:
 
 - `npm install` to install dependencies
-
 <!-- Separator -->
-
 - `npm run dev` to start the local development server
 - `npm run format` to format code with Prettier
 - `npm run lint` to lint code with ESLint
 - `npm run check` to run Astro's type checking diagnostics
-
 <!-- Separator -->
-
 - `npm run build` to build the production site
 - `npm run preview` to preview the production build locally
-
 <!-- Separator -->
-
 - `npm run astro ...` to run Astro CLI commands, like `astro add` or `astro check`
 - `npm run astro -- --help` to get help using the Astro CLI
 
