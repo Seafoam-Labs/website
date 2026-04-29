@@ -1,14 +1,6 @@
 # Starlight Starter Kit: Basics
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
-
-```
-npm create astro@latest -- --template starlight
-```
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
+## Project Structure
 
 Inside of your Astro + Starlight project, you'll see the following folders and files:
 
@@ -31,19 +23,39 @@ Images can be added to `src/assets/` and embedded in Markdown with a relative li
 
 Static assets, like favicons, can be placed in the `public/` directory.
 
-## 🧞 Commands
+## Commands
 
 All commands are run from the root of the project, from a terminal:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+- `npm install` to install dependencies
 
-## 👀 Want to learn more?
+<!-- Separator -->
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+- `npm run dev` to start the local development server
+- `npm run format` to format code with Prettier
+- `npm run lint` to lint code with ESLint
+- `npm run check` to run Astro's type checking diagnostics
+
+<!-- Separator -->
+
+- `npm run build` to build the production site
+- `npm run preview` to preview the production build locally
+
+<!-- Separator -->
+
+- `npm run astro ...` to run Astro CLI commands, like `astro add` or `astro check`
+- `npm run astro -- --help` to get help using the Astro CLI
+
+## Useful links
+
+### Formatting
+
+- https://github.com/withastro/prettier-plugin-astro
+- https://github.com/tailwindlabs/prettier-plugin-tailwindcss
+
+### Linting
+
+- https://github.com/eslint/eslint
+- https://github.com/typescript-eslint/typescript-eslint
+- https://github.com/ota-meshi/eslint-plugin-astro
+- https://docs.astro.build/en/guides/typescript/#type-checking
