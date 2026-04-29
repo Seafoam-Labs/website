@@ -12,7 +12,8 @@ Inside of the project, you'll see the following folders and files:
 ├─ src/
 │  ├─ assets/
 │  ├─ content/
-│  │  └── docs/
+│  │  └─ docs/
+│  ├─ pages/
 │  └─ content.config.ts
 ├─ astro.config.mjs
 ├─ eslint.config.mjs
@@ -22,6 +23,8 @@ Inside of the project, you'll see the following folders and files:
 ```
 
 Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+
+Astro [custom pages](https://starlight.astro.build/guides/pages/#custom-pages) are placed in the `src/pages/` directory. Each file is exposed as a route based on its file name.
 
 Images can be added to `src/assets/` and embedded in Markdown with a relative link.
 
