@@ -1,0 +1,65 @@
+---
+title: Welcome
+description: Open-source tools for Arch Linux and beyond - built with care by Seafoam Labs.
+template: splash
+hero:
+  title: Seafoam Labs
+  tagline: Open-source tools for Arch Linux and beyond - designed with you in mind.
+  actions:
+    - text: Shelly ALPM
+      link: /shelly-alpm/
+      icon: right-arrow
+      variant: primary
+    - text: Starfish
+      link: /starfish/
+      icon: right-arrow
+      variant: minimal
+    - text: Aqueous
+      link: /aqueous/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+## Projects
+
+<CardGrid>
+  <Card title="Shelly ALPM" icon="linux">
+    A modern, visual package manager for Arch Linux - a Pacman alternative designed with you in mind.
+    Built in C# with GTK4, Shelly ALPM brings a polished UI to Arch package management with support
+    for CachyOS, Garuda Linux, and more.
+
+    [Explore Shelly ALPM →](/shelly-alpm/)
+
+  </Card>
+
+  <Card title="Starfish" icon="puzzle">
+    A dependency viewer for Arch packages. Visualise and explore the dependency graph of any package
+    installed on your system with clarity and ease.
+
+    [Explore Starfish →](/starfish/)
+
+  </Card>
+
+  <Card title="Aqueous" icon="setting">
+    A new Seafoam Labs project - currently in early development. Stay tuned for updates.
+
+    [Explore Aqueous →](/aqueous/)
+
+  </Card>
+</CardGrid>
+
+## About Seafoam Labs
+
+<LinkCard
+  title="GitHub Organisation"
+  description="Browse all Seafoam Labs repositories on GitHub."
+  href="https://github.com/Seafoam-Labs"
+/>
+
+<LinkCard
+  title="Shelly ALPM Website"
+  description="Visit the official Shelly ALPM project site."
+  href="https://shellyalpm.com"
+/>

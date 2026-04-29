@@ -8,27 +8,23 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   integrations: [
     starlight({
-      title: "My Docs",
+      title: "Seafoam Labs",
+      logo: {
+        src: "./src/assets/images/seafoamlabs-logo.png",
+      },
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/withastro/starlight",
-        },
-      ],
-      sidebar: [
-        {
-          label: "Guides",
-          items: [
-            // Each item here is one entry in the navigation menu.
-            { label: "Example Guide", slug: "guides/example" },
-          ],
+          href: "https://github.com/Seafoam-Labs",
         },
         {
-          label: "Reference",
-          autogenerate: { directory: "reference" },
+          icon: "comment-alt",
+          label: "Fluxer",
+          href: "https://fluxer.gg/vOjrMXcE",
         },
       ],
+      sidebar: [],
       customCss: ["./src/styles/global.css"],
     }),
   ],
