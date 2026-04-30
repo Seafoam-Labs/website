@@ -3,3 +3,52 @@
 @import "@astrojs/starlight-tailwind";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
+
+@theme {
+  /* Seafoam/Teal from character's hair */
+  --seafoam: #2dd4a8;
+  --seafoam-light: #5eead4;
+  --seafoam-dark: #14b8a6;
+  --seafoam-muted: #0d9488;
+
+  /* Purple from character's suit */
+  --purple: #7c3aed;
+  --purple-light: #a78bfa;
+  --purple-dark: #5b21b6;
+
+  /* Pink accent from character */
+  --pink: #ec4899;
+  --pink-light: #f472b6;
+
+  /* Dark backgrounds */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-input: #0f172a;
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Borders */
+  --border: #334155;
+  --border-focus: var(--seafoam);
+
+  /* TODO: Adapt seafoamlabs colors */
+
+  /* Generated accent color palettes. */
+  --color-accent-200: var(--seafoam-light);
+  --color-accent-600: var(--seafoam);
+  --color-accent-900: var(--seafoam-dark);
+  --color-accent-950: var(--bg-primary);
+  /* Generated gray color palettes. */
+  --color-gray-100: #f3f6fb;
+  --color-gray-200: #e8eef8;
+  --color-gray-300: #bbc2ce;
+  --color-gray-400: #7f8ca2;
+  --color-gray-500: #4c596d;
+  --color-gray-700: #2d394b;
+  --color-gray-800: #1c2739;
+  --color-gray-900: var(--bg-primary);
+}
