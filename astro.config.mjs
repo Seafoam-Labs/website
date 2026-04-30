@@ -10,7 +10,7 @@ export default defineConfig({
     starlight({
       title: "Seafoam Labs",
       logo: {
-        src: "./src/assets/images/seafoamlabs-logo.png",
+        src: "./src/assets/images/shellheart-small.webp",
       },
       social: [
         {
