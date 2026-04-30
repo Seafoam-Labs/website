@@ -24,7 +24,23 @@ export default defineConfig({
           href: "https://fluxer.gg/vOjrMXcE",
         },
       ],
-      sidebar: [],
+      sidebar: [
+        {
+          label: "Shelly ALPM",
+          items: [
+            { label: "Overview", link: "/shelly-alpm" },
+            "shelly-alpm/download",
+          ],
+        },
+        {
+          label: "Starfish",
+          autogenerate: { directory: "starfish" },
+        },
+        {
+          label: "Aqueous",
+          autogenerate: { directory: "aqueous" },
+        },
+      ],
       customCss: ["./src/styles/global.css"],
     }),
   ],

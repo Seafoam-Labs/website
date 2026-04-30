@@ -1,0 +1,98 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import AnchorHeading from "@astrojs/starlight/components/AnchorHeading.astro";
+import {
+  Card,
+  CardGrid,
+  Code,
+  LinkCard,
+  TabItem,
+  Tabs,
+} from "@astrojs/starlight/components";
+import shellyLogo from "../../assets/images/shelly-logo.png";
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Shelly ALPM",
+    description:
+      "Shelly is a modern, visual, and intuitive interface for your Arch Linux system. Not just a wrapper, but a native ground-up experience.",
+    template: "splash",
+    next: false,
+    hero: {
+      title: "Arch Package Management, Reimagined",
+      tagline:
+        "Shelly is a modern, visual, and intuitive interface for your Arch Linux system. Not just a wrapper, but a native ground-up experience.",
+      image: {
+        alt: "A stylized purple-blue shell icon emerging from a brown cardboard box.",
+        file: shellyLogo,
+      },
+      actions: [
+        {
+          text: "Download",
+          link: "/shelly-alpm/download/",
+          icon: "right-arrow",
+        },
+        {
+          text: "View on GitHub",
+          link: "https://github.com/Seafoam-Labs/Shelly-ALPM",
+          icon: "external",
+          variant: "minimal",
+        },
+      ],
+    },
+  }}
+  hasSidebar={false}
+>
+  <AnchorHeading level="2" id="installation">Installation</AnchorHeading>
+
+  <p>
+    The recommended installation for Shelly is for CachyOS or using CachyOS
+    packages:
+  </p>
+
+  <Tabs>
+    <TabItem label="pacman">
+      <Code code="sudo pacman -S shelly" lang="sh" />
+    </TabItem>
+    <TabItem label="yay">
+      <Code code="yay -S shelly" lang="sh" />
+    </TabItem>
+    <TabItem label="paru">
+      <Code code="paru -S shelly" lang="sh" />
+    </TabItem>
+  </Tabs>
+
+  <AnchorHeading level="2" id="why-shelly">Why Shelly?</AnchorHeading>
+
+  <CardGrid stagger>
+    <Card title="Native Performance" icon="rocket">
+      Directly interacts with libalpm for the fastest and most accurate package
+      management possible.
+    </Card>
+    <Card title="Modern UI" icon="laptop">
+      Built with GTK 4, providing a beautiful, responsive, and clean user
+      interface.
+    </Card>
+    <Card title="AUR & Flatpak" icon="puzzle">
+      Integrated support for Arch User Repository and Flatpaks, managing all
+      your software in one place.
+    </Card>
+  </CardGrid>
+
+  <LinkCard
+    title="View on GitHub"
+    description="Browse the Shelly ALPM source code on GitHub."
+    href="https://github.com/Seafoam-Labs/Shelly-ALPM"
+  />
+
+  <LinkCard
+    title="Donate"
+    description="Support the development of Shelly ALPM."
+    href="https://buymeacoffee.com/zoeyerinba3"
+  />
+
+  <p class="mt-16 text-center">
+    <small>Shelly is an open-source project licensed under GPL-3.0.</small>
+  </p>
+</StarlightPage>

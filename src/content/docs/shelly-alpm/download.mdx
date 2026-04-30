@@ -1,0 +1,59 @@
+---
+title: Download Shelly
+sidebar:
+  label: Download
+description: Download Shelly ALPM, the native Arch Linux package manager. Get it for CachyOS or through AUR helpers like yay and paru.
+tableOfContents: false
+---
+
+import {
+  Card,
+  Code,
+  CardGrid,
+  TabItem,
+  LinkButton,
+  Tabs,
+} from "@astrojs/starlight/components";
+
+## Download & Install
+
+<Card title="CachyOS / pacman (Recommended)" icon="download">
+  Install Shelly directly from CachyOS repositories.
+  <Code code="sudo pacman -S shelly" lang="sh" />
+</Card>
+
+<Card title="AUR Helpers" icon="cloud-download">
+  Use your preferred AUR helper:
+  <Tabs>
+    <TabItem label="yay">
+      <Code code="yay -S shelly" lang="sh" />
+    </TabItem>
+    <TabItem label="paru">
+      <Code code="paru -S shelly" lang="sh" />
+    </TabItem>
+  </Tabs>
+</Card>
+
+<Card title="Build from Source (PKGBUILD)" icon="seti:git">
+  Standard Arch Linux build and install flow.
+
+```bash
+git clone https://github.com/Seafoam-Labs/Shelly-ALPM.git
+cd Shelly-ALPM
+makepkg -si
+```
+
+</Card>
+
+## Releases
+
+Download specific versions or source snapshots from GitHub:
+
+<LinkButton
+  href="https://github.com/Seafoam-Labs/Shelly-ALPM/releases"
+  variant="secondary"
+  icon="external"
+  iconPlacement="start"
+>
+  View all releases
+</LinkButton>
