@@ -31,6 +31,7 @@ export default defineConfig({
             { label: "Overview", link: "/shelly-alpm" },
             "shelly-alpm/download",
             "shelly-alpm/screenshots",
+            "shelly-alpm/docs",
             "shelly-alpm/about",
           ],
         },
