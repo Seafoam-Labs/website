@@ -32,7 +32,7 @@
   --text-muted: #64748b;
 
   /* Borders */
-  --border: #334155;
+  --border-normal: #334155;
   --border-focus: var(--seafoam);
 
   /* TODO: Adapt seafoamlabs colors */
@@ -52,3 +52,20 @@
   --color-gray-800: #1c2739;
   --color-gray-900: var(--bg-primary);
 }
+
+/* Starlight overrides */
+
+:root {
+  /* Top header */
+  --sl-nav-height: 4.6rem;
+}
+
+.header {
+  .site-title {
+    --sl-nav-gap: 1rem;
+  }
+
+  border-bottom-color: var(--border-normal);
+}
+
+/* End Starlight overrides */
