@@ -19,7 +19,8 @@ export default defineConfig({
           href: "https://github.com/Seafoam-Labs",
         },
         {
-          icon: "comment-alt",
+          /* Hack to add fluxer icon via SocialIcons.astro override */
+          icon: "comment",
           label: "Fluxer",
           href: "https://fluxer.gg/vOjrMXcE",
         },
@@ -45,6 +46,9 @@ export default defineConfig({
         },
       ],
       customCss: ["./src/styles/global.css"],
+      components: {
+        SocialIcons: "./src/components/overrides/SocialIcons.astro",
+      },
     }),
   ],
   vite: {
