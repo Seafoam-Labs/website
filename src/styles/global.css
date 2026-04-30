@@ -54,6 +54,7 @@
 }
 
 /* Starlight overrides */
+/* See https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css */
 
 :root {
   /* Top header */
