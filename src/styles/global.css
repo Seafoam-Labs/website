@@ -101,3 +101,25 @@
 }
 
 /* End Starlight overrides */
+
+/* Hero page gradient */
+[data-has-hero] {
+  .page {
+    background:
+      radial-gradient(
+        ellipse 80% 50% at 50% -10%,
+        color-mix(in srgb, var(--color-purple) 15%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        ellipse 60% 40% at 80% 60%,
+        color-mix(in srgb, var(--color-seafoam) 10%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        ellipse 50% 30% at 20% 70%,
+        color-mix(in srgb, var(--color-pink) 8%, transparent),
+        transparent
+      );
+  }
+}
