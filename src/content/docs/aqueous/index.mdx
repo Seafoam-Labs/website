@@ -1,11 +1,31 @@
 ---
-title: Example Guide
-description: A guide in my new Starlight docs site.
+title: Aqueous
+description: A minimal Wayland window manager built on River.
+sidebar:
+  label: Overview
 ---
 
-Guides lead a user through a specific task they want to accomplish, often with a sequence of steps.
-Writing a good guide requires thinking about what your users are trying to do.
+**Aqueous** is a minimal **Wayland window manager** built on top of [River](https://codeberg.org/river/river).
 
-## Further reading
+It is designed as a lightweight, configurable River-based environment with a separate shell/bar layer powered by the external [Noctalia](https://github.com/noctalia-dev/noctalia-shell) project.
 
-- Read [about how-to guides](https://diataxis.fr/how-to-guides/) in the Diátaxis framework
+- **Language:** C# (primary), with small amounts of Shell and QML
+- **Platform focus:** Linux / Wayland
+
+## Features
+
+Aqueous provides a River-oriented window management stack with:
+
+- a core window manager client
+- an input daemon for libinput-backed device configuration
+- an output daemon for display/output control
+- test projects for validation
+- packaging and session-launch integration for Linux environments
+
+The project also includes configuration, packaging, and session assets to support a full desktop login flow.
+
+## Learn More
+
+Visit the repository for source code, updates, and contribution information:
+
+[GitHub repository](https://github.com/Seafoam-Labs/Aqueous)
