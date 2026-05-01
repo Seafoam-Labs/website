@@ -80,6 +80,14 @@
     --sl-nav-gap: 1rem;
   }
 
+  .title-wrapper + div {
+    @apply justify-end;
+  }
+
+  site-search button {
+    @apply dark:bg-bg-secondary max-w-40;
+  }
+
   @apply dark:border-b-border;
 }
 
