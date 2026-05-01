@@ -14,15 +14,21 @@ export default defineConfig({
       },
       social: [
         {
-          icon: "github",
-          label: "GitHub",
-          href: "https://github.com/Seafoam-Labs",
+          /* Hack to add fluxer icon via SocialIcons.astro override */
+          icon: "warning",
+          label: "Buy Me a Coffee",
+          href: "https://buymeacoffee.com/zoeyerinba3",
         },
         {
           /* Hack to add fluxer icon via SocialIcons.astro override */
-          icon: "comment",
+          icon: "warning",
           label: "Fluxer",
           href: "https://fluxer.gg/vOjrMXcE",
+        },
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/Seafoam-Labs",
         },
       ],
       sidebar: [

@@ -5,6 +5,7 @@
 import config from "virtual:starlight/user-config";
 import { Icon } from "@astrojs/starlight/components";
 import FluxerIcon from "../../assets/icons/fluxer.svg";
+import BuyMeACoffeeIcon from "../../assets/icons/buymeacoffee.svg";
 
 const links = config.social || [];
 ---
@@ -18,6 +19,8 @@ const links = config.social || [];
 
           {label === "Fluxer" ? (
             <FluxerIcon class="h-4 w-4 fill-current" />
+          ) : label === "Buy Me a Coffee" ? (
+            <BuyMeACoffeeIcon class="h-4 w-4 fill-current" />
           ) : (
             <Icon name={icon} />
           )}
