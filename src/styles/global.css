@@ -88,6 +88,15 @@
     @apply dark:bg-bg-secondary max-w-40;
   }
 
+  starlight-theme-select {
+    svg:first-of-type {
+      @apply size-5;
+    }
+    select {
+      @apply w-14 px-1 opacity-0;
+    }
+  }
+
   @apply dark:border-b-border;
 }
 
