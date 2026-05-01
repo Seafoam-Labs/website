@@ -18,11 +18,11 @@ const links = config.social || [];
           <span class="sr-only">{label}</span>
 
           {label === "Fluxer" ? (
-            <FluxerIcon class="h-4 w-4 fill-current" />
+            <FluxerIcon class="size-5 fill-current" />
           ) : label === "Buy Me a Coffee" ? (
-            <BuyMeACoffeeIcon class="h-4 w-4 fill-current" />
+            <BuyMeACoffeeIcon class="size-5 fill-current" />
           ) : (
-            <Icon name={icon} />
+            <Icon class="size-5" name={icon} />
           )}
         </a>
       ))}
