@@ -1,0 +1,23 @@
+---
+import Default from "@astrojs/starlight/components/Footer.astro";
+
+const { siteTitle } = Astro.locals.starlightRoute;
+---
+
+<Default><slot /></Default>
+
+<div
+  class="text-text-muted mt-12 border-t border-(--sl-color-gray-6) pt-8 text-center text-sm sm:mt-16 sm:pt-12"
+>
+  <span>© {new Date().getFullYear()} {siteTitle}</span>
+  <span class="select-none">·</span>
+  <a
+    class="text-seafoam-muted dark:text-seafoam no-underline hover:underline"
+    href="mailto:developers@seafoamlabs.org">Contact</a
+  >
+  <span class="select-none">·</span>
+  <a
+    class="text-seafoam-muted dark:text-seafoam no-underline hover:underline"
+    href="https://github.com/Seafoam-Labs">GitHub</a
+  >
+</div>

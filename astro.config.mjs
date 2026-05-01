@@ -54,6 +54,7 @@ export default defineConfig({
       customCss: ["./src/styles/global.css"],
       components: {
         SocialIcons: "./src/components/overrides/SocialIcons.astro",
+        Footer: "./src/components/overrides/Footer.astro",
       },
     }),
   ],
