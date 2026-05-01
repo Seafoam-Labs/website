@@ -85,7 +85,7 @@
   }
 
   site-search button {
-    @apply dark:bg-bg-secondary max-w-40;
+    @apply dark:bg-bg-primary/15 h-8 max-w-40;
   }
 
   starlight-theme-select {
