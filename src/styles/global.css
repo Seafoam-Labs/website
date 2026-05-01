@@ -123,3 +123,8 @@
       );
   }
 }
+
+/* Site title gradient */
+.site-title {
+  @apply dark:to-purple-light to-purple dark:from-seafoam from-seafoam-muted bg-linear-to-r bg-clip-text text-transparent;
+}
