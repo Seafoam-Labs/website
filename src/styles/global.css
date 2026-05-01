@@ -6,55 +6,69 @@
 
 @theme {
   /* Seafoam/Teal from character's hair */
-  --seafoam: #2dd4a8;
-  --seafoam-light: #5eead4;
-  --seafoam-dark: #14b8a6;
-  --seafoam-muted: #0d9488;
+  --color-seafoam: #2dd4a8;
+  --color-seafoam-light: #5eead4;
+  --color-seafoam-dark: #14b8a6;
+  --color-seafoam-muted: #0d9488;
 
   /* Purple from character's suit */
-  --purple: #7c3aed;
-  --purple-light: #a78bfa;
-  --purple-dark: #5b21b6;
+  --color-purple: #7c3aed;
+  --color-purple-light: #a78bfa;
+  --color-purple-dark: #5b21b6;
 
   /* Pink accent from character */
-  --pink: #ec4899;
-  --pink-light: #f472b6;
+  --color-pink: #ec4899;
+  --color-pink-light: #f472b6;
 
   /* Dark backgrounds */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #1e293b;
-  --bg-input: #0f172a;
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-card: #1e293b;
+  --color-bg-input: #0f172a;
 
   /* Text */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
 
   /* Borders */
-  --border-normal: #334155;
-  --border-focus: var(--seafoam);
-
-  /* TODO: Adapt seafoamlabs colors */
-
-  /* Generated accent color palettes. */
-  --color-accent-200: var(--seafoam-light);
-  --color-accent-600: var(--seafoam);
-  --color-accent-900: var(--seafoam-dark);
-  --color-accent-950: var(--bg-primary);
-  /* Generated gray color palettes. */
-  --color-gray-100: #f3f6fb;
-  --color-gray-200: #e8eef8;
-  --color-gray-300: #bbc2ce;
-  --color-gray-400: #7f8ca2;
-  --color-gray-500: #4c596d;
-  --color-gray-700: #2d394b;
-  --color-gray-800: #1c2739;
-  --color-gray-900: var(--bg-primary);
+  --color-border: #334155;
+  --color-border-focus: var(--color-seafoam);
 }
 
 /* Starlight overrides */
 /* See https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css */
+
+/* Dark mode colors. */
+:root {
+  --sl-color-accent-low: var(--color-bg-primary);
+  --sl-color-accent: var(--color-seafoam);
+  --sl-color-accent-high: var(--color-seafoam-light);
+  --sl-color-white: #f8fafc;
+  --sl-color-gray-1: #e2e8f0;
+  --sl-color-gray-2: #cbd5e1;
+  --sl-color-gray-3: #94a3b8;
+  --sl-color-gray-4: #64748b;
+  --sl-color-gray-5: #334155;
+  --sl-color-gray-6: #1e293b;
+  --sl-color-black: var(--color-bg-primary);
+}
+
+/* Light mode colors. */
+:root[data-theme="light"] {
+  --sl-color-accent-low: var(--color-seafoam-light);
+  --sl-color-accent: var(--color-seafoam-muted);
+  --sl-color-accent-high: var(--color-bg-primary);
+  --sl-color-white: var(--color-bg-primary);
+  --sl-color-gray-1: #1e293b;
+  --sl-color-gray-2: #334155;
+  --sl-color-gray-3: #64748b;
+  --sl-color-gray-4: #94a3b8;
+  --sl-color-gray-5: #cbd5e1;
+  --sl-color-gray-6: #f1f5f9;
+  --sl-color-gray-7: #f8fafc;
+  --sl-color-black: #ffffff;
+}
 
 :root {
   /* Top header */
@@ -66,7 +80,7 @@
     --sl-nav-gap: 1rem;
   }
 
-  border-bottom-color: var(--border-normal);
+  @apply dark:border-b-border;
 }
 
 /* End Starlight overrides */
