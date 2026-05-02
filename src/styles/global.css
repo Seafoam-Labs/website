@@ -137,3 +137,23 @@
     @apply dark:to-purple-light to-purple dark:from-seafoam from-seafoam-muted bg-linear-to-r bg-clip-text text-transparent;
   }
 }
+
+.sl-container {
+  footer {
+    /* Hide meta and pagination if they have no content */
+    .meta:not(:has(*)),
+    .pagination-links:not(:has(*)) {
+      display: none;
+    }
+
+    /* Add margin to pagination if meta is hidden */
+    .meta:not(:has(*)) + .pagination-links {
+      margin-top: 3rem;
+    }
+
+    /* Hide footer itself if it has no content. */
+    &:not(:has(.meta > *, .pagination-links > *)) {
+      display: none;
+    }
+  }
+}
