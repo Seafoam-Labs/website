@@ -12,6 +12,14 @@ export default defineConfig({
       logo: {
         src: "./src/assets/images/shellheart-small.webp",
       },
+      head: [
+        {
+          tag: "meta",
+          attrs: {
+            name: "darkreader-lock",
+          },
+        },
+      ],
       social: [
         {
           /* Hack to add fluxer icon via SocialIcons.astro override */
