@@ -1,0 +1,49 @@
+---
+import { getCollection } from "astro:content";
+
+function isDate(value: unknown): value is Date {
+  return value instanceof Date && !isNaN(value.getTime());
+}
+
+function formatDate(value: unknown): string {
+  if (isDate(value)) {
+    return value.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+  return "-";
+}
+
+const blog = (
+  await getCollection(
+    "docs",
+    ({ data, id }) => id.startsWith("blog/") && data.draft !== true,
+  )
+).toSorted((a, b) => {
+  const aTime = isDate(a.data.lastUpdated) ? a.data.lastUpdated.getTime() : 0;
+  const bTime = isDate(b.data.lastUpdated) ? b.data.lastUpdated.getTime() : 0;
+  return bTime - aTime;
+});
+---
+
+<ul class="mt-4 list-none p-0">
+  {
+    blog.map(({ id, data }) => (
+      <li class="mb-6 p-0 last:mb-0">
+        <h3>
+          <a class="no-underline hover:underline" href={`/${id}`}>
+            {data.title}
+          </a>
+        </h3>
+        <p class="mt-1.5">{data.description}</p>
+        <div class="mt-2.5">
+          <span class="text-(length:--sl-text-sm) text-(--sl-color-gray-3)">
+            {formatDate(data.lastUpdated)}
+          </span>
+        </div>
+      </li>
+    ))
+  }
+</ul>

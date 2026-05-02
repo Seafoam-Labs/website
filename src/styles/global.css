@@ -82,6 +82,9 @@
 
   /* Left sidebar width */
   --sl-sidebar-width: 16rem;
+
+  /* Navbar gap */
+  --sl-nav-gap: 2rem;
 }
 
 .header {

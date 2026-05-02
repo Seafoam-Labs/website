@@ -1,0 +1,38 @@
+---
+import Default from "@astrojs/starlight/components/PageTitle.astro";
+
+const {
+  entry: {
+    data: { title },
+  },
+} = Astro.locals.starlightRoute;
+
+// Remove leading and trailing slashes from the pathname before checking if it starts with "blog/".
+// This ensures that only blog posts themselves (e.g., "/blog/my-post") will be considered blog posts, while the main blog page ("/blog") will not.
+const isBlogPost = Astro.url.pathname
+  .replace(/^\/|\/$/g, "")
+  .startsWith("blog/");
+---
+
+{
+  isBlogPost ? (
+    <Fragment>
+      <a
+        href="/blog"
+        class="text-(--sl-color-text-accent) no-underline hover:underline"
+      >
+        Blog
+      </a>
+      <h1
+        class="mt-1 text-(length:--sl-text-h1) leading-(--sl-line-height-headings) font-medium tracking-[-1px] text-(--sl-color-white)"
+        id="_top"
+      >
+        {title}
+      </h1>
+    </Fragment>
+  ) : (
+    <Default>
+      <slot />
+    </Default>
+  )
+}
