@@ -19,6 +19,20 @@ export default defineConfig({
             name: "darkreader-lock",
           },
         },
+        {
+          tag: "meta",
+          attrs: {
+            property: "og:image",
+            content: "/og-shellheart.webp",
+          },
+        },
+        {
+          tag: "meta",
+          attrs: {
+            property: "twitter:image",
+            content: "/og-shellheart.webp",
+          },
+        },
       ],
       social: [
         {
