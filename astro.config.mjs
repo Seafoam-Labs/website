@@ -12,6 +12,7 @@ export default defineConfig({
       logo: {
         src: "./src/assets/images/shellheart-small.webp",
       },
+      favicon: "/favicon.png",
       head: [
         {
           tag: "meta",
@@ -31,6 +32,14 @@ export default defineConfig({
           attrs: {
             property: "twitter:image",
             content: "/og-shellheart.webp",
+          },
+        },
+        {
+          tag: "link",
+          attrs: {
+            rel: "icon",
+            href: "/favicon.ico",
+            sizes: "48x48",
           },
         },
       ],
