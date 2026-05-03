@@ -82,6 +82,9 @@ export default defineConfig({
           autogenerate: { directory: "aqueous" },
         },
       ],
+      expressiveCode: {
+        themes: ["catppuccin-macchiato", "catppuccin-latte"],
+      },
       customCss: ["./src/styles/global.css"],
       components: {
         Header: "./src/components/overrides/Header.astro",
