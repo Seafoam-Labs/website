@@ -3,6 +3,9 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
+import starlightChangelogs, {
+  makeChangelogsSidebarLinks,
+} from "starlight-changelogs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -72,6 +75,13 @@ export default defineConfig({
             "shelly-alpm/screenshots",
             "shelly-alpm/docs",
             "shelly-alpm/about",
+            ...makeChangelogsSidebarLinks([
+              {
+                type: "all",
+                base: "shelly-alpm/changelog",
+                label: "Changelog",
+              },
+            ]),
           ],
         },
         {
@@ -93,6 +103,7 @@ export default defineConfig({
         SocialIcons: "./src/components/overrides/SocialIcons.astro",
         Footer: "./src/components/overrides/Footer.astro",
       },
+      plugins: [starlightChangelogs()],
     }),
   ],
   vite: {
