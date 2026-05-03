@@ -160,3 +160,10 @@
     }
   }
 }
+
+.hero {
+  img {
+    /* Hack: Hide alt text in hero images due to firefox issue to prevent flashing. */
+    @apply text-transparent;
+  }
+}
