@@ -37,14 +37,16 @@ const links = [
       alt="Shelly Chel"
     />
   </a>
-  <nav>
+  <nav class="flex flex-wrap justify-end gap-x-4 sm:justify-start sm:gap-x-2">
     {
       links.map((link, index) => (
         <>
           {index === 0 ? (
             ""
           ) : (
-            <span class="mx-1 text-(--sl-color-gray-5) select-none">·</span>
+            <span class="hidden text-(--sl-color-gray-5) select-none sm:inline">
+              ·
+            </span>
           )}
           <a
             class="text-(--sl-color-accent) no-underline hover:underline"
