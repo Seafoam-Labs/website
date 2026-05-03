@@ -1,23 +1,59 @@
 ---
 import Default from "@astrojs/starlight/components/Footer.astro";
+import shellyChel from "../../assets/images/shelly-chel.webp";
+import shellyChelAvif from "../../assets/images/shelly-chel.avif";
 
 const { siteTitle } = Astro.locals.starlightRoute;
+
+const links = [
+  {
+    title: "Blog",
+    href: "/blog",
+  },
+  {
+    title: "GitHub",
+    href: "https://github.com/Seafoam-Labs",
+  },
+  {
+    title: "Contact",
+    href: "mailto:developers@seafoamlabs.org",
+  },
+];
 ---
 
 <Default><slot /></Default>
 
 <div
-  class="text-text-muted mt-12 border-t border-(--sl-color-gray-6) pt-8 text-center text-sm sm:mt-16 sm:pt-12"
+  class="mt-12 flex items-center justify-center border-t border-(--sl-color-gray-6) pt-8 text-(length:--sl-text-sm) text-(--sl-color-gray-3) sm:mt-16 sm:pt-12"
 >
   <span>© {new Date().getFullYear()} {siteTitle}</span>
-  <span class="select-none">·</span>
   <a
-    class="text-seafoam-muted dark:text-seafoam no-underline hover:underline"
-    href="mailto:developers@seafoamlabs.org">Contact</a
+    class="mx-1 text-(--sl-color-gray-5) select-none"
+    href={shellyChelAvif.src}
   >
-  <span class="select-none">·</span>
-  <a
-    class="text-seafoam-muted dark:text-seafoam no-underline hover:underline"
-    href="https://github.com/Seafoam-Labs">GitHub</a
-  >
+    <img
+      class="mx-6 inline-block size-12 rounded-full text-transparent"
+      src={shellyChel.src}
+      alt="Shelly Chel"
+    />
+  </a>
+  <nav>
+    {
+      links.map((link, index) => (
+        <>
+          {index === 0 ? (
+            ""
+          ) : (
+            <span class="mx-1 text-(--sl-color-gray-5) select-none">·</span>
+          )}
+          <a
+            class="text-(--sl-color-accent) no-underline hover:underline"
+            href={link.href}
+          >
+            {link.title}
+          </a>
+        </>
+      ))
+    }
+  </nav>
 </div>
