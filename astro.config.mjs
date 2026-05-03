@@ -6,7 +6,6 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
-  prefetch: !import.meta.env.DEV,
   integrations: [
     starlight({
       title: "Seafoam Labs",
