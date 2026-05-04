@@ -12,7 +12,8 @@ Inside of the project, you'll see the following folders and files:
 ├─ src/
 │  ├─ assets/
 │  ├─ content/
-│  │  └─ docs/
+│  │  ├─ docs/
+│  │  └─ news/
 │  ├─ pages/
 │  └─ content.config.ts
 ├─ astro.config.mjs
@@ -23,6 +24,8 @@ Inside of the project, you'll see the following folders and files:
 ```
 
 Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+
+Custom RSS feed is generated from the Markdown files in `src/content/news/`. Each file is exposed as a route based on its file name, and the content is used to populate the RSS feed that are defined under `src/pages` for example `src/pages/shelly-alpm/feeds/news/rss.xml.ts` which corresponds to the URL `/shelly-alpm/feeds/news/rss.xml`.
 
 Astro [custom pages](https://starlight.astro.build/guides/pages/#custom-pages) are placed in the `src/pages/` directory. Each file is exposed as a route based on its file name.
 
