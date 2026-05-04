@@ -77,14 +77,18 @@
   /* Content page width */
   --sl-content-width: 55rem;
 
-  /* Main content x-axis padding between left and right sidebars */
-  --sl-content-pad-x: 3rem;
-
   /* Left sidebar width */
   --sl-sidebar-width: 16rem;
 
   /* Navbar gap */
   --sl-nav-gap: 2rem;
+}
+
+@media (min-width: 72rem) {
+  :root {
+    /* Main content x-axis padding between left and right sidebars */
+    --sl-content-pad-x: 3rem;
+  }
 }
 
 .header {
