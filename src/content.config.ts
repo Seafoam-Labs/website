@@ -2,6 +2,8 @@ import { defineCollection } from "astro:content";
 import { docsLoader } from "@astrojs/starlight/loaders";
 import { docsSchema } from "@astrojs/starlight/schema";
 import { changelogsLoader } from "starlight-changelogs/loader";
+import { rssSchema } from "@astrojs/rss";
+import { glob } from "astro/loaders";
 
 export const collections = {
   docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
@@ -17,5 +19,12 @@ export const collections = {
         enabled: import.meta.env.PROD,
       },
     ]),
+  }),
+  shellyNews: defineCollection({
+    schema: rssSchema,
+    loader: glob({
+      base: "./src/content/news/shelly-alpm/",
+      pattern: "**/*.{md,mdx}",
+    }),
   }),
 };

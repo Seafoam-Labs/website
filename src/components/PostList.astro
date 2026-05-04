@@ -1,9 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-
-function isDate(value: unknown): value is Date {
-  return value instanceof Date && !isNaN(value.getTime());
-}
+import { isDate } from "../utils/date";
 
 function formatDate(value: unknown): string {
   if (isDate(value)) {
