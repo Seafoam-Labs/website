@@ -24,11 +24,13 @@ const links = [
 <Default><slot /></Default>
 
 <div
-  class="mt-12 flex items-center justify-center border-t border-(--sl-color-gray-6) pt-8 text-(length:--sl-text-sm) text-(--sl-color-gray-3) sm:mt-16 sm:pt-12"
+  class="mt-12 flex flex-col items-center justify-between border-t border-(--sl-color-gray-6) pt-8 text-(length:--sl-text-sm) text-(--sl-color-gray-3) sm:mt-16 sm:flex-row sm:justify-center sm:pt-12"
 >
-  <span>© {new Date().getFullYear()} {siteTitle}</span>
+  <span class="mt-6 mb-2 sm:mt-auto sm:mb-auto"
+    >© {new Date().getFullYear()} {siteTitle}</span
+  >
   <a
-    class="mx-6 text-(--sl-color-gray-5) select-none"
+    class="order-last text-center text-(--sl-color-gray-5) select-none sm:order-0 sm:mx-6"
     href={shellyChelAvif.src}
   >
     <Image
@@ -40,16 +42,14 @@ const links = [
       layout="fixed"
     />
   </a>
-  <nav class="flex flex-wrap justify-end gap-x-4 sm:justify-start sm:gap-x-2">
+  <nav class="order-first flex flex-wrap gap-x-2 sm:order-0">
     {
       links.map((link, index) => (
         <>
           {index === 0 ? (
             ""
           ) : (
-            <span class="hidden text-(--sl-color-gray-5) select-none sm:inline">
-              ·
-            </span>
+            <span class="text-(--sl-color-gray-5) select-none">·</span>
           )}
           <a
             class="text-(--sl-color-accent) no-underline hover:underline"
