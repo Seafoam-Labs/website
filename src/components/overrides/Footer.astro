@@ -1,6 +1,6 @@
 ---
 import Default from "@astrojs/starlight/components/Footer.astro";
-import shellyChel from "../../assets/images/shelly-chel.webp";
+import { Image } from "astro:assets";
 import shellyChelAvif from "../../assets/images/shelly-chel.avif";
 
 const { siteTitle } = Astro.locals.starlightRoute;
@@ -28,13 +28,16 @@ const links = [
 >
   <span>© {new Date().getFullYear()} {siteTitle}</span>
   <a
-    class="mx-1 text-(--sl-color-gray-5) select-none"
+    class="mx-6 text-(--sl-color-gray-5) select-none"
     href={shellyChelAvif.src}
   >
-    <img
-      class="mx-6 inline-block size-12 rounded-full text-transparent"
-      src={shellyChel.src}
+    <Image
+      class="inline-block rounded-full text-transparent"
+      src={shellyChelAvif}
       alt="Shelly Chel"
+      height={48}
+      width={48}
+      layout="fixed"
     />
   </a>
   <nav class="flex flex-wrap justify-end gap-x-4 sm:justify-start sm:gap-x-2">
