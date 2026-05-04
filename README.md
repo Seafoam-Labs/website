@@ -28,6 +28,9 @@ Astro [custom pages](https://starlight.astro.build/guides/pages/#custom-pages) a
 
 Images can be added to `src/assets/` and embedded in Markdown with a relative link.
 
+**Styling Note:**  
+When styling components, prefer to use the theme variables from [Starlight's `props.css`](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) instead of Tailwind CSS classes whenever possible. This helps maintain consistency with the design scheme.
+
 Static assets, like favicons, can be placed in the `public/` directory.
 
 ## Commands
