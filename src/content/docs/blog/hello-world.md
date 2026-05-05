@@ -11,9 +11,9 @@ Welcome to the Seafoam Labs blog! We're a small team building open-source tools 
 
 Our current projects include:
 
-- **[Shelly ALPM](/shelly-alpm)** — a modern, visual package manager for Arch Linux built with C# and GTK4.
-- **[Starfish](/starfish)** — a dependency viewer for Arch packages.
-- **[Aqueous](/aqueous)** — a new project currently in early development.
+- **[Shelly ALPM](/shelly-alpm)** - a modern, visual package manager for Arch Linux built with C# and GTK4.
+- **[Starfish](/starfish)** - a dependency viewer for Arch packages.
+- **[Aqueous](/aqueous)** - a new project currently in early development.
 
 ## What's Next
 
