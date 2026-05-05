@@ -9,7 +9,9 @@ import starlightChangelogs, {
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://www.seafoam-labs.org",
+  site: import.meta.env.PROD
+    ? "https://www.seafoam-labs.org"
+    : "http://localhost:4321",
   integrations: [
     starlight({
       title: "Seafoam Labs",
