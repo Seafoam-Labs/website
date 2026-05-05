@@ -34,6 +34,9 @@ Images can be added to `src/assets/` and embedded in Markdown with a relative li
 **Styling Note:**  
 When styling components, prefer to use the theme variables from [Starlight's `props.css`](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) instead of Tailwind CSS classes whenever possible. This helps maintain consistency with the design scheme.
 
+**Conceptual Note:**
+There is a separation between "content" (Markdown files in `src/content/`) and "pages" (Astro components in `src/pages/`). Content is for writing documentation, blog and RSS updates, while pages are for "standalone" content (e.g. marketing or direct links) and custom routes. This separation helps keep things organized and makes it easier to manage different types of information.
+
 Static assets, like favicons, can be placed in the `public/` directory.
 
 ## Commands
