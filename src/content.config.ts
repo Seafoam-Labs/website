@@ -16,7 +16,6 @@ export const collections = {
         owner: "Seafoam-Labs",
         repo: "Shelly-ALPM",
         title: "Shelly Changelog",
-        enabled: import.meta.env.PROD,
       },
     ]),
   }),

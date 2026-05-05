@@ -69,14 +69,12 @@ export default defineConfig({
         },
       ],
       sidebar: [
+        { slug: "welcome" },
         {
           label: "Shelly ALPM",
           items: [
             "shelly-alpm/overview",
             "shelly-alpm/download",
-            "shelly-alpm/screenshots",
-            "shelly-alpm/docs",
-            "shelly-alpm/about",
             ...makeChangelogsSidebarLinks([
               {
                 type: "all",
@@ -84,6 +82,9 @@ export default defineConfig({
                 label: "Changelog",
               },
             ]),
+            "shelly-alpm/screenshots",
+            "shelly-alpm/docs",
+            "shelly-alpm/about",
           ],
         },
         {
