@@ -58,7 +58,7 @@
 :root[data-theme="light"] {
   --sl-color-accent-low: var(--color-seafoam-light);
   --sl-color-accent: var(--color-seafoam-muted);
-  --sl-color-accent-high: var(--color-bg-primary);
+  --sl-color-accent-high: var(--color-seafoam-dark);
   --sl-color-white: var(--color-bg-primary);
   --sl-color-gray-1: #1e293b;
   --sl-color-gray-2: #334155;
@@ -114,6 +114,22 @@
   }
 
   @apply dark:border-b-border;
+}
+
+.sl-link-button {
+  @apply rounded-lg px-4.5 py-2.5 font-semibold shadow-xs transition duration-75 dark:shadow-none;
+
+  &.primary {
+    @apply hover:bg-(--sl-color-accent-high) dark:hover:bg-(--sl-color-accent);
+  }
+
+  &.secondary {
+    @apply border-(--sl-color-accent) hover:bg-(--sl-color-accent-high) hover:text-(--sl-color-black) dark:border-(--sl-color-accent) dark:hover:bg-(--sl-color-accent);
+  }
+
+  &.minimal {
+    @apply px-0 shadow-none hover:text-(--sl-color-accent) dark:hover:text-(--sl-color-accent-high);
+  }
 }
 
 /* End Starlight overrides */
