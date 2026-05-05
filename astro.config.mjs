@@ -72,7 +72,7 @@ export default defineConfig({
         {
           label: "Shelly ALPM",
           items: [
-            { label: "Overview", link: "/shelly-alpm" },
+            "shelly-alpm/overview",
             "shelly-alpm/download",
             "shelly-alpm/screenshots",
             "shelly-alpm/docs",
