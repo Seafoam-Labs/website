@@ -1,0 +1,188 @@
+---
+title: Shelly Documentation
+sidebar:
+    label: Configuration
+description: Learn how to configure Shelly ALPM cli and gui from the json configuration file.
+---
+
+## Default Configuration
+
+Below is the default configuration. If there is a breaking issue with the way you have Shelly working on your system, one of the first things
+you can do is either copy this default configuration file or simply `rm ~/.config/shelly/config.json` and start over as Shelly will create a new one
+with default values.
+
+```json
+{
+  "FileSizeDisplay": "Bytes",
+  "DefaultExecution": "UpgradeAll",
+  "ParallelDownloadCount": 10,
+  "AccentColor": "",
+  "Culture": "",
+  "DarkMode": true,
+  "AurEnabled": true,
+  "ShellySearchEnabled": true,
+  "AurWarningConfirmed": false,
+  "FlatPackEnabled": true,
+  "ConsoleEnabled": false,
+  "WindowWidth": 2251,
+  "WindowHeight": 1175,
+  "DefaultView": "HomeScreen",
+  "UseKdeTheme": false,
+  "UseOldMenu": true,
+  "TrayEnabled": true,
+  "TrayCheckIntervalHours": 10,
+  "NoConfirm": false,
+  "NewInstall": false,
+  "CurrentVersion": "2.2.3",
+  "UseWeeklySchedule": false,
+  "DaysOfWeek": [],
+  "Time": null,
+  "WebViewEnabled": true,
+  "ShellyIconsEnabled": true,
+  "AppImageEnabled": true,
+  "NewInstallInitSettings": true,
+  "UseSymbolicTray": true,
+  "TrayIconPath": "",
+  "TrayUpdatesIconPath": "",
+  "DefaultPageDropDown": 0,
+  "ProgressBarStyle": "Pacman",
+  "ProgressBarFps": 7,
+  "ProgressBarWidth": 24,
+  "OutputMode": "singlepane",
+  "SinglePaneMaxStickies": 6
+}
+```
+
+## Deprecated Configuration Fields
+
+These fields are no longer used and will be removed in the future. They were used in the past when Shelly was still in early development using Avalonia.
+1. AccentColor
+2. DarkMode
+3. ConsoleEnabled
+4. UseKdeTheme
+5. DefaultPageDropDown
+
+## GUI Configuration Fields
+The following fields are used to configure the GUI. Changing these values will modify the GUI but have no effect on the CLI.
+1. ShellySearchEnabled
+     + If set to false, the Shelly Search page will not be available in the GUI.
+2. AurWarningConfirmed
+     + If set to true, the user has confirmed that they understand the risks of installing packages from the AUR.
+3. WindowWidth
+     + The width of the GUI window.
+4. WindowHeight
+     + The height of the GUI window.
+5. DefaultView
+     + The default view to show when the GUI starts.
+6. NoConfirm
+     + If set to true, all confirmation decisions will be automatically accepted.
+7. WebViewEnabled
+     + If set to false, the WebView will not be available in the GUI.
+8. ShellyIconsEnabled
+    + If set to false, the use of Shelly icons will be disabled.
+9. AppImageEnabled
+    + If set to false, the use of AppImage will be disabled.
+10. NewInstallInitSettings
+     + If set to false, the GUI will not ask the user to initialize the settings on the first run.
+11. NewInstall
+     + If set to true, the GUI will assume that the user is starting Shelly for the first time.
+12. UseOldMenu
+     + If set to true, the GUI will use the vertical menu instead of the horizontal menu.
+
+## CLI Configuration Fields
+The following fields are used to configure the CLI. Changing these values will modify the CLI but have no effect on the GUI.
+1. SinglePaneMaxStickies
+     + The maximum number of sticky lines to show in the single pane view.
+2. OutputMode
+     + The output mode to use. Can be either `singlepane` or `split`.
+3. ProgressBarWidth
+     + The width of the progress bar in the cli output.
+4. ProgressBarFps
+     + The frames per second to use for the progress bar.
+5. ProgressBarStyle
+     + The style of the progress bar to use. Can be either `Pacman` or `Blocks`.  Pacman renders the same as `pacman` with ILoveCandy.
+       Blocks is the default style and renders blocks that fill up the width of the progress bar.
+6. FileSizeDisplay
+     + The file size display to use. Accepted values are `Bytes`,`Megabytes`,`Gigabytes`,`Terabytes`.
+7. DefaultExecution
+     + The default execution mode to use. Can be either `UpgradeAll`, `UpdgradeStandard`, `UpgradeFlatpak`,`UpgradeAur`,`Sync` or `SyncForce`(Neither are recommended), `ListInstalled`.
+
+## Tray Configuration Fields
+The following fields are used to configure the tray icon.
+1. UseSymbolicTray
+     + If set to true, the tray icon will use the symbolic tray icon.
+2. TrayIconPath
+     + The path to the tray icon to use. If blank uses the provided icon.
+3. TrayUpdatesIconPath
+     + The path to the tray icon to use when there are updates available. If blank uses the provided icon.
+4. DaysOfWeek
+     + The days of the week to check for updates.
+5. Time
+     + The time of day to check for updates.
+6. UseWeeklySchedule
+     + If set to true, allows use of DaysOfWeek and Time settings.
+7. TrayEnabled
+     + If set to false, the tray service will not start when Shelly is opened.
+8. TrayCheckIntervalHours
+     + The number of hours between checking for updates.
+
+## Shared Configuration Fields
+The following fields are used to configure the shared settings.
+1. AurEnabled
+ + If set to false, the AUR package manager will not be available.
+2. FlatPackEnabled
+ + If set to false, the Flatpak package manager will not be available in the GUI.
+3. ParallelDownloadCount
+ + The number of parallel downloads to use. Default is 10. Setting this to 1 will disable parallel downloads. Higher than 10 is not recommended as it can cause you to get rate limited from your package repositories.
+4. Culture
+ + The culture to use this is a groundwork setting for language translation support.
+5. CurrentVersion
+ + The current version of Shelly. This is used simply for tracking purposes, and generally should not be changed.
+
+
+
+## Configurations of the developers
+
+Zoey's config file:
+
+```json
+{
+  "FileSizeDisplay": "Bytes",
+  "DefaultExecution": "UpgradeAll",
+  "ParallelDownloadCount": 10,
+  "AccentColor": "",
+  "Culture": "",
+  "DarkMode": true,
+  "AurEnabled": true,
+  "ShellySearchEnabled": true,
+  "AurWarningConfirmed": false,
+  "FlatPackEnabled": true,
+  "ConsoleEnabled": false,
+  "WindowWidth": 2251,
+  "WindowHeight": 1175,
+  "DefaultView": "HomeScreen",
+  "UseKdeTheme": false,
+  "UseOldMenu": true,
+  "TrayEnabled": true,
+  "TrayCheckIntervalHours": 10,
+  "NoConfirm": false,
+  "NewInstall": false,
+  "CurrentVersion": "2.2.3",
+  "UseWeeklySchedule": false,
+  "DaysOfWeek": [],
+  "Time": null,
+  "WebViewEnabled": true,
+  "ShellyIconsEnabled": true,
+  "AppImageEnabled": true,
+  "NewInstallInitSettings": true,
+  "UseSymbolicTray": true,
+  "TrayIconPath": "",
+  "TrayUpdatesIconPath": "",
+  "DefaultPageDropDown": 0,
+  "ProgressBarStyle": "Pacman",
+  "ProgressBarFps": 7,
+  "ProgressBarWidth": 24,
+  "OutputMode": "singlepane",
+  "SinglePaneMaxStickies": 6
+}
+```
