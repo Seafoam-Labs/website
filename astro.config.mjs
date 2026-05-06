@@ -15,6 +15,9 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Seafoam Labs",
+      editLink: {
+        baseUrl: "https://github.com/Seafoam-Labs/website/edit/main/",
+      },
       logo: {
         src: "./src/assets/images/shellheart-small.webp",
       },
