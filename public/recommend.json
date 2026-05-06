@@ -25,12 +25,11 @@
       "firefox-pure",
       "chromium",
       "ungoogled-chromium-bin",
-      "vivaldi vivaldi-ffmpeg-codecs",
       "torbrowser-launcher",
       "brave-bin",
       "floorp-bin",
       "falkon",
-      "qutebrowser python-adblock"
+      "qutebrowser"
     ]
   },
   {
@@ -58,10 +57,12 @@
       "netbeans",
       "intellij-idea-community-edition",
       "pycharm-community-edition",
-      "cockpit cockpit-machines",
+      "cockpit",
       "ansible",
       "docker docker-compose",
-      "podman-docker podman-compose crun",
+      "podman-docker",
+      "podman-compose",
+      "crun",
       "jenkins",
       "puppet",
       "prometheus",
@@ -71,7 +72,8 @@
   {
     "name": "Games",
     "packages": [
-      "cachyos-gaming-applications cachyos-gaming-meta",
+      "cachyos-gaming-applications",
+      "cachyos-gaming-meta",
       "aisleriot",
       "mari0",
       "kapman",
@@ -89,7 +91,7 @@
   {
     "name": "Graphics",
     "packages": [
-      "krita krita-plugin-gmic opencolorio",
+      "krita",
       "gimp",
       "inkscape",
       "blender",
@@ -162,11 +164,9 @@
       "handbrake",
       "transmageddon",
       "soundconverter",
-      "kodi kodi-platform kodi-eventclients",
       "mediaelch",
       "kid3",
       "easytag",
-      "k3b cdparanoia cdrdao dvd+rw-tools emovix vcdimager cdrtools",
       "brasero",
       "xfburn"
     ]
@@ -174,12 +174,12 @@
   {
     "name": "Office",
     "packages": [
-      "libreoffice-fresh libmythes",
-      "libreoffice-still libmythes",
+      "libreoffice-fresh",
+      "libreoffice-still",
       "joplin",
       "onlyoffice-bin",
-      "wps-office wps-office-mime",
-      "yozo-office yozo-office-fonts",
+      "wps-office",
+      "yozo-office",
       "calligra",
       "skrooge",
       "kmymoney",
@@ -196,7 +196,6 @@
   {
     "name": "Video",
     "packages": [
-      "kdenlive movit sox opus-tools frei0r-plugins opentimelineio dvgrab opencv",
       "dragon",
       "shotcut",
       "pitivi frei0r-plugins",
