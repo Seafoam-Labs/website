@@ -84,6 +84,10 @@ export default defineConfig({
               },
             ]),
             "shelly-alpm/about",
+            {
+              label: "Documentation",
+              autogenerate: { directory: "shelly-alpm/docs" },
+            },
           ],
         },
         {
