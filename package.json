@@ -22,7 +22,7 @@
     "sharp": "^0.34.5",
     "starlight-changelogs": "^0.5.0",
     "tailwindcss": "^4.2.4",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "ultrahtml": "^1.6.0"
   },
   "devDependencies": {
