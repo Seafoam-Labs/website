@@ -83,8 +83,6 @@ export default defineConfig({
                 label: "Changelog",
               },
             ]),
-            "shelly-alpm/screenshots",
-            "shelly-alpm/docs",
             "shelly-alpm/about",
           ],
         },
