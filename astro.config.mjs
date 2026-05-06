@@ -75,6 +75,7 @@ export default defineConfig({
           items: [
             "shelly-alpm/overview",
             "shelly-alpm/download",
+            "shelly-alpm/config",
             ...makeChangelogsSidebarLinks([
               {
                 type: "all",
