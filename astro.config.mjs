@@ -88,17 +88,17 @@ export default defineConfig({
             ]),
             {
               label: "Documentation",
-              autogenerate: { directory: "shelly-alpm/docs" },
+              items: [{ autogenerate: { directory: "shelly-alpm/docs" } }],
             },
           ],
         },
         {
           label: "Starfish",
-          autogenerate: { directory: "starfish" },
+          items: [{ autogenerate: { directory: "starfish" } }],
         },
         {
           label: "Aqueous",
-          autogenerate: { directory: "aqueous" },
+          items: [{ autogenerate: { directory: "aqueous" } }],
         },
       ],
       expressiveCode: {

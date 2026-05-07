@@ -15,10 +15,10 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/rss": "^4.0.18",
-    "@astrojs/starlight": "^0.38.5",
+    "@astrojs/starlight": "^0.39.0",
     "@astrojs/starlight-tailwind": "^5.0.0",
     "@tailwindcss/vite": "^4.2.4",
-    "astro": "^6.2.2",
+    "astro": "^6.3.0",
     "sharp": "^0.34.5",
     "starlight-changelogs": "^0.5.0",
     "tailwindcss": "^4.2.4",
