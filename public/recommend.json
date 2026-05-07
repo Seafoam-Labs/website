@@ -210,7 +210,7 @@
     "name": "Virtualization",
     "packages": ["virtualbox", "gnome-boxes", "virt-manager"]
   },
-   {
+  {
     "name": "ShellyTeam",
     "packages": ["ghostty", "kitty", "waterfox"]
   }
