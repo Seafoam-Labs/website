@@ -59,7 +59,8 @@
       "pycharm-community-edition",
       "cockpit",
       "ansible",
-      "docker docker-compose",
+      "docker",
+      "docker-compose",
       "podman-docker",
       "podman-compose",
       "crun",
@@ -112,7 +113,7 @@
     ]
   },
   {
-    "name": "Hardware Tools",
+    "name": "HardwareTools",
     "packages": [
       "amdgpu_top",
       "cachyos-benchmarker",
@@ -201,12 +202,16 @@
       "pitivi frei0r-plugins",
       "obs-studio",
       "vlc",
-      "smplayer smplayer-skins smplayer-themes",
+      "smplayer",
       "baka-mplayer"
     ]
   },
   {
     "name": "Virtualization",
     "packages": ["virtualbox", "gnome-boxes", "virt-manager"]
+  },
+   {
+    "name": "ShellyTeam",
+    "packages": ["ghostty", "kitty", "waterfox"]
   }
 ]
