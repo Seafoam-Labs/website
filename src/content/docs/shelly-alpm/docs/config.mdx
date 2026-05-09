@@ -49,7 +49,9 @@ with default values.
   "ProgressBarFps": 7,
   "ProgressBarWidth": 24,
   "OutputMode": "singlepane",
-  "SinglePaneMaxStickies": 6
+  "SinglePaneMaxStickies": 6,
+  "SuppressFingerprintWarning": false,
+  "RecommendedEnabled": true
 }
 ```
 
@@ -91,6 +93,10 @@ The following fields are used to configure the GUI. Changing these values will m
     - If set to true, the GUI will assume that the user is starting Shelly for the first time.
 12. UseOldMenu
     - If set to true, the GUI will use the vertical menu instead of the horizontal menu.
+13. RecommendedEnabled
+    - If set to true, the GUI will show recommended packages that are available for you to install on your system.
+14. SuppressFingerprintWarning
+    - If set to true, the GUI will not show the fingerprint warning if fingerprint is detected on the system but still not support
 
 ## CLI Configuration Fields
 
@@ -199,6 +205,8 @@ Zoey's config file:
   "ProgressBarFps": 7,
   "ProgressBarWidth": 24,
   "OutputMode": "singlepane",
-  "SinglePaneMaxStickies": 6
+  "SinglePaneMaxStickies": 6,
+  "SuppressFingerprintWarning": false,
+  "RecommendedEnabled": false
 }
 ```
