@@ -18,6 +18,22 @@ export const collections = {
         title: "Shelly Changelog",
         pagefind: false,
       },
+      {
+        provider: "github",
+        base: "aqueous/changelog",
+        owner: "Seafoam-Labs",
+        repo: "Aqueous",
+        title: "Aqueous Changelog",
+        pagefind: false,
+      },
+      {
+        provider: "github",
+        base: "starfish/changelog",
+        owner: "Seafoam-Labs",
+        repo: "Starfish",
+        title: "Starfish Changelog",
+        pagefind: false,
+      },
     ]),
   }),
   shellyNews: defineCollection({
