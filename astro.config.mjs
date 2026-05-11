@@ -94,11 +94,29 @@ export default defineConfig({
         },
         {
           label: "Starfish",
-          items: [{ autogenerate: { directory: "starfish" } }],
+          items: [
+            { autogenerate: { directory: "starfish" } },
+            ...makeChangelogsSidebarLinks([
+              {
+                type: "all",
+                base: "starfish/changelog",
+                label: "Changelog",
+              },
+            ]),
+          ],
         },
         {
           label: "Aqueous",
-          items: [{ autogenerate: { directory: "aqueous" } }],
+          items: [
+            { autogenerate: { directory: "aqueous" } },
+            ...makeChangelogsSidebarLinks([
+              {
+                type: "all",
+                base: "aqueous/changelog",
+                label: "Changelog",
+              },
+            ]),
+          ],
         },
       ],
       expressiveCode: {
