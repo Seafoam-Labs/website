@@ -8,6 +8,10 @@ tableOfContents:
   maxHeadingLevel: 4
 ---
 
+:::tip
+The screenshots use the Adwaita theme. Your theme and version of Shelly may look different, since Shelly is under active development. However, the functionality remains the same.
+:::
+
 ## Packages
 
 ![Package_Listing](../../../../assets/screenshots/Package_Listing.png)
@@ -96,4 +100,25 @@ These are archive-based packages intended for standalone applications.
 
 ### Manage
 
-**TBD**
+#### Local Packages
+
+Shelly lets you list and remove locally installed packages from your system with the **Remove Local Packages** action. These are the packages that are not managed by ALPM and were installed as standalone application directory in `/opt/shelly/`.
+
+##### How to remove a local binary package
+
+1. Open the **Packages** **Manage** screen in Shelly.
+2. Click **Remove Local Packages**.
+   ![Remove Local Packages button](../../../../assets/screenshots/remove_local_button.png)
+3. A table appears showing all package directories currently present in `/opt/shelly/`.
+4. Select one or more packages from the list.
+5. Click **Remove Selected** to uninstall them.
+   ![Remove Local Packages dialog](../../../../assets/screenshots/remove_local_dialog.png)
+
+##### Notes
+
+Shelly takes care to remove local binary packages safely:
+
+- only package directories under `/opt/shelly/` are shown
+- package deletion is handled in a controlled way
+- linked binaries, desktop files, and icons are cleaned up when appropriate
+- standard ALPM packages are left to the normal package manager removal flow
