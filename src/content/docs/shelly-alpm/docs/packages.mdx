@@ -3,6 +3,9 @@ title: Shelly Package Management
 sidebar:
   label: Package Management
 description: This section covers how to access and use the Package section including installing, updating, and managing current packages.
+tableOfContents:
+  minHeadingLevel: 2
+  maxHeadingLevel: 4
 ---
 
 ## Packages
@@ -37,6 +40,48 @@ We will walkthrough installing firefox as an example of doing an installation
 - Once you click the button an Install Packages Prompt will pop up
   ![Install_Packages](../../../../assets/screenshots/Install_Packages.png)
 - Once you click yes you will prompted to enter your password and Shelly will execute the installation.
+
+#### Local Packages
+
+Shelly supports installing package archives from your local filesystem through the **Install Local** action.
+
+##### Supported package types
+
+There are **two kinds of local packages** you can install:
+
+**1. ALPM packages**
+
+These are standard Arch-style package archives that contain `PKGINFO`.
+
+- Shelly recognizes them as normal packages
+- They are installed and managed by **ALPM** _(Arch Linux Package Management)_
+- They behave like regular system packages, including package tracking and removal through the package manager
+
+**2. Universal binary packages**
+
+These are archive-based packages intended for standalone applications.
+
+- Shelly extracts them into `/opt/shelly/`
+- Executable files are linked into `/usr/bin/` using symlinks
+- Icons are installed into the system icon theme directories
+- A desktop entry is created so the app appears in application menus
+- These packages are **not managed by ALPM**
+
+##### How to install a local package
+
+1. Open the **Package** screen in Shelly.
+2. Click **Install Local**.
+3. Choose a supported package archive from the file picker.
+4. Shelly will detect the package type automatically and start installation.
+
+![Package_Install](../../../../assets/screenshots/Packages_Install.png)
+
+##### Notes
+
+- Supported archive formats include `*.gz` and `*.zst`
+- If the archive is an ALPM package, it will be installed like a standard package
+- If the archive is a universal binary package, Shelly will unpack it into `/opt/shelly/` and create the necessary desktop integration automatically
+- A **logout** might be needed for the new icon to start showing up correctly in the system
 
 ### Update
 
