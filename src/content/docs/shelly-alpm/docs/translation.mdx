@@ -5,28 +5,50 @@ sidebar:
 description: This section covers how to access and use the Package section including installing, updating, and managing current packages.
 ---
 
+import { FileTree } from "@astrojs/starlight/components";
+
 ## New Translations
 
-- Clone the repo for Shelly-ALPM, this will give you access to the translations
+- Clone the repo for [Shelly-ALPM](https://github.com/Seafoam-Labs/Shelly-ALPM/), this will give you access to the translations
 - Navigate to the project folder and open the folder called `po`. Here you will create a file for the locale you want to translate to.
-- Example: `po/de_DE.po`
-- Copy the contents of shelly-ui.pot into the file you just created. 100% of the text that needs to translated is in this file.
-- Please update the headers, the msgid "" is the English text, and the msgstr "" is the translated text. So only update the msgstr.
-- Another key not is that all things {} are variables that get replaced with the actual value at runtime. So these must be kept in the translated text.
-- All tags like <span size='large'> and </span> must be kept in the translated text.
+- Copy the contents of `shelly-ui.pot` into the file you just created. 100% of the text that needs to translated is in this file.
+- Example: `po/de_DE.po`. It uses a [primary language tag](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) and a region subtag separated by an underscore.
+
+  {/* prettier-ignore */}
+  <FileTree>
+  - Shelly.Gtk
+    - po
+      - shelly-ui.pot
+      - de_DE.po **New File**
+      - pt_BR.po
+  </FileTree>
+
+- Please update the headers, the `msgid ""` is the English text, and the `msgstr ""` is the translated text. So **only** update the msgstr.
+- Another key not is that all things `{0}`, `{1}`, etc are variables that get replaced with the actual value at runtime. So these must be kept in the translated text.
+- All tags like `<span size='large'>` and `</span>` must be kept in the translated text.
 - Once you have finished translating you can test it out by running `msgfmt <file> -o <ouput>` in the po folder.
-- Example: msgfmt pt_BR.po -o /usr/share/locale/pt_BR/LC_MESSAGES/shelly-ui.mo
-- This will create a new file called shelly-ui.mo in the locale folder for the locale you want to translate to.
+- Example: `msgfmt de_DE.po -o /usr/share/locale/de_DE/LC_MESSAGES/shelly-ui.mo`
+- This will create a new file called `shelly-ui.mo` in the locale folder for the locale you want to translate to.
 - After this you can test by opening shelly, and as long as your locale is set on your system, it will use the translated text.
 
 ## Existing Translations
 
-- Clone the repo for Shelly-ALPM, this will give you access to the translations
+- Clone the repo for [Shelly-ALPM](https://github.com/Seafoam-Labs/Shelly-ALPM/), this will give you access to the translations
 - Navigate to the project folder and open the folder called `po`. Here you will want to open the file for the locale you want to add translations.
+
+  {/* prettier-ignore */}
+  <FileTree>
+  - Shelly.Gtk
+    - po
+      - shelly-ui.pot
+      - de_DE.po
+      - pt_BR.po **Existing File**
+  </FileTree>
+
 - Please update the headers with the relevant information.
-- The msgid "" is the English text and the msgstr "" is the translated text. So only update the msgstr.
-- Another key not is that all things {} are variables that get replaced with the actual value at runtime. So these must be kept in the translated text.
-- All tags like <span size='large'> and </span> must be kept in the translated text.
+- The `msgid ""` is the English text and the `msgstr ""` is the translated text. So **only** update the msgstr.
+- Another key not is that all things `{0}`, `{1}`, etc are variables that get replaced with the actual value at runtime. So these must be kept in the translated text.
+- All tags like `<span size='large'>` and `</span>` must be kept in the translated text.
 - Once you have finished translating you can test it out by running `msgfmt <file> -o <ouput>` in the po folder.
-- Example: msgfmt pt_BR.po -o /usr/share/locale/pt_BR/LC_MESSAGES/shelly-ui.mo
+- Example: `msgfmt pt_BR.po -o /usr/share/locale/pt_BR/LC_MESSAGES/shelly-ui.mo`
 - After this you can test by opening shelly, and as long as your locale is set on your system, it will use the translated text.
