@@ -13,14 +13,12 @@ export const collections = {
     loader: remoteMarkdownLoader([
       {
         id: "shelly-cli-reference",
-        slug: "shelly-alpm/docs/cli-reference",
         title: "Shelly CLI Reference",
         url: "https://raw.githubusercontent.com/Seafoam-Labs/Shelly-ALPM/refs/heads/development/wiki/cli_help.md",
       },
     ]),
     schema: z.object({
       title: z.string(),
-      slug: z.string(),
       sourceUrl: z.url(),
     }),
   }),
