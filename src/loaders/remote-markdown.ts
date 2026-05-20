@@ -3,7 +3,6 @@ import type { Loader } from "astro/loaders";
 interface RemoteMarkdownSource {
   id: string;
   url: string;
-  slug?: string;
   title?: string;
 }
 
@@ -34,7 +33,6 @@ export function remoteMarkdownLoader(sources: RemoteMarkdownSource[]): Loader {
           id: source.id,
           data: {
             title: source.title ?? source.id,
-            slug: source.slug ?? source.id,
             sourceUrl: source.url,
             ...rendered.metadata?.frontmatter,
           },
