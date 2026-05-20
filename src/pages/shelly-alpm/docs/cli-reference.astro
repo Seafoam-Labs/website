@@ -1,0 +1,29 @@
+---
+import { getEntry, render } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+
+const entry = await getEntry("remoteDocs", "shelly-cli-reference");
+
+if (!entry || !entry.rendered) {
+  throw new Error("Failed to load the CLI reference documentation.");
+}
+
+// Need to remove 'Overview' to avoid repeating in TOC using spliced
+const { Content, headings } = await render(entry);
+---
+
+<div class="hide-markdown-h1">
+  <StarlightPage
+    frontmatter={{ title: entry.data.title }}
+    headings={headings.toSpliced(1, 1)}
+  >
+    <Content />
+  </StarlightPage>
+</div>
+
+<style is:global>
+  /* Avoid double h1 */
+  .hide-markdown-h1 .sl-markdown-content h1 {
+    display: none;
+  }
+</style>
