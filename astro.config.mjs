@@ -91,7 +91,7 @@ export default defineConfig({
               items: [
                 { autogenerate: { directory: "shelly-alpm/docs" } },
                 {
-                  link: "shelly-alpm/docs/cli-reference",
+                  link: "shelly-alpm/docs/cli-reference/",
                   label: "CLI Reference",
                 },
               ],
