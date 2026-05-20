@@ -1,12 +1,29 @@
+import { z } from "astro/zod";
 import { defineCollection } from "astro:content";
-import { docsLoader } from "@astrojs/starlight/loaders";
 import { docsSchema } from "@astrojs/starlight/schema";
 import { changelogsLoader } from "starlight-changelogs/loader";
 import { rssSchema } from "@astrojs/rss";
 import { glob } from "astro/loaders";
+import { docsLoader } from "@astrojs/starlight/loaders";
+import { remoteMarkdownLoader } from "./loaders/remote-markdown";
 
 export const collections = {
   docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
+  remoteDocs: defineCollection({
+    loader: remoteMarkdownLoader([
+      {
+        id: "shelly-cli-reference",
+        slug: "shelly-alpm/docs/cli-reference",
+        title: "Shelly CLI Reference",
+        url: "https://raw.githubusercontent.com/Seafoam-Labs/Shelly-ALPM/refs/heads/development/wiki/cli_help.md",
+      },
+    ]),
+    schema: z.object({
+      title: z.string(),
+      slug: z.string(),
+      sourceUrl: z.url(),
+    }),
+  }),
   changelogs: defineCollection({
     // @ts-expect-error - Internally wrong, but it works
     loader: changelogsLoader([
