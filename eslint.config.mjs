@@ -1,16 +1,14 @@
 // @ts-check
 
-import { includeIgnoreFile } from "@eslint/compat";
 import astro from "eslint-plugin-astro";
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig, globalIgnores } from "eslint/config";
+import { defineConfig, globalIgnores, includeIgnoreFile } from "eslint/config";
 import { resolve } from "node:path";
 
 // See https://github.com/ota-meshi/eslint-plugin-astro/issues/447#issuecomment-3590892767
 export default defineConfig(
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
   includeIgnoreFile(resolve(import.meta.dirname, ".gitignore")),
   // Support virtual files from <script> tags in Astro components.
   globalIgnores(["!.astro/**/*.ts"]),
@@ -29,7 +27,7 @@ export default defineConfig(
       },
     },
   },
-  astro.configs["jsx-a11y-recommended"],
+  astro.configs["flat/recommended"],
   // `client-side-ts` extracts <script> tags from Astro components.
   {
     files: ["**/*.astro"],
