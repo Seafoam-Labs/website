@@ -2,7 +2,9 @@
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import AnchorHeading from "@astrojs/starlight/components/AnchorHeading.astro";
 import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { Image } from "astro:assets";
 import chel from "../assets/images/chel.png";
+import jetbrainsWhite from "../assets/icons/jetbrains-white.svg";
 ---
 
 <StarlightPage
@@ -84,4 +86,28 @@ import chel from "../assets/images/chel.png";
     description="Coming soon - browse our custom Arch Linux repository."
     href="#"
   />
+
+  <AnchorHeading level="3" id="powered-by">Powered by</AnchorHeading>
+
+  <div class="my-4">
+    <a
+      href="https://jb.gg/OpenSource"
+      class="inline-block rounded-md p-3 hover:bg-(--sl-color-gray-6) dark:hover:bg-(--sl-color-gray-6)"
+    >
+      <Image
+        src={jetbrainsWhite}
+        class="hidden dark:block"
+        alt="JetBrains logo."
+        width={298}
+        height={64}
+      />
+      <Image
+        src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg"
+        class="mt-0 block dark:hidden"
+        alt="JetBrains logo."
+        width={298}
+        height={64}
+      />
+    </a>
+  </div>
 </StarlightPage>
