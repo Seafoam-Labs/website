@@ -5,6 +5,7 @@ import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
 import { Image } from "astro:assets";
 import chel from "../assets/images/chel.png";
 import jetbrainsWhite from "../assets/icons/jetbrains-white.svg";
+import jetbrains from "../assets/icons/jetbrains.svg";
 ---
 
 <StarlightPage
@@ -102,7 +103,7 @@ import jetbrainsWhite from "../assets/icons/jetbrains-white.svg";
         height={64}
       />
       <Image
-        src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg"
+        src={jetbrains}
         class="mt-0 block dark:hidden"
         alt="JetBrains logo."
         width={298}
