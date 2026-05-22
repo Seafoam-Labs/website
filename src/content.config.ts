@@ -14,7 +14,7 @@ export const collections = {
       {
         id: "shelly-cli-reference",
         title: "Shelly CLI Reference",
-        url: "https://raw.githubusercontent.com/Seafoam-Labs/Shelly-ALPM/refs/heads/development/wiki/cli_help.md",
+        url: "https://raw.githubusercontent.com/Seafoam-Labs/Shelly-ALPM/refs/heads/master/wiki/cli_help.md",
       },
     ]),
     schema: z.object({
