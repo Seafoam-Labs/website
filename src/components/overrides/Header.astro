@@ -14,6 +14,21 @@ import ThemeSelect from "virtual:starlight/components/ThemeSelect";
 const shouldRenderSearch =
   config.pagefind ||
   config.components.Search !== "@astrojs/starlight/components/Search.astro";
+
+const pages = [
+  {
+    title: "Wiki",
+    href: "/welcome/",
+  },
+  {
+    title: "Blog",
+    href: "/blog/",
+  },
+  {
+    title: "About",
+    href: "/about/",
+  },
+];
 ---
 
 <div class="header">
@@ -23,14 +38,16 @@ const shouldRenderSearch =
   <div class="sl-flex print:hidden">
     <div class="flex items-center gap-6 sm:gap-8">
       <nav class="inline-flex gap-7 max-[28rem]:hidden">
-        <a
-          class="text-base font-semibold text-(--color-text) no-underline hover:text-(--sl-color-text-accent)"
-          href="/welcome/">Wiki</a
-        >
-        <a
-          class="text-base font-semibold text-(--color-text) no-underline hover:text-(--sl-color-text-accent)"
-          href="/blog/">Blog</a
-        >
+        {
+          pages.map((page) => (
+            <a
+              class="text-base font-semibold text-(--color-text) no-underline hover:text-(--sl-color-text-accent)"
+              href={page.href}
+            >
+              {page.title}
+            </a>
+          ))
+        }
       </nav>
       {shouldRenderSearch && <Search />}
     </div>
