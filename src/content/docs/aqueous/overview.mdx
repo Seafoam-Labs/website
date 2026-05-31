@@ -1,28 +1,29 @@
 ---
 title: Aqueous
-description: A minimal Wayland window manager built on River.
+description: A minimal Wayland window manager built on RiverDelta a fork of River Wayland compositor.
 sidebar:
   label: Overview
 ---
 
-**Aqueous** is a minimal **Wayland window manager** built on top of [River](https://codeberg.org/river/river).
+**Aqueous** is a minimal **Wayland window manager** built on top of **RiverDelta** - Seafoam Labs' in-tree fork of [River](https://codeberg.org/river/river).
 
-It is designed as a lightweight, configurable River-based environment with a separate shell/bar layer powered by the external [Noctalia](https://github.com/noctalia-dev/noctalia-shell) project.
+It is designed as a lightweight, configurable Wayland environment with the window manager and compositor living side by side in one repository. The shell and bar layer can be used from any compatible project.
 
-- **Language:** C# (primary), with small amounts of Shell and QML
+- **Primary stack:** C# / .NET 10 for the window manager, Zig for RiverDelta
 - **Platform focus:** Linux / Wayland
+- **Project layout:** Single repository containing the window manager, compositor, tests, docs, and Arch packaging
 
 ## Features
 
 Aqueous provides a River-oriented window management stack with:
 
-- a core window manager client
-- an input daemon for libinput-backed device configuration
-- an output daemon for display/output control
-- test projects for validation
-- packaging and session-launch integration for Linux environments
+- a C# window manager client that speaks River and Wayland protocols
+- configurable layouts, gaps, keybindings, outputs, and rules through `wm.toml`
+- Noctalia shell and bar integration for a complete desktop session
+- an output daemon and supporting test projects
+- Arch packaging that ships `aqueous`, `aqueous-wm`, a Wayland session entry, and default configuration files
 
-The project also includes configuration, packaging, and session assets to support a full desktop login flow.
+The repository also includes a reference `PKGBUILD`, nested session launcher scripts for development, and session assets for display-manager based login flows.
 
 ## Learn More
 
