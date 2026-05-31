@@ -13,7 +13,7 @@ Our current projects include:
 
 - **[Shelly ALPM](/shelly-alpm)** - a modern, visual package manager for Arch Linux built with C# and GTK4.
 - **[Starfish](/starfish/overview)** - a dependency viewer for Arch packages.
-- **[Aqueous](/aqueous/overview)** - a new project currently in early development.
+- **[Aqueous](/aqueous/overview)** - a minimal Wayland window manager built on top of RiverDelta a fork of River compositor.
 
 ## What's Next
 
