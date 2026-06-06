@@ -7,7 +7,7 @@ description: Learn setup updates for AppImages within shelly.
 
 ## Setting Updates
 
-Shelly supports updating AppImages in 2 ways:
+Shelly supports updating AppImages in two ways:
 
 1. A static URL
 2. A Repository from GitHub, GitLab, Codeberg, or Forejo.
@@ -28,6 +28,17 @@ We would then enter
 ppy/ous in the repo url field.
 
 Then Shelly will check for updates from the ppy/osu repository user the most recent release or from the most release pre-release based on your settings.
+
+# Key Details for updates:
+
+1. Shelly will check the version from the `.desktop` file and compare it to the latest release.
+2. If the version is `Unknown shelly` will update to the latest release, and track the version via the tags for the future.
+3. If your AppImage has a self-update feature, this is the best way to update and track updates. You can use the sync feature to keep your AppImage info up to date.
+
+## Syncing AppImages
+
+1. Sometimes you may want to sync your AppImages with the latest release this is most useful for self-updating AppImages.
+
 
 ## Migrating from Shelly v1 AppImage Support to Shelly v2 AppImage Support
 
