@@ -124,6 +124,19 @@ export default defineConfig({
             ]),
           ],
         },
+        {
+          label: "Pori",
+          items: [
+            { autogenerate: { directory: "pori" } },
+            ...makeChangelogsSidebarLinks([
+              {
+                type: "all",
+                base: "pori/changelog",
+                label: "Changelog",
+              },
+            ]),
+          ],
+        },
       ],
       expressiveCode: {
         themes: ["catppuccin-macchiato", "catppuccin-latte"],
