@@ -49,6 +49,14 @@ export const collections = {
         title: "Starfish Changelog",
         pagefind: false,
       },
+      {
+        provider: "github",
+        base: "pori/changelog",
+        owner: "Seafoam-Labs",
+        repo: "Pori",
+        title: "Pori Changelog",
+        pagefind: false,
+      },
     ]),
   }),
   shellyNews: defineCollection({
