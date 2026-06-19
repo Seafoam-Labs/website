@@ -54,7 +54,9 @@ with default values.
   "RecommendedEnabled": true
 }
 ```
-
+## Environment Variables
+If you set the environment variable `SHELLY_ELEVATOR` then Shelly will use the designated privlege elevator in the cli rather than detecting the elevator in path. Shelly will fall back to sudo if nothing is detected.
+The natively detected elevators are currently: `doas` and `sudo`
 ## Deprecated Configuration Fields
 
 These fields are no longer used and will be removed in the future. They were used in the past when Shelly was still in early development using Avalonia.
