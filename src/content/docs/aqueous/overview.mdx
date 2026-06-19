@@ -1,23 +1,22 @@
 ---
 title: Aqueous
-description: A minimal Wayland window manager built on River.
+description: A minimal Wayland window manager built on a fork of River.
 sidebar:
   label: Overview
 ---
 
-**Aqueous** is a minimal **Wayland window manager** built on top of [River](https://codeberg.org/river/river).
+**Aqueous** is a minimal **Wayland window manager** built on top of a customied [River](https://codeberg.org/river/river) for called RiverDelta.
 
 It is designed as a lightweight, configurable River-based environment with a separate shell/bar layer powered by the external [Noctalia](https://github.com/noctalia-dev/noctalia-shell) project.
 
-- **Language:** C# (primary), with small amounts of Shell and QML
+- **Language:** C# (primary), zig (secondary), with some shell.
 - **Platform focus:** Linux / Wayland
 
 ## Features
 
-Aqueous provides a River-oriented window management stack with:
+Aqueous provides a tiling oriented window management stack with:
 
 - a core window manager client
-- an input daemon for libinput-backed device configuration
 - an output daemon for display/output control
 - test projects for validation
 - packaging and session-launch integration for Linux environments
