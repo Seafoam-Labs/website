@@ -1,0 +1,46 @@
+---
+title: AppImage Configuration
+sidebar:
+  label: AppImage
+description: Learn setup updates for AppImages within Shelly.
+---
+
+## Setting Updates
+
+Shelly supports updating AppImages in two ways:
+
+1. A static URL
+2. A Repository from GitHub, GitLab, Codeberg, or Forgejo.
+
+### Static URL:
+
+Enter the URL to the AppImage which you have downloaded. Shelly will use this to check for updates.
+
+### Repository:
+
+You will need the Repo Owner and Repo Name. Shelly will then check for updates from this repository.
+
+For example, if we were to add OSU as an AppImage from GitHub, the repo url would be:
+https://github.com/ppy/osu
+
+We would then enter
+
+ppy/osu in the repo url field.
+
+Then Shelly will check for updates from the ppy/osu repository using the most recent release or from the latest pre-release based on your settings.
+
+### Key Details for updates:
+
+1. Shelly will check the version from the `.desktop` file and compare it to the latest release.
+2. If the version is `Unknown`, Shelly will update to the latest release, and track the version via the tags for the future.
+3. If your AppImage has a self-update feature, this is the best way to update and track updates. You can use the sync feature to keep your AppImage info up to date.
+
+## Syncing AppImages
+
+1. Sometimes you may want to sync your AppImages with the latest release. This is most useful for self-updating AppImages.
+
+## Migrating from Shelly v1 AppImage Support to Shelly v2 AppImage Support
+
+1. Run `shelly appimage migrate-manager`
+   or
+2. The UI will prompt you to migrate your AppImages.

@@ -1,0 +1,76 @@
+---
+title: Pori
+description: Pori is a desktop tool that helps you create reliable, persistent Linux mounts using systemd `.mount` units.
+sidebar:
+  label: Overview
+previous: false
+---
+
+import { Image } from "astro:assets";
+import {
+  Card,
+  CardGrid,
+  TabItem,
+  LinkButton,
+  Tabs,
+} from "@astrojs/starlight/components";
+import pori from "../../../assets/images/pori.png";
+
+<Image
+  src={pori}
+  alt="Pori application logo showing a stylized sponge mascot"
+  width={256}
+  height={256}
+/>
+
+_Pori_ (from [Porifera](https://en.wikipedia.org/wiki/Sponge), the phylum of sponges) is a Linux desktop tool for mounting local disks in a way that persists across reboots.
+
+Instead of manually editing `/etc/fstab`, Pori creates and enables native systemd `.mount` units in `/etc/systemd/system/`. This keeps mounts aligned with modern Linux system management and makes setup easier for everyday users.
+
+## Installation
+
+Pori is available in CachyOS repository and AUR.
+
+See https://github.com/Seafoam-Labs/Pori#installation for manual build and installation steps.
+
+## Why Use Pori?
+
+- **Persistent mounts made simple**: Configure a disk once and keep it mounted after reboot.
+- **Systemd-native setup**: Uses `.mount` units rather than legacy `fstab` entries.
+- **Guided workflow**: Choose a disk, confirm options, and apply.
+- **Sudo-based privileged actions**: Performs required root operations securely.
+
+## How It Works
+
+1. Pori scans available block devices.
+2. You choose a target disk and mount point.
+3. Pori generates and enables a systemd `.mount` unit, then starts it immediately.
+
+### What Pori Creates
+
+For a mount at `/mnt/backup`, Pori generates `/etc/systemd/system/mnt-backup.mount`:
+
+```ini
+[Unit]
+Description=Mount for /mnt/backup
+Requires=local-fs-pre.target
+After=local-fs-pre.target
+
+[Mount]
+What=/dev/sdb1
+Where=/mnt/backup
+Type=ext4
+Options=defaults,noatime
+ForceUnmount=no
+
+[Install]
+WantedBy=multi-user.target
+```
+
+You can inspect, edit, or disable this unit anytime using standard `systemctl` commands.
+
+## Learn More
+
+Visit the repository for source code, updates, and contribution information:
+
+[GitHub repository](https://github.com/Seafoam-Labs/Pori)
