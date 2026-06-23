@@ -1,0 +1,70 @@
+---
+title: Window Rules
+description: Per-window rules and the game-mode layout engine.
+sidebar:
+  label: Window Rules
+  order: 5
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Window rules live in `rules.toml` (path is set via `[rules]` in `wm.toml`).
+They are reloaded by `Super+R` together with `wm.toml`. A missing file means no rules.
+
+## Matching
+
+Rules are evaluated on `manage_start` and on `app_id` / `title` changes.
+**First match wins.** At least one matcher (`app_id`, `class`, or `title`) is
+required — rules with none are dropped with a warning.
+
+```toml
+[[window]]
+app_id     = "dota2"
+layout     = "game-mode"
+anchor     = "center"     # center | top | bottom | left | right
+size       = "native"     # "native" | "WxH" | "FxF"
+scale      = 1.0
+tag        = 9
+fullscreen = false
+```
+
+### Sizing another app
+
+```toml
+[[window]]
+class  = "steam_app_570"
+layout = "game-mode"
+size   = "1920x1080"
+```
+
+### Per-window opacity
+
+`opacity` is a `0.0..1.0` fraction; omit it to inherit the global `[opacity]`
+default from `wm.toml`.
+
+```toml
+[[window]]
+app_id  = "com.mitchellh.ghostty"
+opacity = 0.85
+
+[[window]]
+app_id  = "mpv"
+opacity = 1.0    # force fully opaque
+```
+
+## Game-mode engine
+
+Options for the `game-mode` layout. They only apply when at least one rule
+targets `layout = "game-mode"`.
+
+```toml
+[game_mode]
+remainder_layout = "rows"   # tile | grid | monocle | scrolling | float | rows
+gaps_inner       = 8
+fallback_layout  = "grid"   # used when no anchor window is present on the output
+```
+
+<Aside type="tip">
+    The anchor window is immovable; `move_window_*` actions reorder windows within the
+    non-anchor band. Use a rule's `anchor` key to choose placement.
+</Aside>

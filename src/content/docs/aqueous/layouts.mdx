@@ -1,0 +1,86 @@
+---
+title: Layouts
+description: Aqueous layout engines, gaps, borders, slots, and per-layout options.
+sidebar:
+  label: Layouts
+  order: 4
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Layouts are configured in `layout.toml`. Aqueous ships several tiling engines
+plus a floating engine.
+
+## Layout engines
+
+| Engine      | Description                                                        |
+| ----------- | ------------------------------------------------------------------ |
+| `tile`      | Master/stack tiling with adjustable split and master count        |
+| `monocle`   | One full-area window; others stacked behind                        |
+| `grid`      | Even grid of windows                                               |
+| `scrolling` | PaperWM-style horizontal columns with viewport panning            |
+| `float`     | Free-floating windows                                              |
+| `game-mode` | An anchored "main" window with a configurable remainder band       |
+
+## Global defaults
+
+```toml
+[layout]
+default      = "tile"   # tile | monocle | grid | float | scrolling | game-mode
+
+gaps_outer   = 8        # px around the screen edge
+gaps_inner   = 4        # px between tiles
+
+master_ratio = 0.55     # tile engine split (0.0–1.0)
+master_count = 1        # windows in the master area
+```
+
+## Borders
+
+ARGB hex, `0xAARRGGBB`.
+
+```toml
+border_width   = 2
+border_focused = 0xFF88C0D0   # Nord frost
+border_normal  = 0xFF3B4252   # Nord polar night
+border_urgent  = 0xFFBF616A   # Nord aurora red
+```
+
+## Layout slots
+
+Symbolic names bound to `set_layout_primary/secondary/tertiary/quaternary`
+(`Super+T/F/M/G`).
+
+```toml
+[layout.slots]
+primary    = "tile"
+secondary  = "scrolling"
+tertiary   = "monocle"
+quaternary = "grid"
+```
+
+## Per-layout options
+
+Override values per engine with `[layout.options.<id>]`. Recognised scalar keys:
+`gaps_outer`, `gaps_inner`, `master_ratio`, `master_count`. Any other key is
+passed through to the engine as a string.
+
+```toml
+[layout.options.tile]
+gaps_outer   = 12
+gaps_inner   = 6
+master_ratio = 0.6
+
+[layout.options.grid]
+gaps_inner = 8
+
+[layout.options.scrolling]
+column_fraction = "0.5"    # each column = 50% of output width
+center_focused  = "true"   # auto-pan so the focused column is centred
+```
+
+<Aside type="note">
+    The `game-mode` engine is configured separately under `[game_mode]` in
+    `rules.toml`, because it only matters when a window rule targets it. See
+    [Window Rules](/aqueous/window-rules/).
+</Aside>

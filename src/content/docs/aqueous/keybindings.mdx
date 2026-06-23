@@ -1,0 +1,140 @@
+---
+title: Keybindings
+description: The Aqueous keybinding grammar, built-in actions, and custom chords.
+sidebar:
+  label: Keybindings
+  order: 3
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Keybindings live under `[keybinds]` in `wm.toml`. Each built-in action maps to:
+
+- a single chord string — `action = "Super+H"`
+- a list of chords — `action = ["Super+H", "Alt+Left"]`
+- an empty list to unbind — `action = []`
+
+## Chord grammar
+
+Tokens joined by `+`, case-insensitive.
+
+- **Modifiers:** `Super` (Mod4), `Ctrl`, `Alt` (Mod1), `Shift`
+- **Keys:** letters `A–Z`, digits `0–9`, `F1–F24`, and named keys
+(`Return`, `Space`, `Tab`, `Comma`, `Period`, `Escape`, `Left`, `Right`,
+`Up`, `Down`, `Home`, `End`, `PageUp`, `PageDown`, …)
+
+Omit a line to keep the compiled-in default.
+
+## Window & session
+
+```toml
+[keybinds]
+toggle_start_menu = "Super+Space"
+spawn_terminal    = "Super+Return"
+close_focused     = "Super+Q"
+reload_config     = "Super+R"
+```
+
+## Focus & movement
+
+```toml
+focus_left  = "Super+H"
+focus_right = "Super+L"
+focus_up    = "Super+K"
+focus_down  = "Super+J"
+
+move_window_left  = "Super+Shift+Left"
+move_window_right = "Super+Shift+Right"
+move_window_up    = "Super+Shift+Up"
+move_window_down  = "Super+Shift+Down"
+```
+
+Move semantics vary per engine: `tile`/`grid`/`dwindle` swap neighbours;
+`scrolling` swaps columns or reorders within a column; `monocle` reorders the
+z-stack; `game-mode` reorders the non-anchor band; `float` is a no-op.
+
+### Scrolling-layout panning
+
+```toml
+scroll_viewport_left  = "Super+Comma"
+scroll_viewport_right = "Super+Period"
+move_column_left      = "Super+Shift+H"
+move_column_right     = "Super+Shift+L"
+```
+
+## Layout switching
+
+Resolves through `[layout.slots]` in `layout.toml`.
+
+```toml
+set_layout_primary    = "Super+T"   # → primary slot
+set_layout_secondary  = "Super+F"   # → secondary slot
+set_layout_tertiary   = "Super+M"   # → tertiary slot
+set_layout_quaternary = "Super+G"   # → quaternary slot
+```
+
+## Workspaces
+
+Workspaces are **exclusive** (niri-style, `ext-workspace-v1`): a window lives on
+exactly one workspace; one workspace is active per output. Indices are 1-based.
+
+```toml
+focus_workspace_1   = "Super+1"        # …through Super+9
+move_to_workspace_1 = "Super+Shift+1"  # …through Super+Shift+9
+
+focus_workspace_up       = "Super+Bracketleft"
+focus_workspace_down     = "Super+Bracketright"
+focus_previous_workspace = "Super+grave"   # back-and-forth
+
+focus_output_left   = "Super+Comma"
+focus_output_right  = "Super+Period"
+move_to_output_left = "Super+Shift+Comma"
+```
+
+## Window states
+
+Each toggle remembers the prior state, so a second press round-trips. Only one
+fullscreen window per output is allowed.
+
+```toml
+toggle_fullscreen  = "Super+Shift+F"
+toggle_maximize    = "Super+Shift+M"
+toggle_floating    = "Super+Shift+Space"
+toggle_minimize    = "Super+N"
+unminimize_last    = "Super+Shift+N"
+toggle_scratchpad  = "Super+Backslash"
+send_to_scratchpad = "Super+Shift+Backslash"
+```
+
+## Pointer
+
+```toml
+# Hold to release any active pointer constraint (game mouse-trap); re-engages on release.
+untrap_pointer = "Super+grave"
+```
+
+## Custom chords
+
+Free-form `chord = action verb` entries.
+
+```toml
+[keybinds.custom]
+"Super+E"        = "spawn:nemo"
+"Super+Shift+S"  = "spawn:grim -g \"$(slurp)\" - | wl-copy"
+"Alt+F4"         = "builtin:close_focused"
+"Super+grave"    = "builtin:toggle_scratchpad_named:term"
+```
+
+**Action verbs:**
+
+- `spawn:<argv>` — fork/exec via `/bin/sh -c` (detached)
+- `set_layout:<id-or-slot>` — switch active layout (`tile`, `monocle`, `grid`,
+`float`, `scrolling`, or a `[layout.slots]` name)
+- `builtin:<action_name>` — invoke a built-in by canonical name (a
+`:arg` suffix targets named scratchpads, etc.)
+
+<Aside type="caution">
+    `Super+1..9` are reserved by the workspace bindings. For direct layout switches
+    prefer the slot-based `set_layout_*` builtins (`Super+T/F/M/G`) or non-conflicting
+    chords like `Super+Alt+T`.
+</Aside>

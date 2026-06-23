@@ -1,0 +1,147 @@
+---
+title: Configuration
+description: Configure Aqueous through wm.toml, layout.toml, and rules.toml.
+sidebar:
+  label: Configuration
+  order: 2
+---
+
+import { Aside, FileTree, CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+Aqueous is configured with a small set of TOML files. The parser is a **tiny TOML
+subset** — `[section]`, `[[array]]`, `key = value`, and `#` comments. Unknown keys
+are ignored, and a malformed file falls back to defaults silently.
+
+<FileTree>
+    - ~/.config/aqueous/
+    - wm.toml        outputs, struts, keybinds, exec, state, scratchpads
+    - layout.toml    default layout, gaps, borders, per-layout options
+    - rules.toml     per-window rules + game-mode options
+</FileTree>
+
+## Reloading
+
+Most of the configuration **hot-reloads** with `Super+R` (the `reload_config`
+action) — layout options swap live. **Keybinding chord changes still require a
+WM restart**; only layout-related values hot-swap.
+
+```toml
+# wm.toml
+reload_config = "Super+R"
+```
+
+## `wm.toml`
+
+The main configuration file. Key sections:
+
+### Outputs
+
+Repeat one `[[output]]` block per monitor. `name` matches `river_output_v1.name`
+(e.g. `DP-1`, `HDMI-A-1`, `eDP-1`).
+
+```toml
+[[output]]
+name     = "DP-4"
+mode     = "7680x2160@240.000000"
+scale    = 1.0
+position = [0, 0]
+enabled  = true
+
+[display]
+apply_on_start  = true
+apply_on_reload = true
+```
+
+### Per-workspace layout overrides
+
+Force a workspace to a given layout. Add an optional `output` to scope it to one
+monitor.
+
+```toml
+[[workspace]]
+workspace = 1
+layout    = "tile"
+
+[[workspace]]
+output    = "DP-1"
+workspace = 2
+layout    = "monocle"
+```
+
+**Precedence (highest → lowest):** per-keybinding `set_layout_*` override →
+`output`+`workspace` block → `workspace`-only block → `[[output]]` → `[layout].default`.
+
+### Struts (reserved space for bars)
+
+```toml
+[struts]
+top    = 32   # match your Noctalia bar height
+bottom = 0
+left   = 0
+right  = 0
+```
+
+### Actions
+
+Named shell commands you can attach to a keybinding.
+
+```toml
+[actions]
+toggle_start_menu = "qs -c noctalia-shell ipc call launcher toggle"
+spawn_terminal    = "tabby"
+lock_screen       = "swaylock -f --screenshots --clock --indicator"
+```
+
+### Window state behaviour
+
+```toml
+[state]
+fullscreen_hides_bar = true   # hide layer-shell layers above 'bottom'
+maximize_full_output = false  # false → respect exclusive zones (don't cover bar)
+```
+
+### Scratchpads
+
+```toml
+[scratchpad]
+on_empty    = "manual"   # "manual" | "spawn"
+width_frac  = 0.6
+height_frac = 0.5
+anchor      = "center"   # center | top | bottom
+
+[scratchpad.spawn]
+# term = "ghostty --class=aqueous-scratch-term"
+```
+
+### Autostart (`exec`)
+
+Run programs on session start / reload. Repeat `[[exec]]` per program.
+
+```toml
+[[exec]]
+name    = "noctalia"
+command = "qs -c noctalia-shell"
+when    = "startup"   # "startup" (default) | "reload" | "always"
+once    = true        # don't relaunch on --reload
+restart = true        # respawn (with backoff) on non-zero exit
+log     = "/tmp/noctalia.log"
+```
+
+### Pointing to the rules file
+
+```toml
+[rules]
+path = "~/.config/aqueous/rules.toml"
+```
+
+<Aside type="tip">
+    See the dedicated pages for the full keybinding grammar, the layout engines,
+    and the window-rule matchers.
+</Aside>
+
+<CardGrid>
+    <LinkCard title="Keybindings" href="/aqueous/keybindings/" />
+    <LinkCard title="Layouts" href="/aqueous/layouts/" />
+    <LinkCard title="Window Rules" href="/aqueous/window-rules/" />
+    <LinkCard title="Visual Effects" href="/aqueous/visual-effects/" />
+</CardGrid>

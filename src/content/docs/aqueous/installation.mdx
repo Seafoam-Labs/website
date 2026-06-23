@@ -1,0 +1,85 @@
+---
+title: Installation
+description: Install Aqueous on Arch Linux from the PKGBUILD or build it from source.
+sidebar:
+  label: Installation
+  order: 1
+---
+
+import { Steps, Tabs, TabItem, Aside } from "@astrojs/starlight/components";
+
+Aqueous targets **Linux / Wayland**. The window manager is written in **C# / .NET 10**
+and the **RiverDelta** compositor (an in-tree fork of [River](https://codeberg.org/river/river))
+is written in **Zig**.
+
+## Requirements
+
+- A Wayland-capable GPU + `seatd`/`logind`
+- `dotnet-runtime` 10 (or the SDK to build the WM)
+- `zig` (to build RiverDelta from source)
+- A compatible shell/bar — Aqueous ships defaults for the **Noctalia** shell
+
+## Arch Linux
+
+The repository ships a reference `PKGBUILD` that produces the `aqueous` and
+`aqueous-wm` packages, a Wayland session entry, and default configuration files.
+
+<Tabs>
+    <TabItem label="From the PKGBUILD">
+
+        ```sh
+        git clone https://github.com/Seafoam-Labs/Aqueous.git
+        cd Aqueous
+        makepkg -si
+        ```
+
+    </TabItem>
+    <TabItem label="Build from source">
+
+        ```sh
+        git clone https://github.com/Seafoam-Labs/Aqueous.git
+        cd Aqueous
+        # Build the Zig compositor (RiverDelta)
+        zig build -Doptimize=ReleaseSafe
+        # Build and publish the C# window manager
+        dotnet publish -c Release
+        ```
+
+    </TabItem>
+</Tabs>
+
+<Aside type="note">
+    Installing the package also drops default `wm.toml`, `layout.toml`, and `rules.toml`
+    files and registers a Wayland session entry so Aqueous shows up in your display manager.
+</Aside>
+
+## Starting a session
+
+<Steps>
+
+    1. Select **Aqueous** from your display manager's session list, **or**
+
+    2. Launch it manually from a TTY:
+
+       ```sh
+       aqueous
+       ```
+
+    3. For development, use the nested-session launcher scripts in the repository
+    to run Aqueous inside an existing Wayland session.
+
+</Steps>
+
+## First-run configuration
+
+Aqueous reads its configuration from `~/.config/aqueous/`. Copy the shipped
+examples to start customizing:
+
+```sh
+mkdir -p ~/.config/aqueous
+cp /usr/share/aqueous/wm.toml      ~/.config/aqueous/wm.toml
+cp /usr/share/aqueous/layout.toml  ~/.config/aqueous/layout.toml
+cp /usr/share/aqueous/rules.toml   ~/.config/aqueous/rules.toml
+```
+
+Continue with the [Configuration](/aqueous/configuration/) guide.
