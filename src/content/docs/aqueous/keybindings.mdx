@@ -20,8 +20,8 @@ Tokens joined by `+`, case-insensitive.
 
 - **Modifiers:** `Super` (Mod4), `Ctrl`, `Alt` (Mod1), `Shift`
 - **Keys:** letters `A–Z`, digits `0–9`, `F1–F24`, and named keys
-(`Return`, `Space`, `Tab`, `Comma`, `Period`, `Escape`, `Left`, `Right`,
-`Up`, `Down`, `Home`, `End`, `PageUp`, `PageDown`, …)
+  (`Return`, `Space`, `Tab`, `Comma`, `Period`, `Escape`, `Left`, `Right`,
+  `Up`, `Down`, `Home`, `End`, `PageUp`, `PageDown`, …)
 
 Omit a line to keep the compiled-in default.
 
@@ -129,12 +129,12 @@ Free-form `chord = action verb` entries.
 
 - `spawn:<argv>` — fork/exec via `/bin/sh -c` (detached)
 - `set_layout:<id-or-slot>` — switch active layout (`tile`, `monocle`, `grid`,
-`float`, `scrolling`, or a `[layout.slots]` name)
+  `float`, `scrolling`, or a `[layout.slots]` name)
 - `builtin:<action_name>` — invoke a built-in by canonical name (a
-`:arg` suffix targets named scratchpads, etc.)
+  `:arg` suffix targets named scratchpads, etc.)
 
 <Aside type="caution">
-    `Super+1..9` are reserved by the workspace bindings. For direct layout switches
-    prefer the slot-based `set_layout_*` builtins (`Super+T/F/M/G`) or non-conflicting
-    chords like `Super+Alt+T`.
+  `Super+1..9` are reserved by the workspace bindings. For direct layout
+  switches prefer the slot-based `set_layout_*` builtins (`Super+T/F/M/G`) or
+  non-conflicting chords like `Super+Alt+T`.
 </Aside>
