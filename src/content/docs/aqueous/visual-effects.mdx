@@ -1,0 +1,50 @@
+---
+title: Visual Effects
+description: Backdrop blur and window opacity in Aqueous.
+sidebar:
+  label: Visual Effects
+  order: 6
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Aqueous supports compositor-level visual effects when **RiverDelta is built with
+SceneFX**. These are configured in `wm.toml` and can be overridden per window in
+`rules.toml`.
+
+## Backdrop blur
+
+Applied behind window content.
+
+```toml
+[blur]
+enabled = false   # set true to enable compositor backdrop blur
+radius  = 5       # blur radius in pixels
+passes  = 3       # number of passes (higher = blurrier, costlier)
+```
+
+Per-window exclusions (e.g. games) go in `rules.toml`:
+
+```toml
+[[window]]
+app_id = "dota2"
+blur   = false
+```
+
+## Window opacity
+
+Default content opacity for all windows.
+
+```toml
+[opacity]
+enabled = false   # apply the value below to all windows
+value   = 0.9     # 0.0 = transparent .. 1.0 = opaque
+```
+
+Override per window in `rules.toml` via the `opacity` key (see
+[Window Rules](/aqueous/window-rules/)).
+
+<Aside type="caution">
+  Both effects require a RiverDelta build with SceneFX / opacity support.
+  Without it the keys are parsed but have no visible effect.
+</Aside>
