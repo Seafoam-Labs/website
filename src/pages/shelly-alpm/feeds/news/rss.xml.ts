@@ -1,4 +1,4 @@
-import { getContainerRenderer as getMDXRenderer } from "@astrojs/mdx";
+import { getContainerRenderer } from "@astrojs/mdx/container-renderer";
 import rss, { type RSSFeedItem } from "@astrojs/rss";
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
@@ -17,7 +17,7 @@ export const GET: APIRoute = async (context) => {
   let baseUrl = context.site.href;
   if (baseUrl.at(-1) === "/") baseUrl = baseUrl.slice(0, -1);
 
-  const renderers = await loadRenderers([getMDXRenderer()]);
+  const renderers = await loadRenderers([getContainerRenderer()]);
   const container = await AstroContainer.create({ renderers });
 
   const posts = (await getCollection("shellyNews")).toSorted((a, b) => {
