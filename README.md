@@ -2,6 +2,11 @@
 
 Website for Seafoam Labs, built with [Astro](https://github.com/withastro/astro) and [Starlight](https://github.com/withastro/starlight).
 
+## Requirements
+
+- Node.js - lts
+- pnpm - latest
+
 ## Project Structure
 
 Inside of the project, you'll see the following folders and files:
@@ -43,18 +48,18 @@ Static assets, like favicons, can be placed in the `public/` directory.
 
 All commands are run from the root of the project, from a terminal:
 
-- `npm install` to install dependencies
+- `pnpm install` to install dependencies
 <!-- Separator -->
-- `npm run dev` to start the local development server
-- `npm run format` to format code with Prettier
-- `npm run lint` to lint code with ESLint
-- `npm run check` to run Astro's type checking diagnostics
+- `pnpm run dev` to start the local development server
+- `pnpm run format` to format code with Prettier
+- `pnpm run lint` to lint code with ESLint
+- `pnpm run check` to run Astro's type checking diagnostics
 <!-- Separator -->
-- `npm run build` to build the production site
-- `npm run preview` to preview the production build locally
+- `pnpm run build` to build the production site
+- `pnpm run preview` to preview the production build locally
 <!-- Separator -->
-- `npm run astro ...` to run Astro CLI commands, like `astro add` or `astro check`
-- `npm run astro -- --help` to get help using the Astro CLI
+- `pnpm run astro ...` to run Astro CLI commands, like `astro add` or `astro check`
+- `pnpm run astro -- --help` to get help using the Astro CLI
 
 ## Useful links
 

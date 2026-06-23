@@ -23,7 +23,6 @@ export const collections = {
     }),
   }),
   changelogs: defineCollection({
-    // @ts-expect-error - Internally wrong, but it works
     loader: changelogsLoader([
       {
         provider: "github",
