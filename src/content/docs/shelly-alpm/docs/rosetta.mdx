@@ -5,6 +5,8 @@ sidebar:
 description: A reference for pacman commands and their equivalent Shelly commands. It is intended to help users who are familiar with pacman to transition to Shelly.
 ---
 
+import { Badge } from "@astrojs/starlight/components";
+
 Shelly Rosetta is a reference for pacman commands and their equivalent Shelly commands. It is intended to help users who are familiar with pacman to transition to Shelly.
 
 ## Install or update
@@ -32,15 +34,15 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 
 ## Remove
 
-| pacman                            | shelly shortcode      | shelly longcode                    | Description                                                                                                                        |
-| --------------------------------- | --------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `pacman -R package`               | `shelly -SR package`  | `shelly remove package`            | Remove a single package, leaving all of its dependencies installed                                                                 |
-| `pacman -Rs package`              | `shelly -SR package`  | `shelly remove --cascade package`  | Remove a package and its dependencies which are not required by any other installed package                                        |
-| `pacman -Rsc package`             | `shelly -SRi package` | `shelly remove --cascade --ripple` | Remove a package, its dependencies and all the packages that depend on the target package. ==Be very careful running this.==       |
-| `pacman -Rdd package`             | `shelly -SRf`         | `shelly remove --force`            | Remove a package, skipping any dependency checks. ==This can break your system. Only run if advanced user or directed by support== |
-| `pacman -Sc`                      | `shelly -UCi`         | `shelly cache-clean --uninstalled` | Clean the local package cache of uninstalled packages                                                                              |
-| `pacman -Scc`                     | `shelly -UCk 0`       | `shelly cache-clean --keep 0`      | Clean the local package cache of all packages                                                                                      |
-| `pacman -Qdtq` or `pacman -Rns -` | `shelly -SPo`         | `shelly purify --orphans`          | Remove packages that were installed as a dependency and are no longer required by any package, aka orphans                         |
+| pacman                            | shelly shortcode      | shelly longcode                    | Description                                                                                                                                                                   |
+| --------------------------------- | --------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pacman -R package`               | `shelly -SR package`  | `shelly remove package`            | Remove a single package, leaving all of its dependencies installed                                                                                                            |
+| `pacman -Rs package`              | `shelly -SR package`  | `shelly remove --cascade package`  | Remove a package and its dependencies which are not required by any other installed package                                                                                   |
+| `pacman -Rsc package`             | `shelly -SRi package` | `shelly remove --cascade --ripple` | Remove a package, its dependencies and all the packages that depend on the target package. <Badge text="Be very careful running this" size="small" variant="danger" />        |
+| `pacman -Rdd package`             | `shelly -SRf`         | `shelly remove --force`            | Remove a package, skipping any dependency checks. <Badge text="This can break your system. Only run if advanced user or directed by support" size="small" variant="danger" /> |
+| `pacman -Sc`                      | `shelly -UCi`         | `shelly cache-clean --uninstalled` | Clean the local package cache of uninstalled packages                                                                                                                         |
+| `pacman -Scc`                     | `shelly -UCk 0`       | `shelly cache-clean --keep 0`      | Clean the local package cache of all packages                                                                                                                                 |
+| `pacman -Qdtq` or `pacman -Rns -` | `shelly -SPo`         | `shelly purify --orphans`          | Remove packages that were installed as a dependency and are no longer required by any package, aka orphans                                                                    |
 
 ## Downgrading
 
