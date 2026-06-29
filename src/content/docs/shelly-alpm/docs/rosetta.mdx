@@ -11,13 +11,13 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 
 ## Install or update
 
-| pacman                | shelly shortcode      | shelly longcode                    | Description                                                   |
-| --------------------- | --------------------- | ---------------------------------- | ------------------------------------------------------------- |
-| `pacman -S package`   | `shelly -SI package`  | `shelly install package`           | (Re)Install a package                                         |
+| pacman                | shelly shortcode         | shelly longcode                    | Description                                                   |
+| --------------------- | ------------------------ | ---------------------------------- | ------------------------------------------------------------- |
+| `pacman -S package`   | `shelly -SI package`     | `shelly install package`           | (Re)Install a package                                         |
 | `pacman -Syu`         | `shelly -SU` or `shelly` | `shelly upgrade`                   | Perform a system update                                       |
-| `pacman -Syu package` | `shelly -SIu package` | `shelly install --upgrade package` | Install a package and do a system update                      |
-| `n/a`                 | `shelly -UK`          | `shelly check-updates`             | Check for updates                                             |
-| `pacman -U URL`       | `shelly -SI URL`      | `shelly install URL`               | Download and install a .pkg.tar.zst package from the internet |
+| `pacman -Syu package` | `shelly -SIu package`    | `shelly install --upgrade package` | Install a package and do a system update                      |
+| `n/a`                 | `shelly -UK`             | `shelly check-updates`             | Check for updates                                             |
+| `pacman -U URL`       | `shelly -SI URL`         | `shelly install URL`               | Download and install a .pkg.tar.zst package from the internet |
 
 ## Search or information
 
@@ -27,21 +27,21 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 | `pacman -Si package` | `shelly -SQad package` | `shelly query --available --detail package` | Get detailed information about a package in the arch/cachy repos                                                                                         |
 | `pacman -Qs package` | `shelly -SQi package`  | `shelly query --installed package`          | Search locally installed package names                                                                                                                   |
 | `pacman -Qi package` | `shelly -SQ package`   | `shelly query --installed --detail package` | Get detailed information for a locally installed package                                                                                                 |
-| `yay -Ss package`    | `shelly -AS package`   | `shelly aur search package`                 | Search for a package in the AUR                                                                                                                          |
+| `yay -Ss package`    | `shelly -ASs package`  | `shelly aur search --standard package`      | Search for a package in the standard repos and AUR `alias dat-ass="shelly -ASs"`                                                                         |
 | `yay -Si package`    | `shelly -ASd package`  | `shelly aur search --detail package`        | Get detailed information about a package in the AUR                                                                                                      |
 | `pacman -Qm`         | `shelly -AL`           | `shelly aur list`                           | List packages installed from the AUR.                                                                                                                    |
 | `pacman -Qe package` | `n/a`                  | `n/a`                                       | List all explicitly installed packages. This is primarily used for package list backup purposes like with `pacman -Qqe`, but `shelly export` covers that |
 
 ## Remove
 
-| pacman                            | shelly shortcode      | shelly longcode                    | Description                                                                                                                                                                   |
-| --------------------------------- | --------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pacman -R package`               | `shelly -SR package`  | `shelly remove package`            | Remove a single package, leaving all of its dependencies installed                                                                                                            |
-| `pacman -Rs package`              | `shelly -SR package`  | `shelly remove --cascade package`  | Remove a package and its dependencies which are not required by any other installed package                                                                                   |
-| `pacman -Rsc package`             | `shelly -SRi package` | `shelly remove --cascade --ripple` | Remove a package, its dependencies and all the packages that depend on the target package. <Badge text="Be very careful running this" size="small" variant="danger" />        |
-| `pacman -Rdd package`             | `shelly -SRf`         | `shelly remove --force`            | Remove a package, skipping any dependency checks. <Badge text="This can break your system. Only run if advanced user or directed by support" size="small" variant="danger" /> |
-| `pacman -Sc`                      | `shelly -UCi`         | `shelly cache-clean --uninstalled` | Clean the local package cache of uninstalled packages                                                                                                                         |
-| `pacman -Scc`                     | `shelly -UCk 0`       | `shelly cache-clean --keep 0`      | Clean the local package cache of all packages                                                                                                                                 |
+| pacman                          | shelly shortcode      | shelly longcode                    | Description                                                                                                                                                                   |
+| ------------------------------- | --------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pacman -R package`             | `shelly -SR package`  | `shelly remove package`            | Remove a single package, leaving all of its dependencies installed                                                                                                            |
+| `pacman -Rs package`            | `shelly -SR package`  | `shelly remove --cascade package`  | Remove a package and its dependencies which are not required by any other installed package                                                                                   |
+| `pacman -Rsc package`           | `shelly -SRi package` | `shelly remove --cascade --ripple` | Remove a package, its dependencies and all the packages that depend on the target package. <Badge text="Be very careful running this" size="small" variant="danger" />        |
+| `pacman -Rdd package`           | `shelly -SRf`         | `shelly remove --force`            | Remove a package, skipping any dependency checks. <Badge text="This can break your system. Only run if advanced user or directed by support" size="small" variant="danger" /> |
+| `pacman -Sc`                    | `shelly -UCi`         | `shelly cache-clean --uninstalled` | Clean the local package cache of uninstalled packages                                                                                                                         |
+| `pacman -Scc`                   | `shelly -UCk 0`       | `shelly cache-clean --keep 0`      | Clean the local package cache of all packages                                                                                                                                 |
 | `pacman -Qdtq \| pacman -Rns -` | `shelly -SPo`         | `shelly purify --orphans`          | Remove packages that were installed as a dependency and are no longer required by any package, aka orphans                                                                    |
 
 ## Downgrading
