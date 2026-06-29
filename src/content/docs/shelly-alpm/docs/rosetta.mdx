@@ -14,7 +14,7 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 | pacman                | shelly shortcode      | shelly longcode                    | Description                                                   |
 | --------------------- | --------------------- | ---------------------------------- | ------------------------------------------------------------- |
 | `pacman -S package`   | `shelly -SI package`  | `shelly install package`           | (Re)Install a package                                         |
-| `pacman -Syu`         | `shelly -SU / shelly` | `shelly upgrade`                   | Perform a system update                                       |
+| `pacman -Syu`         | `shelly -SU` or `shelly` | `shelly upgrade`                   | Perform a system update                                       |
 | `pacman -Syu package` | `shelly -SIu package` | `shelly install --upgrade package` | Install a package and do a system update                      |
 | `n/a`                 | `shelly -UK`          | `shelly check-updates`             | Check for updates                                             |
 | `pacman -U URL`       | `shelly -SI URL`      | `shelly install URL`               | Download and install a .pkg.tar.zst package from the internet |
@@ -42,7 +42,7 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 | `pacman -Rdd package`             | `shelly -SRf`         | `shelly remove --force`            | Remove a package, skipping any dependency checks. <Badge text="This can break your system. Only run if advanced user or directed by support" size="small" variant="danger" /> |
 | `pacman -Sc`                      | `shelly -UCi`         | `shelly cache-clean --uninstalled` | Clean the local package cache of uninstalled packages                                                                                                                         |
 | `pacman -Scc`                     | `shelly -UCk 0`       | `shelly cache-clean --keep 0`      | Clean the local package cache of all packages                                                                                                                                 |
-| `pacman -Qdtq` or `pacman -Rns -` | `shelly -SPo`         | `shelly purify --orphans`          | Remove packages that were installed as a dependency and are no longer required by any package, aka orphans                                                                    |
+| `pacman -Qdtq \| pacman -Rns -` | `shelly -SPo`         | `shelly purify --orphans`          | Remove packages that were installed as a dependency and are no longer required by any package, aka orphans                                                                    |
 
 ## Downgrading
 
