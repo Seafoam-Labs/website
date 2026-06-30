@@ -132,6 +132,12 @@
   }
 }
 
+/* Prevent CLI snippets inside table cells from wrapping */
+.sl-markdown-content td code,
+.sl-markdown-content th code {
+  white-space: nowrap;
+}
+
 /* End Starlight overrides */
 
 /* Hero page gradient */
