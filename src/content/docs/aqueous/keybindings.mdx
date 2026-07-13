@@ -1,6 +1,6 @@
 ---
 title: Keybindings
-description: The Aqueous keybinding grammar, built-in actions, and custom chords.
+description: Configure Aqueous's built-in actions and free-form key chords.
 sidebar:
   label: Keybindings
   order: 3
@@ -8,133 +8,152 @@ sidebar:
 
 import { Aside } from "@astrojs/starlight/components";
 
-Keybindings live under `[keybinds]` in `wm.toml`. Each built-in action maps to:
+Keybindings live under `[keybinds]` in `wm.toml`. A built-in action accepts one
+chord, a list of chords, or an empty list that removes all bindings for that
+action.
 
-- a single chord string — `action = "Super+H"`
-- a list of chords — `action = ["Super+H", "Alt+Left"]`
-- an empty list to unbind — `action = []`
+```toml
+[keybinds]
+cycle_focus = ["Super+Tab", "Alt+Tab"]
+close_focused = "Super+Q"
+reload_rules = []
+```
+
+Omitting an action preserves its compiled-in default. The packaged `wm.toml`
+also supplies a few useful bindings that are not compiled defaults, including
+the four layout slots and scrolling column movement.
 
 ## Chord grammar
 
-Tokens joined by `+`, case-insensitive.
+Join tokens with `+`; names are case-insensitive.
 
-- **Modifiers:** `Super` (Mod4), `Ctrl`, `Alt` (Mod1), `Shift`
-- **Keys:** letters `A–Z`, digits `0–9`, `F1–F24`, and named keys
-  (`Return`, `Space`, `Tab`, `Comma`, `Period`, `Escape`, `Left`, `Right`,
-  `Up`, `Down`, `Home`, `End`, `PageUp`, `PageDown`, …)
+- Modifiers: `Super`/`Mod4`, `Ctrl`, `Alt`/`Mod1`, and `Shift`
+- Keys: printable characters, `F1` through `F24`, navigation keys such as
+  `Return`, `Tab`, `Escape`, `BackSpace`, `Left`, and `PageDown`, plus common
+  `XF86` media and brightness keys
 
-Omit a line to keep the compiled-in default.
+`Super` means the primary modifier. It normally resolves to Mod4, but a session
+started with `AQUEOUS_MOD=Alt` uses Alt instead.
 
-## Window & session
+## Window, focus, and movement
 
 ```toml
 [keybinds]
 toggle_start_menu = "Super+Space"
-spawn_terminal    = "Super+Return"
-close_focused     = "Super+Q"
-reload_config     = "Super+R"
-```
+spawn_terminal = "Super+Return"
+close_focused = "Super+Q"
+cycle_focus = "Super+Tab"
+lock_screen = "Super+Ctrl+L"
+reload_config = "Super+R"
 
-## Focus & movement
-
-```toml
-focus_left  = "Super+H"
+focus_left = "Super+H"
 focus_right = "Super+L"
-focus_up    = "Super+K"
-focus_down  = "Super+J"
+focus_up = "Super+K"
+focus_down = "Super+J"
 
-move_window_left  = "Super+Shift+Left"
+move_window_left = "Super+Shift+Left"
 move_window_right = "Super+Shift+Right"
-move_window_up    = "Super+Shift+Up"
-move_window_down  = "Super+Shift+Down"
+move_window_up = "Super+Shift+Up"
+move_window_down = "Super+Shift+Down"
 ```
 
-Move semantics vary per engine: `tile`/`grid`/`dwindle` swap neighbours;
-`scrolling` swaps columns or reorders within a column; `monocle` reorders the
-z-stack; `game-mode` reorders the non-anchor band; `float` is a no-op.
-
-### Scrolling-layout panning
+The first three launch actions execute the matching command in `[actions]`:
 
 ```toml
-scroll_viewport_left  = "Super+Comma"
-scroll_viewport_right = "Super+Period"
-move_column_left      = "Super+Shift+H"
-move_column_right     = "Super+Shift+L"
+[actions]
+toggle_start_menu = "noctalia msg panel-toggle launcher"
+spawn_terminal = "foot"
+lock_screen = "swaylock -f"
 ```
 
-## Layout switching
+Movement follows the active layout: tiled layouts swap neighbors, `scrolling`
+swaps columns or reorders within a column, `monocle` changes stack order, and
+`float` leaves directional movement as a no-op.
 
-Resolves through `[layout.slots]` in `layout.toml`.
+## Layout switching and scrolling
+
+The four `set_layout_*` actions resolve through `[layout.slots]` in
+`layout.toml`.
 
 ```toml
-set_layout_primary    = "Super+T"   # → primary slot
-set_layout_secondary  = "Super+F"   # → secondary slot
-set_layout_tertiary   = "Super+M"   # → tertiary slot
-set_layout_quaternary = "Super+G"   # → quaternary slot
+[keybinds]
+set_layout_primary = "Super+T"
+set_layout_secondary = "Super+F"
+set_layout_tertiary = "Super+M"
+set_layout_quaternary = "Super+G"
+
+scroll_viewport_left_arrow = "Super+Left"
+scroll_viewport_right_arrow = "Super+Right"
+move_column_left = "Super+Shift+H"
+move_column_right = "Super+Shift+L"
 ```
 
-## Workspaces
+`scroll_viewport_left` and `scroll_viewport_right` remain available as legacy
+aliases, bound by default to `Super+Comma` and `Super+Period`.
 
-Workspaces are **exclusive** (niri-style, `ext-workspace-v1`): a window lives on
-exactly one workspace; one workspace is active per output. Indices are 1-based.
+## Workspaces and outputs
+
+Workspaces are exclusive: a window belongs to one workspace, and one workspace
+is active on each output. Workspace numbers are 1-based.
 
 ```toml
-focus_workspace_1   = "Super+1"        # …through Super+9
-move_to_workspace_1 = "Super+Shift+1"  # …through Super+Shift+9
+[keybinds]
+focus_workspace_1 = "Super+1" # continue through focus_workspace_9
+move_to_workspace_1 = "Super+Shift+1"
 
-focus_workspace_up       = "Super+Bracketleft"
-focus_workspace_down     = "Super+Bracketright"
-focus_previous_workspace = "Super+grave"   # back-and-forth
+focus_workspace_up = "Super+Bracketleft"
+focus_workspace_down = "Super+Bracketright"
+focus_previous_workspace = "Super+BackSpace"
+move_to_workspace_up = "Super+Shift+Bracketleft"
+move_to_workspace_down = "Super+Shift+Bracketright"
 
-focus_output_left   = "Super+Comma"
-focus_output_right  = "Super+Period"
+focus_output_left = "Super+Ctrl+Comma"
+focus_output_right = "Super+Ctrl+Period"
 move_to_output_left = "Super+Shift+Comma"
+move_to_output_right = "Super+Shift+Period"
 ```
 
-## Window states
-
-Each toggle remembers the prior state, so a second press round-trips. Only one
-fullscreen window per output is allowed.
+## Window states and pointer constraints
 
 ```toml
-toggle_fullscreen  = "Super+Shift+F"
-toggle_maximize    = "Super+Shift+M"
-toggle_floating    = "Super+Shift+Space"
-toggle_minimize    = "Super+N"
-unminimize_last    = "Super+Shift+N"
-toggle_scratchpad  = "Super+Backslash"
-send_to_scratchpad = "Super+Shift+Backslash"
-```
+[keybinds]
+toggle_fullscreen = "Super+Shift+F"
+toggle_maximize = "Super+Shift+M"
+toggle_floating = "Super+Shift+Space"
+toggle_minimize = "Super+N"
+unminimize_last = "Super+Shift+N"
 
-## Pointer
-
-```toml
-# Hold to release any active pointer constraint (game mouse-trap); re-engages on release.
+# Hold to release a game's active pointer constraint; release to re-engage it.
 untrap_pointer = "Super+grave"
 ```
 
+State toggles remember their prior state, so pressing the same binding again
+restores it. Aqueous allows one fullscreen window per output.
+
 ## Custom chords
 
-Free-form `chord = action verb` entries.
+Use `[keybinds.custom]` when a chord should run a command, select a layout
+directly, or invoke a built-in action by name.
 
 ```toml
 [keybinds.custom]
-"Super+E"        = "spawn:nemo"
-"Super+Shift+S"  = "spawn:grim -g \"$(slurp)\" - | wl-copy"
-"Alt+F4"         = "builtin:close_focused"
-"Super+grave"    = "builtin:toggle_scratchpad_named:term"
+"Super+E" = "spawn:nemo"
+"Super+Shift+S" = "spawn:grim -g \"$(slurp)\" - | wl-copy"
+"Super+Alt+D" = "set_layout:dwindle"
+"Alt+F4" = "builtin:close_focused"
+"XF86AudioRaiseVolume" = "spawn:wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
 ```
 
-**Action verbs:**
+The supported verbs are:
 
-- `spawn:<argv>` — fork/exec via `/bin/sh -c` (detached)
-- `set_layout:<id-or-slot>` — switch active layout (`tile`, `monocle`, `grid`,
-  `float`, `scrolling`, or a `[layout.slots]` name)
-- `builtin:<action_name>` — invoke a built-in by canonical name (a
-  `:arg` suffix targets named scratchpads, etc.)
+- `spawn:<command>` — run a detached command through `/bin/sh -c`
+- `set_layout:<id-or-slot>` — select `tile`, `monocle`, `grid`, `rows`,
+  `dwindle`, `scrolling`, `float`, `game-mode`, or a slot name
+- `builtin:<action>` — invoke any canonical built-in action
+
+If multiple declarations use the same chord, the last declaration wins.
 
 <Aside type="caution">
-  `Super+1..9` are reserved by the workspace bindings. For direct layout
-  switches prefer the slot-based `set_layout_*` builtins (`Super+T/F/M/G`) or
-  non-conflicting chords like `Super+Alt+T`.
+  The default `Super+1` through `Super+9` bindings select workspaces. Prefer the
+  slot actions or chords such as `Super+Alt+D` for direct layout selection.
 </Aside>

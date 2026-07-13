@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install Aqueous on Arch Linux from the PKGBUILD or build it from source.
+description: Install Aqueous on Arch Linux or build the Zig compositor from source.
 sidebar:
   label: Installation
   order: 1
@@ -8,80 +8,92 @@ sidebar:
 
 import { Steps, Tabs, TabItem, Aside } from "@astrojs/starlight/components";
 
-Aqueous targets **Linux / Wayland**. The window manager is written in **C# / .NET 10**
-and the **RiverDelta** compositor (an in-tree fork of [River](https://codeberg.org/river/river))
-is written in **Zig**.
+Aqueous targets Linux and Wayland. The compositor, window-management policy,
+input handling, and output management are compiled into one Zig executable;
+there is no .NET runtime or separate window-manager service.
 
 ## Requirements
 
-- A Wayland-capable GPU + `seatd`/`logind`
-- `dotnet-runtime` 10 (or the SDK to build the WM)
-- `zig` (to build RiverDelta from source)
-- A compatible shell/bar — Aqueous ships defaults for the **Noctalia** shell
+To build from source, you need:
+
+- Zig 0.16 or newer
+- wlroots 0.20, Wayland, wayland-protocols, libxkbcommon, libinput, libevdev,
+  pixman, and pkg-config development files
+- XWayland when building with `-Dxwayland`
+- SceneFX when building with `-Dscenefx=true`
+
+The reference Arch package declares the complete runtime and build dependency
+set, including the session, portal, XWayland, and Noctalia components.
 
 ## Arch Linux
 
-The repository ships a reference `PKGBUILD` that produces the `aqueous` and
-`aqueous-wm` packages, a Wayland session entry, and default configuration files.
+The repository includes a source `PKGBUILD`, plus binary-package recipes for
+published builds. The source package installs the compositor, `aqueousctl`, the
+Wayland session entry, portal integration, the default `wm.toml`, and Noctalia
+session assets.
 
 <Tabs>
-    <TabItem label="From the PKGBUILD">
+  <TabItem label="Build the Arch package">
 
-        ```sh
-        git clone https://github.com/Seafoam-Labs/Aqueous.git
-        cd Aqueous
-        makepkg -si
-        ```
+    ```sh
+    git clone https://github.com/Seafoam-Labs/Aqueous.git
+    cd Aqueous
+    makepkg -si
+    ```
 
-    </TabItem>
-    <TabItem label="Build from source">
+  </TabItem>
+  <TabItem label="Build from source">
 
-        ```sh
-        git clone https://github.com/Seafoam-Labs/Aqueous.git
-        cd Aqueous
-        # Build the Zig compositor (RiverDelta)
-        zig build -Doptimize=ReleaseSafe
-        # Build and publish the C# window manager
-        dotnet publish -c Release
-        ```
+    ```sh
+    git clone https://github.com/Seafoam-Labs/Aqueous.git
+    cd Aqueous
+    scripts/build-compositor.sh
+    ```
 
-    </TabItem>
+    The build helper stages `aqueous` and `aqueousctl` under `bin/`. For a
+    direct development build, run `zig build` from the `compositor/` directory.
 
+  </TabItem>
 </Tabs>
-
-<Aside type="note">
-  Installing the package also drops default `wm.toml`, `layout.toml`, and
-  `rules.toml` files and registers a Wayland session entry so Aqueous shows up
-  in your display manager.
-</Aside>
 
 ## Starting a session
 
 <Steps>
 
-    1. Select **Aqueous** from your display manager's session list, **or**
+1. Select **Aqueous** from your display manager's Wayland session list.
 
-    2. Launch it manually from a TTY:
+2. The packaged session starts Aqueous through UWSM, exports the live Wayland
+   environment, and starts the graphical-session services.
 
-       ```sh
-       aqueous
-       ```
+3. To test a development build inside an existing Wayland session, run:
 
-    3. For development, use the nested-session launcher scripts in the repository
-    to run Aqueous inside an existing Wayland session.
+   ```sh
+   ./launch_river.sh
+   ```
 
 </Steps>
 
+<Aside type="note" title="The launcher name is historical">
+  `launch_river.sh` starts a nested Aqueous session. The project no longer
+  launches a separate River compositor or external window-manager client.
+</Aside>
+
 ## First-run configuration
 
-Aqueous reads its configuration from `~/.config/aqueous/`. Copy the shipped
-examples to start customizing:
+The packaged session creates `~/.config/aqueous/wm.toml` from the system
+default when the file does not already exist. It never overwrites your copy.
+The other three files are optional sidecars, so create only the ones you want
+to customize:
 
 ```sh
 mkdir -p ~/.config/aqueous
-cp /usr/share/aqueous/wm.toml      ~/.config/aqueous/wm.toml
-cp /usr/share/aqueous/layout.toml  ~/.config/aqueous/layout.toml
-cp /usr/share/aqueous/rules.toml   ~/.config/aqueous/rules.toml
+
+# When working from a source checkout:
+cp layout.toml.example ~/.config/aqueous/layout.toml
+cp input.toml.example  ~/.config/aqueous/input.toml
+cp rules.toml.example  ~/.config/aqueous/rules.toml
 ```
 
-Continue with the [Configuration](/aqueous/configuration/) guide.
+The example files are heavily annotated references. For a smaller day-to-day
+setup, use the focused examples in the [Configuration](/aqueous/configuration/)
+guide and add sections only as you need them.

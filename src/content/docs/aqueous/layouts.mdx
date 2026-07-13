@@ -1,6 +1,6 @@
 ---
 title: Layouts
-description: Aqueous layout engines, gaps, borders, slots, and per-layout options.
+description: Configure Aqueous's eight layout engines and layout selection rules.
 sidebar:
   label: Layouts
   order: 4
@@ -8,79 +8,121 @@ sidebar:
 
 import { Aside } from "@astrojs/starlight/components";
 
-Layouts are configured in `layout.toml`. Aqueous ships several tiling engines
-plus a floating engine.
+Layout settings can live in `wm.toml`, but a dedicated `layout.toml` is easier
+to maintain. The sidecar overlays `wm.toml` one recognized key at a time, so an
+omitted value keeps the setting already loaded from `wm.toml` or the compiled
+default.
 
 ## Layout engines
 
-| Engine      | Description                                                  |
-| ----------- | ------------------------------------------------------------ |
-| `tile`      | Master/stack tiling with adjustable split and master count   |
-| `monocle`   | One full-area window; others stacked behind                  |
-| `grid`      | Even grid of windows                                         |
-| `scrolling` | PaperWM-style horizontal columns with viewport panning       |
-| `float`     | Free-floating windows                                        |
-| `game-mode` | An anchored "main" window with a configurable remainder band |
+| Engine      | Best suited to                                         |
+| ----------- | ------------------------------------------------------ |
+| `tile`      | A master area beside a stack of secondary windows      |
+| `monocle`   | One full-area window at a time                         |
+| `grid`      | Balanced rows and columns                              |
+| `rows`      | Full-width windows arranged in horizontal rows         |
+| `dwindle`   | Alternating recursive splits                           |
+| `scrolling` | PaperWM-style horizontal columns and viewport panning  |
+| `float`     | Remembered, native, or rule-provided floating geometry |
+| `game-mode` | One anchor window with companion windows beside it     |
 
-## Global defaults
+`floating` and `game_mode` are accepted aliases for `float` and `game-mode`.
+
+## A balanced starting point
 
 ```toml
+# ~/.config/aqueous/layout.toml
 [layout]
-default      = "tile"   # tile | monocle | grid | float | scrolling | game-mode
+default = "scrolling"
+gaps_outer = 8
+gaps_inner = 4
+master_ratio = 0.55
+master_count = 1
 
-gaps_outer   = 8        # px around the screen edge
-gaps_inner   = 4        # px between tiles
+# Colors use 0xAARRGGBB.
+border_width = 2
+border_focused = 0xFF88C0D0
+border_normal = 0xFF3B4252
+border_urgent = 0xFFBF616A
+force_ssd = false
 
-master_ratio = 0.55     # tile engine split (0.0–1.0)
-master_count = 1        # windows in the master area
-```
-
-## Borders
-
-ARGB hex, `0xAARRGGBB`.
-
-```toml
-border_width   = 2
-border_focused = 0xFF88C0D0   # Nord frost
-border_normal  = 0xFF3B4252   # Nord polar night
-border_urgent  = 0xFFBF616A   # Nord aurora red
-```
-
-## Layout slots
-
-Symbolic names bound to `set_layout_primary/secondary/tertiary/quaternary`
-(`Super+T/F/M/G`).
-
-```toml
 [layout.slots]
-primary    = "tile"
-secondary  = "scrolling"
-tertiary   = "monocle"
+primary = "tile"
+secondary = "scrolling"
+tertiary = "monocle"
 quaternary = "grid"
 ```
 
-## Per-layout options
+The four slots are targets for the `set_layout_primary`,
+`set_layout_secondary`, `set_layout_tertiary`, and `set_layout_quaternary`
+bindings.
 
-Override values per engine with `[layout.options.<id>]`. Recognised scalar keys:
-`gaps_outer`, `gaps_inner`, `master_ratio`, `master_count`. Any other key is
-passed through to the engine as a string.
+## Engine-specific options
+
+Every `[layout.options.<id>]` section accepts the common gap, master, and border
+keys. Only `monocle`, `dwindle`, and `scrolling` add engine-specific keys.
 
 ```toml
 [layout.options.tile]
-gaps_outer   = 12
-gaps_inner   = 6
-master_ratio = 0.6
+master_ratio = 0.60
+master_count = 1
 
-[layout.options.grid]
-gaps_inner = 8
+[layout.options.monocle]
+hide_others = true
+show_borders = false
+
+[layout.options.dwindle]
+split_ratio = 0.50
+start_axis = "vertical" # vertical | horizontal
 
 [layout.options.scrolling]
-column_fraction = "0.5"    # each column = 50% of output width
-center_focused  = "true"   # auto-pan so the focused column is centred
+column_fraction = 0.50
+center_focused = true
+follow_new_windows = true
+snap_to_columns = false
+allow_overscroll = true
+
+[layout.options.float]
+border_width = 2
 ```
 
+Ratios must be greater than `0` and less than `1`. Use TOML numbers and booleans
+for these options, not quoted strings.
+
 <Aside type="note">
-  The `game-mode` engine is configured separately under `[game_mode]` in
-  `rules.toml`, because it only matters when a window rule targets it. See
-  [Window Rules](/aqueous/window-rules/).
+  `[layout.options.game-mode]` accepts only common geometry and border keys.
+  Configure `remainder_layout`, `fallback_layout`, and the anchor gap under
+  `[game_mode]` in `rules.toml`.
 </Aside>
+
+## Select layouts by output and workspace
+
+An output can define its normal layout in either `wm.toml` or `layout.toml`.
+Workspace mappings are also accepted in both files; define each mapping in only
+one place.
+
+```toml
+[[output]]
+name = "DP-1"
+layout = "tile"
+
+[[workspace]]
+workspace = 2
+layout = "monocle"
+
+[[workspace]]
+output = "DP-1"
+workspace = 3
+layout = "dwindle"
+```
+
+Layout selection resolves from highest to lowest priority:
+
+1. A layout selected at runtime for the active workspace
+2. An output-and-workspace mapping
+3. A workspace-only mapping
+4. The matching output's default
+5. `[layout].default`
+
+Runtime selection is stored per workspace, so switching away and back preserves
+the layout you chose for that workspace during the session.

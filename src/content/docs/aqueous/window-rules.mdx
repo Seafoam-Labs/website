@@ -1,70 +1,170 @@
 ---
 title: Window Rules
-description: Per-window rules and the game-mode layout engine.
+description: Match applications and configure placement, state, visuals, and game mode.
 sidebar:
   label: Window Rules
-  order: 5
+  order: 6
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-Window rules live in `rules.toml` (path is set via `[rules]` in `wm.toml`).
-They are reloaded by `Super+R` together with `wm.toml`. A missing file means no rules.
+Window rules live in `rules.toml`. Aqueous watches the file, re-evaluates
+managed windows after a change, and reloads it with the rest of the
+configuration when you press `Super+R`.
 
-## Matching
+## Find a window's identity
 
-Rules are evaluated on `manage_start` and on `app_id` / `title` changes.
-**First match wins.** At least one matcher (`app_id`, `class`, or `title`) is
-required — rules with none are dropped with a warning.
+Use `aqueousctl` instead of guessing an application's identifiers:
+
+```sh
+aqueousctl windows
+aqueousctl windows --json
+aqueousctl inspect --rule
+```
+
+`aqueousctl inspect --rule` emits a ready-to-paste `[[window]]` block. Native
+Wayland applications normally match by `app_id`; XWayland applications use
+their `WM_CLASS` through `class`.
+
+## Matching behavior
+
+Rules are checked from top to bottom and the **first matching rule wins**. Each
+rule needs at least one of `app_id`, `class`, or `title`. When a rule has more
+than one matcher, all of them must match.
+
+Matchers are anchored, case-sensitive globs:
+
+- `*` matches any number of characters.
+- `?` matches exactly one character.
+- A value without wildcards must match the entire identifier.
 
 ```toml
 [[window]]
-app_id     = "dota2"
-layout     = "game-mode"
-anchor     = "center"     # center | top | bottom | left | right
-size       = "native"     # "native" | "WxH" | "FxF"
-scale      = 1.0
-tag        = 9
+app_id = "org.example.Editor"
+title = "Preferences*"
+layout = "float"
+floating = true
+width = 900
+height = 640
+```
+
+Put narrow rules before broad ones:
+
+```toml
+[[window]]
+app_id = "org.example.Editor"
+title = "Preferences*"
+layout = "float"
+floating = true
+width = 900
+height = 640
+
+[[window]]
+app_id = "org.example.Editor"
+layout = "tile"
+workspace = 2
+```
+
+<Aside type="caution" title="Always set layout explicitly">
+  The current rule snapshot defaults an omitted `layout` to `game-mode`. Add a
+  layout to every rule, including rules that primarily change opacity or
+  placement. Be aware that a matched layout selects the layout for that
+  output/workspace, so choose it deliberately.
+</Aside>
+
+## Floating placement
+
+```toml
+[[window]]
+class = "Pavucontrol"
+title = "Volume Control"
+layout = "float"
+floating = true
+workspace = 2
+width = 960
+height = 640
+x = 80
+y = 60
 fullscreen = false
+ignore_struts = false
+opacity = 0.96
 ```
 
-### Sizing another app
+`width` and `height` are positive pixel dimensions. `x` and `y` are offsets
+from the usable area's origin; a zero value centers that axis. Setting
+`layout = "float"` also enables floating placement, so the explicit
+`floating = true` is optional but can make a complete rule easier to scan.
+
+## Rule-owned state and manual overrides
+
+Rules can set `workspace`, `floating`, and `fullscreen`, but Aqueous does not
+fight the user. A manual workspace move, floating toggle, or fullscreen toggle
+overrides that property until a different matcher becomes active.
 
 ```toml
 [[window]]
-class  = "steam_app_570"
-layout = "game-mode"
-size   = "1920x1080"
+app_id = "org.example.Video"
+layout = "monocle"
+workspace = 4
+fullscreen = true
+ignore_struts = true
+opacity = 1.0
 ```
 
-### Per-window opacity
+`ignore_struts = true` uses the full output instead of the configured usable
+area. A fullscreen rule is treated as actual fullscreen rather than as a game
+mode anchor.
 
-`opacity` is a `0.0..1.0` fraction; omit it to inherit the global `[opacity]`
-default from `wm.toml`.
+## Game mode
 
-```toml
-[[window]]
-app_id  = "com.mitchellh.ghostty"
-opacity = 0.85
-
-[[window]]
-app_id  = "mpv"
-opacity = 1.0    # force fully opaque
-```
-
-## Game-mode engine
-
-Options for the `game-mode` layout. They only apply when at least one rule
-targets `layout = "game-mode"`.
+Game mode gives one matched window an anchor rectangle and arranges companion
+windows in the remaining left and right columns.
 
 ```toml
 [game_mode]
-remainder_layout = "rows"   # tile | grid | monocle | scrolling | float | rows
-gaps_inner       = 8
-fallback_layout  = "grid"   # used when no anchor window is present on the output
+remainder_layout = "grid"
+fallback_layout = "tile"
+gaps_inner = 8
+
+[[window]]
+app_id = "steam_app_*"
+title = "*"
+layout = "game-mode"
+workspace = 9
+anchor = "center"
+size = "0.70x0.80"
+scale = 1.0
+fullscreen = false
+ignore_struts = false
+opacity = 1.0
+blur = false
 ```
 
-<Aside type="tip">
-  The anchor window is immovable; `move_window_*` actions reorder windows within
-  the non-anchor band. Use a rule's `anchor` key to choose placement.
+Anchor options are:
+
+- `anchor`: `center`, `top`, `bottom`, `left`, or `right`
+- `size = "native"`: use the client's requested size
+- `size = "2560x1440"`: request an exact pixel size
+- `size = "0.70x0.80"`: use fractions of the output area
+- `scale`: multiply the resolved size by a positive factor
+
+`remainder_layout` and `fallback_layout` accept any layout except `game-mode`.
+The fallback is used when game mode is selected but no matching anchor is
+present. If the anchor touches an edge, the column on that edge collapses and
+all companion windows use the surviving column.
+
+<Aside type="note">
+  `blur` is accepted and retained as a per-window preference, but the current
+  SceneFX path cannot selectively mask backdrop blur. See [Visual
+  Effects](/aqueous/visual-effects/) before relying on this field.
 </Aside>
+
+## Reload only the rule file
+
+`reload_rules` has no default chord. Bind it when you are iterating on rules and
+do not want to run reload-time commands from `wm.toml`:
+
+```toml
+[keybinds]
+reload_rules = "Super+Shift+R"
+```

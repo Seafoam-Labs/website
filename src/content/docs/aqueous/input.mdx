@@ -1,0 +1,92 @@
+---
+title: Input
+description: Configure XKB, keyboard repeat, and libinput devices in Aqueous.
+sidebar:
+  label: Input
+  order: 5
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Put input policy in `~/.config/aqueous/input.toml`. The sidecar overlays any
+`[input]` sections in `wm.toml`, and changes apply to connected devices as well
+as devices added later.
+
+## Keyboard and focus
+
+```toml
+[input]
+focus_follows_mouse = false
+
+xkb_layout = "us,de"
+xkb_variant = ""
+xkb_options = "caps:escape,grp:alt_shift_toggle"
+
+repeat_rate = 40
+repeat_delay = 400
+```
+
+`repeat_rate` is measured in characters per second; `0` disables key repeat.
+`repeat_delay` is the delay in milliseconds before repeating begins. Empty or
+omitted XKB values fall back to xkbcommon's normal defaults.
+
+## Mouse and touchpad
+
+Device options are overrides. Omit a key when you want the device's libinput
+default.
+
+```toml
+[input.mouse]
+accel_profile = "flat"
+accel_speed = 0.0
+natural_scroll = false
+left_handed = false
+middle_emulation = false
+
+[input.touchpad]
+accel_profile = "adaptive"
+accel_speed = 0.0
+natural_scroll = true
+tap = true
+dwt = true
+click_method = "clickfinger"
+scroll_method = "two-finger"
+```
+
+Supported values are:
+
+- `accel_profile`: `flat` or `adaptive`
+- `accel_speed`: `-1.0` through `1.0`
+- `click_method`: `clickfinger` or `button-areas`
+- `scroll_method`: `two-finger`, `edge`, or `no-scroll`
+- Boolean switches: `natural_scroll`, `tap`, `dwt`, `left_handed`, and
+  `middle_emulation`
+
+Tap, click-method, and scroll-method settings are applied only to devices
+detected as touchpads.
+
+## Trackpoints and legacy pointer settings
+
+`[input.trackpoint]` accepts the same device keys, but the current application
+path classifies every non-touchpad pointer as a mouse. Put effective trackpoint
+policy under `[input.mouse]` for now.
+
+Older configurations may use global pointer settings:
+
+```toml
+[input]
+pointer_acceleration = false
+pointer_acceleration_factor = 0.0
+```
+
+Per-device `accel_profile` and `accel_speed` take precedence. For a new setup,
+prefer the device sections because they express intent more clearly.
+
+<Aside type="caution" title="Keep input policy in one file">
+  Most device fields track whether they were explicitly set, but the legacy
+  global pointer values and `focus_follows_mouse` merge by comparing against
+  defaults, while empty XKB strings do not replace inherited strings. A `false`,
+  `0.0`, or empty string in `input.toml` therefore cannot clear the matching
+  non-default value inherited from `wm.toml`. Avoid the ambiguity by defining
+  input settings only in `input.toml`.
+</Aside>

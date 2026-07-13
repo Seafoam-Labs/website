@@ -1,50 +1,88 @@
 ---
 title: Visual Effects
-description: Backdrop blur and window opacity in Aqueous.
+description: Configure Aqueous blur, opacity, rounded corners, and workspace motion.
 sidebar:
   label: Visual Effects
-  order: 6
+  order: 7
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-Aqueous supports compositor-level visual effects when **RiverDelta is built with
-SceneFX**. These are configured in `wm.toml` and can be overridden per window in
-`rules.toml`.
+Aqueous applies visual policy in the compositor, after layout geometry is
+resolved. Backdrop blur and rounded corners require a SceneFX build; opacity
+and workspace-transition policy are configured independently in `wm.toml`.
 
 ## Backdrop blur
 
-Applied behind window content.
-
 ```toml
 [blur]
-enabled = false   # set true to enable compositor backdrop blur
-radius  = 5       # blur radius in pixels
-passes  = 3       # number of passes (higher = blurrier, costlier)
+enabled = true
+radius = 5
+passes = 3
 ```
 
-Per-window exclusions (e.g. games) go in `rules.toml`:
+Higher radius and pass counts produce a stronger blur and require more render
+work. Set `enabled = false` when you want to remove that cost entirely.
 
-```toml
-[[window]]
-app_id = "dota2"
-blur   = false
-```
+<Aside type="caution" title="Blur is currently global">
+  A `blur = false` window rule is parsed and retained, but the current SceneFX
+  implementation does not yet have the selective mask needed to exclude an
+  individual window. Treat `[blur].enabled` as a global switch.
+</Aside>
 
 ## Window opacity
 
-Default content opacity for all windows.
+Use one stable opacity for every window:
 
 ```toml
 [opacity]
-enabled = false   # apply the value below to all windows
-value   = 0.9     # 0.0 = transparent .. 1.0 = opaque
+enabled = true
+value = 0.94
+focus_sensitive = false
 ```
 
-Override per window in `rules.toml` via the `opacity` key (see
-[Window Rules](/aqueous/window-rules/)).
+Or make focus visually clearer:
 
-<Aside type="caution">
-  Both effects require a RiverDelta build with SceneFX / opacity support.
-  Without it the keys are parsed but have no visible effect.
-</Aside>
+```toml
+[opacity]
+enabled = true
+focus_sensitive = true
+focused = 1.0
+unfocused = 0.90
+```
+
+All opacity values are fractions from `0.0` (transparent) through `1.0`
+(opaque). When `focus_sensitive = true`, `focused` and `unfocused` are applied
+per window; otherwise Aqueous uses `value`.
+
+A matching rule's `opacity` takes precedence over the global or focus-sensitive
+value:
+
+```toml
+[[window]]
+app_id = "mpv"
+layout = "monocle"
+opacity = 1.0
+```
+
+Remember that window rules currently require an explicit layout and that a
+matched rule selects that layout for the output/workspace.
+
+## Workspace transitions
+
+```toml
+[workspace_transition]
+enabled = true
+rate = 0.0
+```
+
+`rate = 0.0` selects the compiled default. A larger positive value makes the
+slide settle more quickly. Window-placement and workspace animations can be
+compiled out entirely with `-Danimations=false`; configuration cannot enable
+an effect that is absent from the build.
+
+## Rounded corners
+
+SceneFX builds apply a fixed 12-pixel corner radius to normal window content
+and borders. Fullscreen content remains square. There is currently no TOML key
+for changing the radius; builds without SceneFX use square corners.

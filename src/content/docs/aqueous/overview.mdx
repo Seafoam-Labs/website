@@ -1,33 +1,53 @@
 ---
 title: Aqueous
-description: A minimal Wayland window manager built on RiverDelta a fork of River Wayland compositor.
+description: A visually expressive, single-process Wayland compositor and window manager.
 sidebar:
   label: Overview
   order: 0
 ---
 
-**Aqueous** is a minimal **Wayland window manager** built on top of **RiverDelta** - Seafoam Labs' in-tree fork of [River](https://codeberg.org/river/river).
+**Aqueous** is a Wayland compositor and window manager built as one native Zig
+process. Its layout engines, rules, keybindings, input policy, workspaces, and
+output management all run inside the compositor, which keeps configuration
+changes predictable and avoids a chain of helper processes or IPC round trips.
 
-It is designed as a lightweight, configurable Wayland environment with the window manager and compositor living side by side in one repository. The shell and bar layer can be used from any compatible project.
+Aqueous began as a fork of [River](https://codeberg.org/river/river), but now
+owns its window-management policy and configuration format. It retains the
+small, focused feel of a tiling window manager while adding compositor-side
+motion and optional SceneFX visuals.
 
-- **Primary stack:** C# / .NET 10 for the window manager, Zig for RiverDelta
-- **Platform focus:** Linux / Wayland
-- **Project layout:** Single repository containing the window manager, compositor, tests, docs, and Arch packaging
+## Highlights
 
-## Features
+- Eight built-in layouts: `tile`, `monocle`, `grid`, `rows`, `dwindle`,
+  `scrolling`, `float`, and `game-mode`
+- Per-output and per-workspace layout selection
+- First-match window rules for layout, workspace, floating geometry, state,
+  opacity, and game-mode placement
+- Native output configuration for modes, scale, transforms, adaptive sync,
+  positions, hotplug, and named profiles
+- XKB and libinput settings for keyboards, mice, touchpads, and trackpoints
+- Optional SceneFX rounded corners and backdrop blur, plus focus-aware opacity
+  and animated workspace transitions
+- Native XWayland support alongside modern Wayland protocols
+- A packaged Noctalia shell configuration for a ready-to-use desktop session
 
-Aqueous provides a River-oriented window management stack with:
+## Configuration at a glance
 
-- a C# window manager client that speaks River and Wayland protocols
-- configurable layouts, gaps, keybindings, outputs, and rules through `wm.toml`
-- Noctalia shell and bar integration for a complete desktop session
-- an output daemon and supporting test projects
-- Arch packaging that ships `aqueous`, `aqueous-wm`, a Wayland session entry, and default configuration files
+Aqueous uses four focused TOML files under `~/.config/aqueous/`:
 
-The repository also includes a reference `PKGBUILD`, nested session launcher scripts for development, and session assets for display-manager based login flows.
+- `wm.toml` for outputs, bindings, commands, struts, and global policy
+- `layout.toml` for layout defaults, engine options, slots, and overrides
+- `input.toml` for XKB, keyboard repeat, and libinput policy
+- `rules.toml` for per-window behavior and game-mode policy
 
-## Learn More
+The compositor watches these files and publishes validated replacement
+snapshots when they change. Most edits become visible within a second, or
+immediately when you press the configured `reload_config` binding.
 
-Visit the repository for source code, updates, and contribution information:
+Start with [Installation](/aqueous/installation/), then build a clean setup in
+the [Configuration](/aqueous/configuration/) guide.
 
-[GitHub repository](https://github.com/Seafoam-Labs/Aqueous)
+## Project source
+
+The source, annotated configuration references, packaging, and development
+tools live in the [Aqueous GitHub repository](https://github.com/Seafoam-Labs/Aqueous).
