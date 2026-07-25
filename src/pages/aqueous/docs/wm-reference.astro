@@ -1,0 +1,23 @@
+---
+import { getEntry, render } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import { Aside } from "@astrojs/starlight/components";
+
+const entry = await getEntry("remoteConfigs", "aqueous-wm-toml");
+
+if (!entry || !entry.rendered) {
+  throw new Error("Failed to load the Aqueous wm.toml reference.");
+}
+
+const { Content } = await render(entry);
+---
+
+<StarlightPage frontmatter={{ title: entry.data.title }} headings={[]}>
+  <Aside type="note">
+    Fetched directly from the Aqueous repository on every build, so this always
+    reflects the latest <code>wm.toml</code>. See the{" "}
+    <a href={entry.data.sourceUrl}>source on GitHub</a>.
+  </Aside>
+
+  <Content />
+</StarlightPage>

@@ -115,6 +115,10 @@ export default defineConfig({
           label: "Aqueous",
           items: [
             { autogenerate: { directory: "aqueous" } },
+            {
+              link: "aqueous/docs/wm-reference/",
+              label: "wm.toml Reference",
+            },
             ...makeChangelogsSidebarLinks([
               {
                 type: "all",
