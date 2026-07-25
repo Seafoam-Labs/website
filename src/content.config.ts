@@ -6,6 +6,7 @@ import { rssSchema } from "@astrojs/rss";
 import { glob } from "astro/loaders";
 import { docsLoader } from "@astrojs/starlight/loaders";
 import { remoteMarkdownLoader } from "./loaders/remote-markdown";
+import { remoteTextLoader } from "./loaders/remote-text";
 
 export const collections = {
   docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
@@ -15,6 +16,20 @@ export const collections = {
         id: "shelly-cli-reference",
         title: "Shelly CLI Reference",
         url: "https://raw.githubusercontent.com/Seafoam-Labs/Shelly-ALPM/refs/heads/master/wiki/cli_help.md",
+      },
+    ]),
+    schema: z.object({
+      title: z.string(),
+      sourceUrl: z.url(),
+    }),
+  }),
+  remoteConfigs: defineCollection({
+    loader: remoteTextLoader([
+      {
+        id: "aqueous-wm-toml",
+        title: "Aqueous wm.toml Reference",
+        url: "https://raw.githubusercontent.com/Seafoam-Labs/Aqueous/refs/heads/master/wm.toml",
+        language: "toml",
       },
     ]),
     schema: z.object({
