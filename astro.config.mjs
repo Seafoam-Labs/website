@@ -116,8 +116,25 @@ export default defineConfig({
           items: [
             { autogenerate: { directory: "aqueous" } },
             {
-              link: "aqueous/docs/wm-reference/",
-              label: "wm.toml Reference",
+              label: "Config References",
+              items: [
+                {
+                  link: "aqueous/docs/toml/wm/",
+                  label: "wm.toml",
+                },
+                {
+                  link: "aqueous/docs/toml/rules/",
+                  label: "rules.toml",
+                },
+                {
+                  link: "aqueous/docs/toml/layout/",
+                  label: "layout.toml",
+                },
+                {
+                  link: "aqueous/docs/toml/input/",
+                  label: "input.toml",
+                },
+              ],
             },
             ...makeChangelogsSidebarLinks([
               {
