@@ -31,6 +31,24 @@ export const collections = {
         url: "https://raw.githubusercontent.com/Seafoam-Labs/Aqueous/refs/heads/master/wm.toml",
         language: "toml",
       },
+      {
+        id: "aqueous-rules-toml",
+        title: "Aqueous rules.toml Reference",
+        url: "https://raw.githubusercontent.com/Seafoam-Labs/Aqueous/refs/heads/master/rules.toml.example",
+        language: "toml",
+      },
+      {
+        id: "aqueous-layout-toml",
+        title: "Aqueous layout.toml Reference",
+        url: "https://raw.githubusercontent.com/Seafoam-Labs/Aqueous/refs/heads/master/layout.toml.example",
+        language: "toml",
+      },
+      {
+        id: "aqueous-input-toml",
+        title: "Aqueous input.toml Reference",
+        url: "https://raw.githubusercontent.com/Seafoam-Labs/Aqueous/refs/heads/master/input.toml.example",
+        language: "toml",
+      },
     ]),
     schema: z.object({
       title: z.string(),

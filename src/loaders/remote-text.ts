@@ -1,4 +1,5 @@
 import type { Loader } from "astro/loaders";
+import { rawToGitHubUrl } from "../utils/github";
 
 interface RemoteTextSource {
   id: string;
@@ -56,7 +57,7 @@ export function remoteTextLoader(sources: RemoteTextSource[]): Loader {
           id: source.id,
           data: {
             title: source.title ?? source.id,
-            sourceUrl: source.url,
+            sourceUrl: rawToGitHubUrl(source.url),
           },
         });
 
