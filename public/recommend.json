@@ -19,17 +19,14 @@
     "name": "Browsers",
     "packages": [
       "brave-bin",
-      "chromium",
-      "falkon",
-      "firefox",
-      "firefox-esr-bin",
       "firefox-pure",
       "floorp-bin",
+      "helium-browser-bin",
       "librewolf-bin",
-      "qutebrowser",
+      "mullvad-browser-bin",
       "torbrowser-launcher",
-      "ungoogled-chromium-bin",
-      "vivaldi"
+      "vivaldi",
+      "zen-browser-bin"
     ]
   },
   {
