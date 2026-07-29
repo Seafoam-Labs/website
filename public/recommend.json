@@ -19,14 +19,15 @@
     "name": "Browsers",
     "packages": [
       "brave-bin",
-      "firefox-pure",
+      "falkon",
+      "firefox",
       "floorp-bin",
       "helium-browser-bin",
       "librewolf-bin",
-      "mullvad-browser-bin",
+      "qutebrowser",
       "torbrowser-launcher",
       "vivaldi",
-      "zen-browser-bin"
+      "zen"
     ]
   },
   {
@@ -40,6 +41,7 @@
       "neochat",
       "signal-desktop",
       "telegram-desktop",
+      "vesktop",
       "wire-desktop"
     ]
   },
@@ -81,7 +83,9 @@
       "kapman",
       "kmahjongg",
       "knights",
+      "lutris",
       "mari0",
+      "protonup-qt",
       "supertux",
       "supertuxkart",
       "teeworlds",
@@ -133,12 +137,15 @@
       "deluge-gtk",
       "filezilla",
       "freedownloadmanager",
+      "freetube",
       "jdownloader2",
       "nextcloud-client",
       "nitroshare",
+      "proton-vpn-gtk-app",
       "putty",
       "qbittorrent",
       "remmina",
+      "rqbit-desktop",
       "warpinator",
       "xdman"
     ]
@@ -151,6 +158,7 @@
       "geary",
       "kmail",
       "mailspring",
+      "proton-mail-bin",
       "thunderbird"
     ]
   },
@@ -181,7 +189,6 @@
       "joplin",
       "kmymoney",
       "libreoffice-fresh",
-      "libreoffice-still",
       "onlyoffice-bin",
       "skrooge",
       "wps-office",
@@ -190,13 +197,14 @@
   },
   {
     "name": "Other",
-    "packages": ["scrcpy", "variety"]
+    "packages": ["bitwarden", "keepass", "scrcpy", "variety", "proton-pass"]
   },
   {
     "name": "Video",
     "packages": [
       "baka-mplayer",
       "dragon",
+      "kdenlive",
       "obs-studio",
       "pitivi",
       "shotcut",
