@@ -2,116 +2,116 @@
   {
     "name": "Audio",
     "packages": [
-      "strawberry",
-      "lollypop",
+      "ardour",
       "audacious",
+      "audacity",
       "elisa",
       "kwave",
-      "audacity",
-      "ardour",
       "lmms",
+      "lollypop",
       "mixxx",
       "musescore",
       "rosegarden",
-      "bitwig-studio"
+      "strawberry"
     ]
   },
   {
     "name": "Browsers",
     "packages": [
-      "librewolf-bin",
+      "brave-bin",
+      "chromium",
+      "falkon",
       "firefox",
       "firefox-esr-bin",
       "firefox-pure",
-      "chromium",
-      "ungoogled-chromium-bin",
-      "torbrowser-launcher",
-      "brave-bin",
       "floorp-bin",
-      "falkon",
+      "librewolf-bin",
       "qutebrowser",
+      "torbrowser-launcher",
+      "ungoogled-chromium-bin",
       "vivaldi"
     ]
   },
   {
     "name": "Communication",
     "packages": [
-      "fluxer-canary",
-      "telegram-desktop",
       "discord",
-      "neochat",
-      "fractal",
       "element-desktop",
-      "wire-desktop",
+      "fluxer-canary",
+      "fractal",
+      "mumble",
+      "neochat",
       "signal-desktop",
-      "mumble"
+      "telegram-desktop",
+      "wire-desktop"
     ]
   },
   {
     "name": "Development",
     "packages": [
-      "vim",
-      "code",
-      "emacs",
-      "qtcreator",
-      "gnome-builder",
-      "kdevelop",
-      "netbeans",
-      "intellij-idea-community-edition",
-      "pycharm-community-edition",
-      "cockpit",
       "ansible",
+      "cockpit",
+      "code",
+      "crun",
       "docker",
       "docker-compose",
-      "podman-docker",
-      "podman-compose",
-      "crun",
+      "emacs",
+      "gnome-builder",
+      "intellij-idea-community-edition",
       "jenkins",
-      "puppet",
+      "kdevelop",
+      "netbeans",
+      "podman-compose",
+      "podman-docker",
       "prometheus",
-      "terraform"
+      "puppet",
+      "pycharm-community-edition",
+      "qtcreator",
+      "terraform",
+      "vim",
+      "zed"
     ]
   },
   {
-    "name": "Games",
+    "name": "Gaming",
     "packages": [
+      "0ad",
+      "aisleriot",
       "cachyos-gaming-applications",
       "cachyos-gaming-meta",
-      "aisleriot",
-      "mari0",
-      "kapman",
-      "knights",
-      "kmahjongg",
-      "supertuxkart",
-      "supertux",
       "extremetuxracer",
-      "0ad",
+      "hedgewars",
+      "kapman",
+      "kmahjongg",
+      "knights",
+      "mari0",
+      "supertux",
+      "supertuxkart",
       "teeworlds",
-      "xonotic",
-      "hedgewars"
+      "xonotic"
     ]
   },
   {
     "name": "Graphics",
     "packages": [
-      "krita",
+      "birdfont",
+      "blender",
+      "darktable",
+      "digikam",
+      "fontforge",
+      "freecad",
       "gimp",
       "inkscape",
-      "blender",
-      "digikam",
-      "darktable",
-      "luminancehdr",
-      "kolourpaint",
-      "mypaint",
-      "sweethome3d",
-      "freecad",
-      "librecad",
       "kicad",
-      "pencil2d",
-      "synfigstudio",
+      "kolourpaint",
+      "krita",
+      "librecad",
+      "luminancehdr",
+      "mypaint",
       "opentoonz",
-      "fontforge",
-      "birdfont"
+      "pencil2d",
+      "sweethome3d",
+      "synfigstudio"
     ]
   },
   {
@@ -121,7 +121,6 @@
       "cachyos-benchmarker",
       "coolercontrol",
       "cpu-x",
-      "gparted",
       "kdiskmark",
       "lact",
       "nvtop",
@@ -134,62 +133,62 @@
   {
     "name": "Internet",
     "packages": [
-      "xdman",
-      "freedownloadmanager",
       "deluge-gtk",
-      "qbittorrent",
-      "nextcloud-client",
-      "remmina",
       "filezilla",
-      "putty",
-      "warpinator",
+      "freedownloadmanager",
+      "jdownloader2",
+      "nextcloud-client",
       "nitroshare",
-      "jdownloader2"
+      "putty",
+      "qbittorrent",
+      "remmina",
+      "warpinator",
+      "xdman"
     ]
   },
   {
     "name": "Mail",
     "packages": [
-      "thunderbird",
-      "kmail",
+      "claws-mail",
       "evolution",
       "geary",
+      "kmail",
       "mailspring",
-      "claws-mail"
+      "thunderbird"
     ]
   },
   {
     "name": "Multimedia",
     "packages": [
-      "hypnotix",
-      "shortwave",
-      "converseen",
-      "handbrake",
-      "transmageddon",
-      "soundconverter",
-      "mediaelch",
-      "kid3",
-      "easytag",
       "brasero",
+      "converseen",
+      "easytag",
+      "handbrake",
+      "hypnotix",
+      "kid3",
+      "mediaelch",
+      "shortwave",
+      "soundconverter",
+      "transmageddon",
       "xfburn"
     ]
   },
   {
     "name": "Office",
     "packages": [
+      "abiword",
+      "calligra",
+      "gnucash",
+      "gnumeric",
+      "homebank",
+      "joplin",
+      "kmymoney",
       "libreoffice-fresh",
       "libreoffice-still",
-      "joplin",
       "onlyoffice-bin",
-      "wps-office",
-      "yozo-office",
-      "calligra",
       "skrooge",
-      "kmymoney",
-      "abiword",
-      "gnumeric",
-      "gnucash",
-      "homebank"
+      "wps-office",
+      "yozo-office"
     ]
   },
   {
@@ -199,21 +198,21 @@
   {
     "name": "Video",
     "packages": [
+      "baka-mplayer",
       "dragon",
-      "shotcut",
-      "pitivi frei0r-plugins",
       "obs-studio",
-      "vlc",
+      "pitivi",
+      "shotcut",
       "smplayer",
-      "baka-mplayer"
+      "vlc"
     ]
   },
   {
     "name": "Virtualization",
-    "packages": ["virtualbox", "gnome-boxes", "virt-manager"]
+    "packages": ["gnome-boxes", "virt-manager"]
   },
   {
     "name": "ShellyTeam",
-    "packages": ["ghostty", "kitty", "waterfox"]
+    "packages": ["fluxer-canary", "ghostty", "kitty", "waterfox"]
   }
 ]
