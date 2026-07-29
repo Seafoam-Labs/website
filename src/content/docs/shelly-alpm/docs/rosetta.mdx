@@ -10,6 +10,7 @@ import { Badge } from "@astrojs/starlight/components";
 Shelly Rosetta is a reference for pacman commands and their equivalent Shelly commands. It is intended to help users who are familiar with pacman to transition to Shelly.
 
 ## Install or update
+
 | pacman                | shelly short/longcode                                                | Description                                                   |
 | --------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------- |
 | `pacman -S package`   | `shelly -Is package`<br>`shelly install standard package`            | (Re)Install a package                                         |
@@ -19,6 +20,7 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 | `pacman -U URL`       | `shelly -Is URL`<br>`shelly install standard URL`                    | Download and install a .pkg.tar.zst package from the internet |
 
 ## Search or information
+
 | pacman/related        | shelly shortcode/longcode                                                       | Description                                                                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pacman -Ss <string>` | `shelly -SSv package`<br>`shelly search standard --available <string>`<br>      | Search configured repos for a package containing \<string\> in the name, description, or group                                                           |
@@ -32,6 +34,7 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 | `yay -Pw`             | `shelly -N`<br>`shelly news`                                                    | Find unread Arch Linux news                                                                                                                              |
 
 ## Remove
+
 | pacman                          | shelly shortcode/longcode                                                          | Description                                                                                                                                                                   |
 | ------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pacman -R package`             | `shelly -Rs --no-cascade package`<br>`shelly remove standard --no-cascade package` | Remove a single package, leaving all of its dependencies installed                                                                                                            |
@@ -43,7 +46,7 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 | `pacman -Qdtq \| pacman -Rns -` | `shelly -Zso`<br>`shelly purify standard --orphans`                                | Remove packages that were installed as a dependency and are no longer required by any package, aka orphans                                                                    |
 
 ## Downgrading
+
 | pacman/related      | shelly shortcode                                            | Description                                                                                                                            |
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `downgrade package` | `shelly -Di package`<br>`shelly downgrade --ignore package` | Revert a package you have installed to an earlier cached version or cachy repo version if available and also add it to the ignore list |
-
