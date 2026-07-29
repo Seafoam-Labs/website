@@ -12,16 +12,15 @@ Shelly supports updating AppImages in two ways:
 1. A static URL
 2. A Repository from GitHub, GitLab, Codeberg, or Forgejo.
 
-### Static URL:
+### Static URL
 
 Enter the URL to the AppImage which you have downloaded. Shelly will use this to check for updates.
 
-### Repository:
+### Repository
 
 You will need the Repo Owner and Repo Name. Shelly will then check for updates from this repository.
 
-For example, if we were to add OSU as an AppImage from GitHub, the repo url would be:
-https://github.com/ppy/osu
+For example, if we were to add OSU as an AppImage from GitHub, the repo url would be: [https://github.com/ppy/osu](https://github.com/ppy/osu)
 
 We would then enter
 
@@ -29,7 +28,7 @@ ppy/osu in the repo url field.
 
 Then Shelly will check for updates from the ppy/osu repository using the most recent release or from the latest pre-release based on your settings.
 
-### Key Details for updates:
+### Key Details for updates
 
 1. Shelly will check the version from the `.desktop` file and compare it to the latest release.
 2. If the version is `Unknown`, Shelly will update to the latest release, and track the version via the tags for the future.
