@@ -36,6 +36,7 @@
   {
     "name": "Communication",
     "packages": [
+      "fluxer-canary",
       "telegram-desktop",
       "discord",
       "neochat",
