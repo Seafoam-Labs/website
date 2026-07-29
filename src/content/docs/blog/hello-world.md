@@ -11,9 +11,9 @@ Welcome to the Seafoam Labs blog! We're a small team building open-source tools 
 
 Our current projects include:
 
-- **[Shelly ALPM](/shelly-alpm)** - a modern, visual package manager for Arch Linux built with C# and GTK4.
+- **[Shelly ALPM](/shelly-alpm)** - a modern, visual package manager for Arch Linux built with Zig and GTK4.
 - **[Starfish](/starfish/overview)** - a dependency viewer for Arch packages.
-- **[Aqueous](/aqueous/overview)** - a minimal Wayland window manager built on top of RiverDelta a fork of River compositor.
+- **[Aqueous](/aqueous/overview)** - a minimal Wayland window manager built in Zig.
 
 ## What's Next
 
