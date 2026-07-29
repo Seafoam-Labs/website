@@ -69,7 +69,10 @@
       "qtcreator",
       "terraform",
       "vim",
-      "zed"
+      "zed",
+      "openfpgaloader",
+      "verilator",
+      "yosys"
     ]
   },
   {
