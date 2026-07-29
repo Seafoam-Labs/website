@@ -24,10 +24,11 @@
       "floorp-bin",
       "helium-browser-bin",
       "librewolf-bin",
+      "mullvad-browser-bin",
       "qutebrowser",
       "torbrowser-launcher",
       "vivaldi",
-      "zen"
+      "zen-browser-bin"
     ]
   },
   {
