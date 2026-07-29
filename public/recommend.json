@@ -193,10 +193,7 @@
   },
   {
     "name": "Other",
-    "packages": [
-      "scrcpy",
-      "variety"
-    ]
+    "packages": ["scrcpy", "variety"]
   },
   {
     "name": "Video",
@@ -212,18 +209,10 @@
   },
   {
     "name": "Virtualization",
-    "packages": [
-      "gnome-boxes",
-      "virt-manager"
-    ]
+    "packages": ["gnome-boxes", "virt-manager"]
   },
   {
     "name": "ShellyTeam",
-    "packages": [
-      "fluxer-canary",
-      "ghostty",
-      "kitty",
-      "waterfox"
-    ]
+    "packages": ["fluxer-canary", "ghostty", "kitty", "waterfox"]
   }
 ]
