@@ -77,7 +77,7 @@ export default defineConfig({
           label: "Shelly ALPM",
           items: [
             "shelly-alpm/overview",
-            "shelly-alpm/download",
+            "shelly-alpm/installation",
             {
               label: "Documentation",
               items: [{ autogenerate: { directory: "shelly-alpm/docs" } }],
