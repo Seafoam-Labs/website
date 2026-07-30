@@ -6,7 +6,14 @@ sidebar:
   order: 1
 ---
 
-import { Steps, Tabs, TabItem, Aside } from "@astrojs/starlight/components";
+import {
+  Steps,
+  Tabs,
+  TabItem,
+  Aside,
+  Card,
+  Code,
+} from "@astrojs/starlight/components";
 
 Aqueous targets Linux and Wayland. The compositor, window-management policy,
 input handling, and output management are compiled into one Zig executable;
@@ -27,13 +34,43 @@ set, including the session, portal, XWayland, and Noctalia components.
 
 ## Arch Linux
 
-The repository includes a source `PKGBUILD`, plus binary-package recipes for
-published builds. The source package installs the compositor, `aqueousctl`, the
-Wayland session entry, portal integration, the default `wm.toml`, and Noctalia
-session assets.
+The reference Arch package installs the compositor, `aqueousctl`, the Wayland
+session entry, portal integration, the default `wm.toml`, and Noctalia session
+assets. Prebuilt packages are available from CachyOS and AUR; the repository
+also includes a source `PKGBUILD` and binary-package recipes for published
+builds.
+
+<Card title="CachyOS / Shelly / pacman (Recommended)" icon="download">
+  Install Aqueous directly from CachyOS repositories.
+  <Tabs>
+    <TabItem label="shelly">
+      <Code code="shelly -Is aqueous" lang="sh" />
+    </TabItem>
+    <TabItem label="pacman">
+      <Code code="sudo pacman -S aqueous" lang="sh" />
+    </TabItem>
+  </Tabs>
+</Card>
+
+<Card title="AUR Helpers" icon="cloud-download">
+  Use your preferred AUR helper:
+  <Tabs>
+    <TabItem label="shelly">
+      <Code code="shelly -Ia aqueous" lang="sh" />
+    </TabItem>
+    <TabItem label="yay">
+      <Code code="yay -S aqueous" lang="sh" />
+    </TabItem>
+    <TabItem label="paru">
+      <Code code="paru -S aqueous" lang="sh" />
+    </TabItem>
+  </Tabs>
+</Card>
+
+### Build from source
 
 <Tabs>
-  <TabItem label="Build the Arch package">
+  <TabItem label="PKGBUILD">
 
     ```sh
     git clone https://github.com/Seafoam-Labs/Aqueous.git
@@ -42,7 +79,7 @@ session assets.
     ```
 
   </TabItem>
-  <TabItem label="Build from source">
+  <TabItem label="Build helper">
 
     ```sh
     git clone https://github.com/Seafoam-Labs/Aqueous.git
