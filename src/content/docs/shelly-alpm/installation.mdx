@@ -1,0 +1,90 @@
+---
+title: Installation
+description: Install Shelly ALPM on Arch Linux, or build it from source.
+sidebar:
+  label: Installation
+  order: 1
+---
+
+import {
+  Aside,
+  Card,
+  Code,
+  LinkButton,
+  TabItem,
+  Tabs,
+} from "@astrojs/starlight/components";
+
+Shelly is a native package manager for Arch Linux. It provides both a GTK4
+application and command-line tools that interface directly with `libalpm`.
+
+## Requirements
+
+Shelly runs on Arch Linux and Arch-based distributions. To build it from source,
+you need:
+
+- Zig 0.16.0
+- `libalpm`, provided by `pacman`
+
+## Arch Linux
+
+Prebuilt Shelly packages are available from CachyOS and the AUR. The package
+includes the graphical interface and command-line tools.
+
+<Card title="CachyOS / pacman (Recommended)" icon="download">
+  Install Shelly directly from CachyOS repositories.
+  <Code code="sudo pacman -S shelly" lang="sh" />
+</Card>
+
+<Card title="AUR Helpers" icon="cloud-download">
+  Use your preferred AUR helper:
+  <Tabs>
+    <TabItem label="yay">
+      <Code code="yay -S shelly" lang="sh" />
+    </TabItem>
+    <TabItem label="paru">
+      <Code code="paru -S shelly" lang="sh" />
+    </TabItem>
+  </Tabs>
+</Card>
+
+### Build from source
+
+Clone the repository and use its git `PKGBUILD`:
+
+```sh
+git clone https://github.com/Seafoam-Labs/Shelly-ALPM.git
+cd Shelly-ALPM
+cp PKGBUILD-git PKGBUILD
+makepkg -si
+```
+
+## Starting Shelly
+
+Launch the graphical application with:
+
+```sh
+shelly-ui
+```
+
+For terminal-based package management, run `shelly`. Shelly creates its default
+CLI configuration at `~/.config/shelly/config.json` on first use.
+
+<Aside type="note" title="Optional Flatpak support">
+  Install `flatpak` and `shelly-flatpak-backend` to manage Flatpak applications
+  from Shelly. The backend is loaded only when performing a Flatpak operation,
+  so it is not required for a base Shelly installation.
+</Aside>
+
+## Releases
+
+Download specific versions or source snapshots from GitHub:
+
+<LinkButton
+  href="https://github.com/Seafoam-Labs/Shelly-ALPM/releases"
+  variant="secondary"
+  icon="external"
+  iconPlacement="start"
+>
+  View all releases
+</LinkButton>
