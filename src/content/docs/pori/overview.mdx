@@ -10,6 +10,7 @@ import { Image } from "astro:assets";
 import {
   Card,
   CardGrid,
+  Code,
   TabItem,
   LinkButton,
   Tabs,
@@ -29,9 +30,35 @@ Instead of manually editing `/etc/fstab`, Pori creates and enables native system
 
 ## Installation
 
-Pori is available in CachyOS repository and AUR.
+<Card title="CachyOS / Shelly / pacman (Recommended)" icon="download">
+  Install Pori directly from CachyOS repositories.
+  <Tabs>
+    <TabItem label="shelly">
+      <Code code="shelly -Is pori" lang="sh" />
+    </TabItem>
+    <TabItem label="pacman">
+      <Code code="sudo pacman -S pori" lang="sh" />
+    </TabItem>
+  </Tabs>
+</Card>
 
-See https://github.com/Seafoam-Labs/Pori#installation for manual build and installation steps.
+<Card title="AUR Helpers" icon="cloud-download">
+  Use your preferred AUR helper:
+  <Tabs>
+    <TabItem label="shelly">
+      <Code code="shelly -Ia pori" lang="sh" />
+    </TabItem>
+    <TabItem label="yay">
+      <Code code="yay -S pori" lang="sh" />
+    </TabItem>
+    <TabItem label="paru">
+      <Code code="paru -S pori" lang="sh" />
+    </TabItem>
+  </Tabs>
+</Card>
+
+For manual build and installation steps, see the
+[GitHub repository](https://github.com/Seafoam-Labs/Pori#installation).
 
 ## Why Use Pori?
 
