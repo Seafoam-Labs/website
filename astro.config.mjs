@@ -78,7 +78,10 @@ export default defineConfig({
           items: [
             "shelly-alpm/overview",
             "shelly-alpm/download",
-            "shelly-alpm/about",
+            {
+              label: "Documentation",
+              items: [{ autogenerate: { directory: "shelly-alpm/docs" } }],
+            },
             ...makeChangelogsSidebarLinks([
               {
                 type: "all",
@@ -86,10 +89,6 @@ export default defineConfig({
                 label: "Changelog",
               },
             ]),
-            {
-              label: "Documentation",
-              items: [{ autogenerate: { directory: "shelly-alpm/docs" } }],
-            },
           ],
         },
         {

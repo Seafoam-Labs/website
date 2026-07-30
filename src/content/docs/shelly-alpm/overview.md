@@ -5,9 +5,11 @@ sidebar:
 description: Discover Shelly – a modern, easy-to-use package manager for Arch Linux.
 ---
 
-# What is Shelly?
+## What is Shelly?
 
 Shelly is a fresh, modern way to manage software on Arch Linux and Arch-based systems. It’s designed to be simple, friendly, and visually appealing - making it easy for anyone to install, update, or remove apps and packages, whether you prefer a beautiful desktop app or a powerful command line.
+
+Built to make Arch more accessible without compromising its core principles, Shelly communicates directly with `libalpm` for fast, native package management rather than wrapping existing tools.
 
 ![Shelly Packages page](../../../assets/screenshots/shelly-packages.png)
 
@@ -18,6 +20,7 @@ Shelly is a fresh, modern way to manage software on Arch Linux and Arch-based sy
 - **Easy to Use:** Clean, intuitive interface - no need to memorize commands.
 - **All-in-One:** Search and manage software from official Arch repositories, the AUR, Flatpak and even AppImages, all in one place.
 - **Modern Look:** Built with the latest technology for a smooth, native experience.
+- **Native Performance:** Direct communication with system libraries keeps Shelly fast while providing a modern visual experience.
 - **Flexible:** Use the desktop app or the command line, whichever you prefer.
 
 ---
