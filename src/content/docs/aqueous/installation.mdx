@@ -15,9 +15,8 @@ import {
   Code,
 } from "@astrojs/starlight/components";
 
-Aqueous targets Linux and Wayland. The compositor, window-management policy,
-input handling, and output management are compiled into one Zig executable;
-there is no .NET runtime or separate window-manager service.
+Aqueous is a Linux Wayland compositor built as a single Zig executable. It has
+no separate runtime or window-manager service.
 
 ## Requirements
 
@@ -29,16 +28,11 @@ To build from source, you need:
 - XWayland when building with `-Dxwayland`
 - SceneFX when building with `-Dscenefx=true`
 
-The reference Arch package declares the complete runtime and build dependency
-set, including the session, portal, XWayland, and Noctalia components.
-
 ## Arch Linux
 
-The reference Arch package installs the compositor, `aqueousctl`, the Wayland
-session entry, portal integration, the default `wm.toml`, and Noctalia session
-assets. Prebuilt packages are available from CachyOS and AUR; the repository
-also includes a source `PKGBUILD` and binary-package recipes for published
-builds.
+Prebuilt packages are available from CachyOS and the AUR. The package includes
+Aqueous, `aqueousctl`, and the session integration; the repository also
+provides a source `PKGBUILD` and binary-package recipes for published builds.
 
 <Card title="CachyOS / Shelly / pacman (Recommended)" icon="download">
   Install Aqueous directly from CachyOS repositories.
@@ -119,8 +113,8 @@ builds.
 
 The packaged session creates `~/.config/aqueous/wm.toml` from the system
 default when the file does not already exist. It never overwrites your copy.
-The other three files are optional sidecars, so create only the ones you want
-to customize:
+`layout.toml`, `input.toml`, and `rules.toml` are optional, so create only the
+files you want to customize:
 
 ```sh
 mkdir -p ~/.config/aqueous
