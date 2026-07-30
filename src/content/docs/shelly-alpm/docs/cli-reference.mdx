@@ -109,7 +109,7 @@ Subcommands:
 | Command                  | Description                                                                                                                                                |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `shelly search standard` | Search ALPM repository and installed packages, or Shelly-managed local binary packages. With a package and no source modifier, show exact package details. |
-| `shelly search aur`      | Search the AUR RPC, fetch exact package PKGBUILDs, or append high-confidence standard repository matches.                                                  |
+| `shelly search aur`      | Search the AUR RPC, fetch exact package PKGBUILDs, append high-confidence standard repository matches, or show complete metadata for one AUR package.      |
 | `shelly search flatpak`  | Search cached AppStream catalogs from every configured system and user Flatpak remote, with local pagination and remote-reference sizes and permissions.   |
 
 #### `shelly search standard`
@@ -146,7 +146,7 @@ Options:
 
 #### `shelly search aur`
 
-Search the AUR RPC, fetch exact package PKGBUILDs, or append high-confidence standard repository matches.
+Search the AUR RPC, fetch exact package PKGBUILDs, append high-confidence standard repository matches, or show complete metadata for one AUR package.
 
 Usage:
 
@@ -156,16 +156,17 @@ shelly search aur <query>... [options]
 
 Arguments:
 
-| Argument  | Arity | Description                                                                                    |
-| --------- | ----- | ---------------------------------------------------------------------------------------------- |
-| `<query>` | 1..\* | Search words joined for an AUR RPC query, or exact AUR package names when --pkgbuild is passed |
+| Argument  | Arity | Description                                                                                                |
+| --------- | ----- | ---------------------------------------------------------------------------------------------------------- |
+| `<query>` | 1..\* | Search words joined for an AUR RPC query, or exact AUR package names when --pkgbuild or --detail is passed |
 
 Options:
 
-| Option           | Type   | Description                                                                |
-| ---------------- | ------ | -------------------------------------------------------------------------- |
-| `--standard, -s` | `bool` | Append high-confidence standard ALPM repository matches to the AUR results |
-| `--pkgbuild, -p` | `bool` | Fetch and display the PKGBUILD for each exact AUR package name             |
+| Option                 | Type   | Description                                                                |
+| ---------------------- | ------ | -------------------------------------------------------------------------- |
+| `--standard, -s`       | `bool` | Append high-confidence standard ALPM repository matches to the AUR results |
+| `--pkgbuild, -p`       | `bool` | Fetch and display the PKGBUILD for each exact AUR package name             |
+| `--detail, --info, -d` | `bool` | Show complete metadata for one exact AUR package name                      |
 
 #### `shelly search flatpak`
 
@@ -235,7 +236,7 @@ Install a local AppImage into the configured AppImage directory and update Shell
 Usage:
 
 ```text
-shelly install appimage <location>
+shelly install appimage <location> [options]
 ```
 
 Arguments:
@@ -243,6 +244,12 @@ Arguments:
 | Argument     | Arity | Description                                           |
 | ------------ | ----- | ----------------------------------------------------- |
 | `<location>` | 1..1  | Path to an existing file whose extension is .AppImage |
+
+Options:
+
+| Option                          | Type     | Description                                                                          |
+| ------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `--install-path <install-path>` | `string` | Directory to install the AppImage into; overrides the configured AppImageInstallPath |
 
 #### `shelly install aur`
 
