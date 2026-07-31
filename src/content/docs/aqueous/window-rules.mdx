@@ -155,10 +155,32 @@ present. If the anchor touches an edge, the column on that edge collapses and
 all companion windows use the surviving column.
 
 <Aside type="note">
-  `blur` is accepted and retained as a per-window preference, but the current
-  SceneFX path cannot selectively mask backdrop blur. See [Visual
-  Effects](/aqueous/visual-effects/) before relying on this field.
+  `blur = false` keeps a game or video window out of the backdrop-blur mask. It
+  takes effect only when global blur is enabled in `wm.toml`. See [Visual
+  Effects](/aqueous/visual-effects/) for the global quality and cost settings.
 </Aside>
+
+## Layer-shell rules
+
+`[[layer]]` rules control blur for panels, launchers, notifications, and other
+layer-shell clients. Discover a surface's namespace with `aqueousctl scene`.
+Like window rules, layer rules use case-sensitive `*` and `?` globs and the
+first match wins, so put exact exceptions before broad patterns.
+
+```toml
+[[layer]]
+namespace = "waybar"
+blur = true
+blur_popups = true
+
+[[layer]]
+namespace = "screen-locker"
+blur = false
+blur_popups = false
+```
+
+`blur_popups` applies to the layer surface's XDG popups and nested popups, and
+requires `blur = true`. Global blur must also be enabled in `wm.toml`.
 
 ## Reload only the rule file
 
