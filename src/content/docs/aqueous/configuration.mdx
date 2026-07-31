@@ -102,6 +102,8 @@ mode = "2560x1440@144"
 scale = 1.0
 position = [1536, 0] # logical coordinates after eDP-1's scale
 adaptive_sync = true
+# Enable only on capable DRM outputs; uses the fixed HDR10 profile.
+hdr = true
 layout = "tile"
 
 [struts]
@@ -130,7 +132,9 @@ Output positions use logical coordinates. If you omit `position`, Aqueous
 places otherwise unconfigured outputs in a non-overlapping horizontal row.
 Display fields accept connector-name globs such as `DP-*`; layout-only output
 matching uses an exact connector name. An `edid` selector is also accepted when
-connector names are not stable.
+connector names are not stable. Run `aqueousctl outputs` to see connector
+names, supported modes, and the current/preferred mode before writing a display
+block.
 
 <Aside type="note" title="Layer-shell panels usually reserve their own space">
   `[struts]` adds fixed margins after layer-shell exclusive zones are applied.
@@ -141,7 +145,8 @@ connector names are not stable.
 ## Display transforms and profiles
 
 `transform` accepts `normal`, `90`, `180`, `270`, and the four `flipped-*`
-variants. `scale` must be between `0.5` and `3.0`.
+variants. `scale` must be between `0.5` and `3.0`. Set `hdr = true` only for a
+capable DRM output; Aqueous uses a fixed HDR10 profile (10-bit BT.2020 with PQ).
 
 Named profiles use the same display fields as `[[output]]` and can be selected
 through Aqueous's output-service API. A fallback profile can provide a safe

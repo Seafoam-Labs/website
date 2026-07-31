@@ -66,6 +66,19 @@ Supported values are:
 Tap, click-method, and scroll-method settings are applied only to devices
 detected as touchpads.
 
+## Gestures
+
+Gesture bindings can live in `input.toml` or `wm.toml`; the input sidecar wins
+when both define the same gesture. Gesture values use the same `builtin:`,
+`set_layout:`, and `spawn:` verbs as [custom keybindings](/aqueous/keybindings/#custom-chords).
+
+```toml
+[gestures]
+swipe_3_left = "builtin:focus_workspace_down"
+swipe_3_right = "builtin:focus_workspace_up"
+pinch_4_in = "builtin:toggle_start_menu"
+```
+
 ## Trackpoints and legacy pointer settings
 
 `[input.trackpoint]` accepts the same device keys, but the current application

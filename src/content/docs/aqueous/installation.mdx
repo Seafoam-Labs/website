@@ -26,7 +26,7 @@ To build from source, you need:
 - wlroots 0.20, Wayland, wayland-protocols, libxkbcommon, libinput, libevdev,
   pixman, and pkg-config development files
 - XWayland when building with `-Dxwayland`
-- SceneFX when building with `-Dscenefx=true`
+- Vulkan headers and loader, plus `glslang`, for the default Vulkan-effects build
 
 ## Arch Linux
 
@@ -83,6 +83,9 @@ provides a source `PKGBUILD` and binary-package recipes for published builds.
 
     The build helper stages `aqueous` and `aqueousctl` under `bin/`. For a
     direct development build, run `zig build` from the `compositor/` directory.
+    The default build uses Aqueous's Vulkan effects backend; use
+    `-Dvulkan-effects=false` only when you need the square, no-blur diagnostic
+    build.
 
   </TabItem>
 </Tabs>
@@ -127,4 +130,6 @@ cp rules.toml.example  ~/.config/aqueous/rules.toml
 
 The example files are heavily annotated references. For a smaller day-to-day
 setup, use the focused examples in the [Configuration](/aqueous/configuration/)
-guide and add sections only as you need them.
+guide and add sections only as you need them. Use `aqueousctl windows` or
+`aqueousctl inspect --rule` after starting a session to discover the exact
+application identities for window rules.

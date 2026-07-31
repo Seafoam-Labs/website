@@ -14,7 +14,7 @@ changes predictable and avoids a chain of helper processes or IPC round trips.
 Aqueous began as a fork of [River](https://codeberg.org/river/river), but now
 owns its window-management policy and configuration format. It retains the
 small, focused feel of a tiling window manager while adding compositor-side
-motion and optional SceneFX visuals.
+motion and optional Vulkan-rendered visuals.
 
 ## Highlights
 
@@ -26,8 +26,10 @@ motion and optional SceneFX visuals.
 - Native output configuration for modes, scale, transforms, adaptive sync,
   positions, hotplug, and named profiles
 - XKB and libinput settings for keyboards, mice, touchpads, and trackpoints
-- Optional SceneFX rounded corners and backdrop blur, plus focus-aware opacity
-  and animated workspace transitions
+- Optional Vulkan-rendered rounded corners and backdrop blur, plus focus-aware
+  opacity and animated workspace transitions
+- A workspace-local window overview (`Super+W`) for browsing and focusing every
+  window on the active workspace
 - Native XWayland support alongside modern Wayland protocols
 - A packaged Noctalia shell configuration for a ready-to-use desktop session
 
@@ -42,7 +44,9 @@ Aqueous uses four focused TOML files under `~/.config/aqueous/`:
 
 The compositor watches these files and publishes validated replacement
 snapshots when they change. Most edits become visible within a second, or
-immediately when you press the configured `reload_config` binding.
+immediately when you press the configured `reload_config` binding. Use
+`aqueousctl` to inspect window identities, layer-shell namespaces, output modes,
+and active layouts instead of guessing values for a configuration file.
 
 Start with [Installation](/aqueous/installation/), then build a clean setup in
 the [Configuration](/aqueous/configuration/) guide.

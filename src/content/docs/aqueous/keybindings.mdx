@@ -46,6 +46,8 @@ close_focused = "Super+Q"
 cycle_focus = "Super+Tab"
 lock_screen = "Super+Ctrl+L"
 reload_config = "Super+R"
+toggle_overview = "Super+W"
+screenshot = "Print"
 
 focus_left = "Super+H"
 focus_right = "Super+L"
@@ -58,13 +60,17 @@ move_window_up = "Super+Shift+Up"
 move_window_down = "Super+Shift+Down"
 ```
 
-The first three launch actions execute the matching command in `[actions]`:
+`toggle_overview` opens a workspace-local window overview. Navigate with arrow
+keys, `H`/`J`/`K`/`L`, or `Tab`, then confirm the selected window. `screenshot`
+executes the matching action in `[actions]`, just like the first three launch
+actions:
 
 ```toml
 [actions]
 toggle_start_menu = "noctalia msg panel-toggle launcher"
 spawn_terminal = "foot"
 lock_screen = "swaylock -f"
+screenshot = "grim -g \"$(slurp)\" - | wl-copy"
 ```
 
 Movement follows the active layout: tiled layouts swap neighbors, `scrolling`
