@@ -9,10 +9,12 @@ Shelly includes built-in PKGBUILD security checks for AUR installs and updates. 
 
 ## What Shelly checks
 
-Shelly currently focuses on two high-risk areas:
+Shelly currently focuses on four high-risk areas:
 
 1. Post-install scriptlets that fetch or execute code outside libalpm's control.
-2. Spoofed package names, dependencies, URLs, and other attacker-controlled text that use Unicode homograph tricks.
+2. Local source files that are ELF executables or other binary content and cannot be safely reviewed as text.
+3. Privilege elevation commands that run package-controlled code as root.
+4. Spoofed package names, dependencies, URLs, and other attacker-controlled text that use Unicode homograph tricks.
 
 ## Risky post-install behavior
 
@@ -27,6 +29,24 @@ It also flags dynamic command construction that cannot be safely reviewed ahead 
 
 Shelly also performs lightweight de-obfuscation before matching commands. That means tricks like `b''u''n`, `cur\l`, or `n"p"m` are still detected. If a risky tool name was deliberately hidden this way, Shelly escalates the finding to `Critical`.
 
+## Local binary and ELF source checks (`Critical`)
+
+Shelly reviews local `source=()` files used by the PKGBUILD and flags files that appear to be binary content, including ELF executables.
+
+If a local source file is binary, Shelly raises a `Critical` finding because the content cannot be meaningfully reviewed as plain text in the package review flow and may hide malicious behavior.
+
+This includes extensionless files as well as names like `.bin`, and specifically identifies ELF headers when present.
+
+## Privilege elevation checks (`Critical`)
+
+Shelly scans for privilege elevation tools such as `sudo`, `sudoedit`, `doas`, `pkexec`, `run0`, and `su`.
+
+These checks apply to `post_install`, local source scripts, and PKGBUILD function bodies such as `prepare()`, `pkgver()`, `build()`, `check()`, and `package()`.
+
+When one of these tools is detected, Shelly reports a `Critical` finding because the package can run code as root outside Shelly and libalpm's control.
+
+If the tool name was intentionally obfuscated, Shelly still detects it and treats it as a strong malicious indicator.
+
 :::note
 These checks are intentionally conservative. A warning does not automatically mean a package is malicious, but it does mean the install path includes behavior outside normal package management.
 :::
@@ -35,7 +55,7 @@ These checks are intentionally conservative. A warning does not automatically me
 
 Shelly also looks for text designed to look trustworthy while using different Unicode characters underneath. This helps catch package or source data that visually resembles a known project but is not actually the same string.
 
-https://en.wikipedia.org/wiki/IDN_homograph_attack
+[IDN homograph attack](https://en.wikipedia.org/wiki/IDN_homograph_attack)
 
 Examples of suspicious patterns include:
 
