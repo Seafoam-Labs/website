@@ -11,7 +11,7 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 
 ## Install or update
 
-| pacman                | shelly shortcode/longcode                                                 | Description                                                   |
+| pacman                | shelly shortcode/longcode                                             | Description                                                   |
 | --------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------- |
 | `pacman -S package`   | `shelly -Is package`<br/>`shelly install standard package`            | (Re)Install a package                                         |
 | `pacman -Syu`         | `shelly -Us`<br/>`shelly upgrade standard`                            | Update packages from configured repos                         |
@@ -47,6 +47,6 @@ Shelly Rosetta is a reference for pacman commands and their equivalent Shelly co
 
 ## Downgrading
 
-| pacman/related      | shelly shortcode/longcode                                             | Description                                                                                                                            |
+| pacman/related      | shelly shortcode/longcode                                    | Description                                                                                                                            |
 | ------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `downgrade package` | `shelly -Di package`<br/>`shelly downgrade --ignore package` | Revert a package you have installed to an earlier cached version or cachy repo version if available and also add it to the ignore list |
