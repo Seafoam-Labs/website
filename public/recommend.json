@@ -141,7 +141,7 @@
     ]
   },
   {
-    "name": "Hardware tools",
+    "name": "Hardware monitoring & tools",
     "packages": [
       "amdgpu_top",
       "cachyos-benchmarker",
