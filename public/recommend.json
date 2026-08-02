@@ -1,18 +1,44 @@
 [
   {
-    "name": "Audio",
+    "name": "2D/3D editors",
+    "packages": [
+      "birdfont",
+      "blender",
+      "darktable",
+      "digikam",
+      "fontforge",
+      "freecad",
+      "gimp",
+      "inkscape",
+      "kicad",
+      "kolourpaint",
+      "krita",
+      "librecad",
+      "luminancehdr",
+      "mypaint",
+      "opentoonz",
+      "pencil2d",
+      "sweethome3d",
+      "synfigstudio"
+    ]
+  },
+  {
+    "name": "Audio/Video editing",
     "packages": [
       "ardour",
-      "audacious",
       "audacity",
-      "elisa",
+      "baka-mplayer",    
+      "kdenlive",
       "kwave",
       "lmms",
-      "lollypop",
       "mixxx",
       "musescore",
+      "obs-studio",
+      "pitivi",
       "rosegarden",
-      "strawberry"
+      "shotcut",
+      "soundconverter",
+      "transmageddon"
     ]
   },
   {
@@ -28,6 +54,7 @@
       "qutebrowser",
       "torbrowser-launcher",
       "vivaldi",
+      "waterfox-bin",
       "zen-browser-bin"
     ]
   },
@@ -76,6 +103,22 @@
     ]
   },
   {
+    "name": "File transfer & downloaders",
+    "packages": [
+      "deluge-gtk",
+      "filezilla",
+      "freedownloadmanager",
+      "jdownloader2",
+      "localsend",
+      "nextcloud-client",
+      "nitroshare",
+      "qbittorrent",
+      "rqbit-desktop",
+      "warpinator",
+      "xdman"
+    ]
+  },
+  {
     "name": "Gaming",
     "packages": [
       "0ad",
@@ -84,12 +127,14 @@
       "cachyos-gaming-meta",
       "extremetuxracer",
       "hedgewars",
+      "heroic-games-launcher-bin",
       "kapman",
       "kmahjongg",
       "knights",
       "lutris",
       "mari0",
       "protonup-qt",
+      "steam",
       "supertux",
       "supertuxkart",
       "teeworlds",
@@ -97,30 +142,7 @@
     ]
   },
   {
-    "name": "Graphics",
-    "packages": [
-      "birdfont",
-      "blender",
-      "darktable",
-      "digikam",
-      "fontforge",
-      "freecad",
-      "gimp",
-      "inkscape",
-      "kicad",
-      "kolourpaint",
-      "krita",
-      "librecad",
-      "luminancehdr",
-      "mypaint",
-      "opentoonz",
-      "pencil2d",
-      "sweethome3d",
-      "synfigstudio"
-    ]
-  },
-  {
-    "name": "HardwareTools",
+    "name": "Hardware tools",
     "packages": [
       "amdgpu_top",
       "cachyos-benchmarker",
@@ -136,27 +158,7 @@
     ]
   },
   {
-    "name": "Internet",
-    "packages": [
-      "deluge-gtk",
-      "filezilla",
-      "freedownloadmanager",
-      "freetube",
-      "jdownloader2",
-      "localsend",
-      "nextcloud-client",
-      "nitroshare",
-      "proton-vpn-gtk-app",
-      "putty",
-      "qbittorrent",
-      "remmina",
-      "rqbit-desktop",
-      "warpinator",
-      "xdman"
-    ]
-  },
-  {
-    "name": "Mail",
+    "name": "Mail clients",
     "packages": [
       "claws-mail",
       "evolution",
@@ -168,19 +170,19 @@
     ]
   },
   {
-    "name": "Multimedia",
+    "name": "Media players",
     "packages": [
-      "brasero",
-      "converseen",
-      "easytag",
-      "handbrake",
+      "audacious",
+      "dragon",
+      "elisa",
+      "freetube",
       "hypnotix",
-      "kid3",
+      "lollypop",
       "mediaelch",
       "shortwave",
-      "soundconverter",
-      "transmageddon",
-      "xfburn"
+      "smplayer",
+      "strawberry",
+      "vlc"
     ]
   },
   {
@@ -194,6 +196,7 @@
       "joplin",
       "kmymoney",
       "libreoffice-fresh",
+      "obsidian",
       "onlyoffice-bin",
       "skrooge",
       "wps-office",
@@ -201,28 +204,34 @@
     ]
   },
   {
-    "name": "Other",
-    "packages": ["bitwarden", "keepass", "scrcpy", "variety", "proton-pass"]
+    "name": "Password managers",
+    "packages": ["bitwarden", "keepass", "proton-pass"]
   },
   {
-    "name": "Video",
+    "name": "Utilities",
     "packages": [
-      "baka-mplayer",
-      "dragon",
-      "kdenlive",
-      "obs-studio",
-      "pitivi",
-      "shotcut",
-      "smplayer",
-      "vlc"
+      "brasero",
+      "converseen",
+      "easytag",
+      "handbrake",
+      "kdeconnect",
+      "kid3",
+      "mullvad-vpn",
+      "putty",
+      "proton-vpn-gtk-app",
+      "remmina",
+      "scrcpy",
+      "tailscale",
+      "variety",
+      "xfburn"
     ]
   },
   {
     "name": "Virtualization",
-    "packages": ["gnome-boxes", "virt-manager"]
+    "packages": ["gnome-boxes", "virt-manager", "virtualbox"]
   },
   {
     "name": "ShellyTeam",
-    "packages": ["fluxer-canary", "ghostty", "kitty", "waterfox"]
+    "packages": ["ghostty", "kitty"]
   }
 ]
