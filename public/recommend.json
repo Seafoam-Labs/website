@@ -58,7 +58,7 @@
     ]
   },
   {
-    "name": "Communication",
+    "name": "Chatting clients",
     "packages": [
       "discord",
       "element-desktop",
@@ -73,7 +73,7 @@
     ]
   },
   {
-    "name": "Development",
+    "name": "Software development",
     "packages": [
       "ansible",
       "cockpit",
@@ -102,7 +102,7 @@
     ]
   },
   {
-    "name": "File transfers & downloaders",
+    "name": "File transfer & downloaders",
     "packages": [
       "deluge-gtk",
       "filezilla",
@@ -118,7 +118,7 @@
     ]
   },
   {
-    "name": "Gaming",
+    "name": "Games, libraries & launchers",
     "packages": [
       "0ad",
       "aisleriot",
@@ -179,6 +179,7 @@
       "hypnotix",
       "lollypop",
       "mediaelch",
+      "pear-desktop",
       "shortwave",
       "smplayer",
       "strawberry",
