@@ -27,7 +27,6 @@
     "packages": [
       "ardour",
       "audacity",
-      "baka-mplayer",
       "kdenlive",
       "kwave",
       "lmms",
@@ -173,6 +172,7 @@
     "name": "Media players",
     "packages": [
       "audacious",
+      "baka-mplayer",
       "dragon",
       "elisa",
       "freetube",
