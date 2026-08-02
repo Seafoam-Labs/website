@@ -1,6 +1,6 @@
 [
   {
-    "name": "2D/3D editors",
+    "name": "2D/3D editing",
     "packages": [
       "birdfont",
       "blender",
@@ -102,7 +102,7 @@
     ]
   },
   {
-    "name": "File transfer & downloaders",
+    "name": "File transfers & downloaders",
     "packages": [
       "deluge-gtk",
       "filezilla",
@@ -169,7 +169,7 @@
     ]
   },
   {
-    "name": "Media players",
+    "name": "Media players & streamers",
     "packages": [
       "audacious",
       "baka-mplayer",
@@ -186,7 +186,7 @@
     ]
   },
   {
-    "name": "Office",
+    "name": "Office work",
     "packages": [
       "abiword",
       "calligra",
