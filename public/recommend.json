@@ -232,7 +232,7 @@
     "packages": ["gnome-boxes", "virt-manager", "virtualbox"]
   },
   {
-    "name": "ShellyTeam",
-    "packages": ["ghostty", "kitty"]
+    "name": "Seafoam Labs recommends",
+    "packages": ["fluxer-canary", "ghostty", "kitty"]
   }
 ]
