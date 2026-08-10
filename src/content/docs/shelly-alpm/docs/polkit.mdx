@@ -13,6 +13,8 @@ as root. Under the hood, the app runs the Shelly CLI as an administrator through
 `pkexec`, which is what shows the prompt. When polkit is working, the app shows a
 password prompt instead of failing with a permission error.
 
+![Noctalia Polkit Agent](../../../../assets/screenshots/shelly/polkit.png)
+
 The command-line tool (`shelly`) does not need polkit - it elevates with `sudo` or
 `doas` directly (see [Configuration](./config.mdx)). You only need this page if you
 use the graphical app.
