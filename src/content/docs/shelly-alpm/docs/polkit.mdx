@@ -6,6 +6,8 @@ description: Install and test polkit so Shelly can request permission for authen
 ---
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import { Image } from "astro:assets";
+import polkitImage from "../../../../assets/screenshots/shelly/polkit.png";
 
 The Shelly graphical app (**shelly-ui**) uses **polkit** to ask for your password
 before it installs, updates, or removes packages, so you never need to launch the app
@@ -13,11 +15,21 @@ as root. Under the hood, the app runs the Shelly CLI as an administrator through
 `pkexec`, which is what shows the prompt. When polkit is working, the app shows a
 password prompt instead of failing with a permission error.
 
-![Noctalia Polkit Agent](../../../../assets/screenshots/shelly/polkit.png)
+<figure className="my-6">
+  <Image
+    src={polkitImage}
+    alt="Noctalia Polkit Agent"
+    width="550"
+    className="rounded"
+  />
+  <figcaption className="text-(length:--sl-text-sm) text-(--sl-color-gray-3)">
+    Noctalia Polkit Agent
+  </figcaption>
+</figure>
 
-The command-line tool (`shelly`) does not need polkit - it elevates with `sudo` or
-`doas` directly (see [Configuration](/shelly-alpm/docs/config/)). You only need this page if you
-use the graphical app.
+The command-line tool (`shelly`) does not need polkit - it elevates with `sudo`
+or `doas` directly (see [Configuration](/shelly-alpm/docs/config/)). You only
+need this page if you use the graphical app.
 
 ## Choose a graphical authentication agent
 
