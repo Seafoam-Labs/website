@@ -1,0 +1,119 @@
+---
+title: Devario for business
+description: Who Devario is designed for, where it fits, and when a different platform is the better choice.
+sidebar:
+  label: For business
+  order: 2
+---
+
+import { Aside, Card, CardGrid } from "@astrojs/starlight/components";
+
+Devario is aimed first at organizations with **tens to a few hundred employee
+workstations**, a lean internal IT function or MSP, and a visible need to make
+software state consistent across devices.
+
+The best early fit is not determined by company size alone. Application,
+peripheral, identity, and support requirements matter more than seat count.
+
+## A strong fit
+
+<CardGrid>
+  <Card title="Existing directory" icon="padlock">
+    The organization already uses Active Directory or Samba AD for employee
+    identities and wants to keep that authority.
+  </Card>
+  <Card title="Compatible workflows" icon="laptop">
+    Daily work happens primarily in browsers, SaaS products, remote desktops, or
+    cross-platform applications.
+  </Card>
+  <Card title="Governance need" icon="approve-check-circle">
+    IT wants approved applications, a known workstation baseline, and
+    predictable update rings.
+  </Card>
+  <Card title="Mixed-fleet intent" icon="puzzle">
+    The business wants to introduce Linux by role while Windows remains where
+    compatibility requires it.
+  </Card>
+</CardGrid>
+
+Good starting cohorts can include:
+
+- shared workstation pools;
+- administrative and back-office teams;
+- browser-first call centers;
+- training rooms and labs; and
+- professional-services teams using web and cross-platform tools.
+
+## The operational value
+
+### Familiar access
+
+Employees use an existing business identity rather than receiving a separate
+Linux-only account. Active Directory remains authoritative for users, groups,
+computer accounts, and access decisions.
+
+### Central software governance
+
+Administrators define approved software once, assign it by device group, and
+stage changes through controlled channels. A curated self-service catalog can
+offer autonomy without opening the entire package ecosystem.
+
+### Verifiable endpoint execution
+
+Signed repositories and Shelly's defined transaction layer create an auditable
+boundary from approved supply to the installed device. Remora can report drift,
+failures, update state, and restart requirements without directly manipulating
+the endpoint package database.
+
+### Gradual migration
+
+Devario can begin with roles where Linux compatibility is already strong. The
+business keeps Windows for specialized applications or hardware and expands
+the Devario cohort only after pilot results justify it.
+
+## Qualify these constraints early
+
+<Aside type="caution" title="Not every seat is a Devario seat">
+  Devario should not initially be treated as a universal Windows replacement. A
+  narrow, compatible cohort is a feature of the adoption model—not a compromise
+  to hide during planning.
+</Aside>
+
+Devario is currently a weaker fit when:
+
+- a critical workflow depends on Windows-only desktop software;
+- required device drivers or specialized peripherals lack a supported Linux
+  path;
+- the organization needs full Microsoft GPO, Intune, or Windows roaming-profile
+  parity beyond scoped login controls;
+- an offline first login is required before credentials can be cached; or
+- the buyer requires a production-certified platform before Devario's
+  hardening and integration work is complete.
+
+## Compatibility worksheet
+
+Before choosing a pilot cohort, record the following for each role:
+
+| Area                    | Questions to answer                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| Applications            | Which tools are browser-based, cross-platform, remotely delivered, or Windows-only?                |
+| Files and collaboration | Where does work data live, and which sync, network-share, or collaboration clients are required?   |
+| Identity                | Which AD domain, user groups, login formats, and local-administrator mappings are needed?          |
+| Hardware                | Which docks, printers, scanners, smart cards, GPUs, and specialized peripherals must work?         |
+| Network                 | Which Wi-Fi, VPN, proxy, certificate, DNS, and time requirements apply?                            |
+| Recovery                | What is the acceptable rollback, reimage, offline-login, and help-desk path?                       |
+| Policy                  | Which packages are required, prohibited, optional, or pinned? Which rollout rings are appropriate? |
+
+The answers become the pilot baseline and prevent a technically successful
+deployment from missing the workflow that employees actually need.
+
+## Adoption path
+
+1. **Qualify** one browser-first or cross-platform role.
+2. **Deploy** a small group beside the existing Windows fleet.
+3. **Validate** login, applications, peripherals, updates, support, and
+   recovery.
+4. **Expand** to more device groups only after agreed outcomes are met.
+
+Continue with the [pilot program](/devario/pilot/) to turn this qualification
+work into a measurable deployment plan.

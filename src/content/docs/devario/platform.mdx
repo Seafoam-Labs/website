@@ -1,0 +1,160 @@
+---
+title: Platform architecture
+description: How Remora, Shelly, Devario endpoints, and Active Directory work together.
+sidebar:
+  label: Platform architecture
+  order: 1
+---
+
+import { Aside, Card, CardGrid, Steps } from "@astrojs/starlight/components";
+
+Devario keeps its core responsibilities deliberately separate:
+
+> **Remora decides. Shelly executes. Active Directory authenticates.**
+
+This boundary lets software management, package trust, and employee identity
+continue operating independently. A directory outage should not corrupt
+package state, and a Remora outage should not invalidate a user's identity.
+
+## The integrated workstation stack
+
+<div
+  class="architecture"
+  role="img"
+  aria-label="Administrator policy flows through Remora to a Devario endpoint. Shelly applies signed packages, while Active Directory authenticates the user into an Aqueous session."
+>
+  <div class="architecture-layer">
+    <span>Operator</span>
+    <strong>Administrator</strong>
+    <small>Catalogs · groups · rollouts</small>
+  </div>
+  <span class="architecture-arrow" aria-hidden="true">
+    →
+  </span>
+  <div class="architecture-layer architecture-control">
+    <span>Control + supply</span>
+    <strong>Remora</strong>
+    <small>Policy · channels · inventory</small>
+  </div>
+  <span class="architecture-arrow" aria-hidden="true">
+    →
+  </span>
+  <div class="architecture-layer architecture-endpoint">
+    <span>Devario endpoint</span>
+    <strong>Shelly</strong>
+    <small>Verify · resolve · transact</small>
+  </div>
+  <span class="architecture-arrow" aria-hidden="true">
+    ↔
+  </span>
+  <div class="architecture-layer">
+    <span>Identity</span>
+    <strong>Active Directory</strong>
+    <small>Users · groups · access</small>
+  </div>
+</div>
+
+## Component responsibilities
+
+| Component              | Owns                                                                                          | Does not own                                           |
+| ---------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| **Devario**            | Managed OS, installer, trusted runtime, approved applications, and Aqueous desktop            | Directory passwords or fleet policy authoring          |
+| **Remora**             | Catalogs, desired state, device groups, channels, rollout policy, inventory, and reporting    | Local package-database mutation or user authentication |
+| **Shelly**             | Signature verification, dependency resolution, install, removal, upgrade, and local inventory | Fleet-wide policy decisions                            |
+| **Active Directory**   | Users, groups, computer accounts, authentication, and domain access policy                    | Devario software state                                 |
+| **SSSD, PAM, and NSS** | Mapping directory identities into authorized Linux users and sessions                         | Package policy or repository publication               |
+
+## Software control loop
+
+<Steps>
+
+1. **Publish signed supply**
+
+   The build pipeline produces packages and repository metadata. Release
+   operations sign those artifacts before publication.
+
+2. **Define desired state**
+
+   Remora organizes approved content into channels such as test, staged, and
+   production. Administrators assign baselines and update policy to device
+   groups.
+
+3. **Converge the endpoint**
+
+   The endpoint service receives its desired state and asks Shelly to perform
+   the approved install, update, or removal transaction.
+
+4. **Verify and report**
+
+   Shelly checks repository and package signatures, resolves dependencies,
+   applies the transaction through `libalpm`, and returns the outcome. Remora
+   receives inventory, update state, failures, and restart requirements.
+
+</Steps>
+
+Policy can describe:
+
+- required and prohibited packages;
+- packages available through a curated self-service catalog;
+- pinned versions and approved repository channels;
+- staged rollout timing; and
+- device or group assignments.
+
+### Why Shelly is the transaction boundary
+
+Devario's patched Shelly foundation removes the remaining runtime dependency
+on the `pacman` and `pacman-key` executables. Shelly performs native keyring and
+ALPM operations and provides a defined place for transaction locking,
+machine-readable results, inventory, and auditable errors.
+
+Remora asks Shelly for an approved outcome. It does not edit the ALPM database
+or invoke lower-level package tools itself.
+
+## Windows-connected identity
+
+The intended sign-in path preserves the identity system a mixed Windows fleet
+already uses:
+
+<Steps>
+
+1. Installation establishes a device identity, checks domain DNS and time, and
+   enrolls the workstation with Active Directory.
+2. A user enters `user@example.com` or `DOMAIN\\user` without requiring a
+   directory-wide list of accounts on the login screen.
+3. PAM and NSS pass identity requests to SSSD, which uses Kerberos and LDAP to
+   map the domain user and groups into Linux.
+4. On first successful sign-in, PAM creates a local home directory and starts
+   the user's Aqueous session.
+5. Administrators can allow credential caching for temporary network outages
+   and map selected directory groups to local access or administration.
+
+</Steps>
+
+<Aside type="note" title="Identity is not profile roaming">
+  Windows-connected login does not automatically roam a user's files,
+  application settings, or complete Windows Group Policy behavior. Those
+  capabilities require separate storage, synchronization, and policy work.
+</Aside>
+
+<Aside type="caution" title="Current implementation boundary">
+  Local Active Directory enrollment has been validated. Completing the guided
+  installer flow, production domain login, and applicable SSSD GPO logon-right
+  enforcement remains part of the pilot-readiness work.
+</Aside>
+
+## Failure containment
+
+<CardGrid>
+  <Card title="Directory interruption" icon="padlock">
+    Package state remains intact. Previously authorized users may continue with
+    cached credentials when the administrator's policy allows it.
+  </Card>
+  <Card title="Remora interruption" icon="cloud-download">
+    The endpoint retains its last accepted policy and repository configuration;
+    domain identity remains a separate concern.
+  </Card>
+  <Card title="Repository interruption" icon="database">
+    Existing applications keep working. New transactions wait for approved,
+    signed metadata and packages rather than trusting network location alone.
+  </Card>
+</CardGrid>

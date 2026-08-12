@@ -92,6 +92,10 @@ export default defineConfig({
           ],
         },
         {
+          label: "Devario",
+          items: [{ autogenerate: { directory: "devario" } }],
+        },
+        {
           label: "Starfish",
           items: [
             { autogenerate: { directory: "starfish" } },

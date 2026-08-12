@@ -1,0 +1,100 @@
+---
+title: Devario
+description: Managed Linux workstations for small-business fleets, with central software policy and Windows-connected identity.
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import {
+  Aside,
+  Card,
+  CardGrid,
+  LinkButton,
+} from "@astrojs/starlight/components";
+
+Devario is a **managed Linux workstation platform** for small businesses. It
+combines a modern desktop, central software policy, trusted package execution,
+and Windows-connected identity in one intentionally focused system.
+
+It is designed for lean IT teams and managed service providers that want to
+introduce Linux without turning every workstation into a separate
+administration project—or replacing every Windows device at once.
+
+<div class="devario-statement">
+  <span>Managed workstation platform</span>
+  <strong>One login. One software policy. One fleet view.</strong>
+</div>
+
+## What Devario brings together
+
+<CardGrid>
+  <Card title="Governed software" icon="setting">
+    Remora defines approved catalogs, required and prohibited packages, update
+    channels, rollout timing, and device assignments.
+  </Card>
+  <Card title="Trusted execution" icon="approve-check-circle">
+    Shelly verifies signed software, resolves dependencies, applies package
+    transactions, and returns structured results.
+  </Card>
+  <Card title="A modern workspace" icon="laptop">
+    Devario provides the managed operating system, guided installer, approved
+    applications, and an Aqueous desktop session.
+  </Card>
+  <Card title="Connected identity" icon="padlock">
+    Active Directory remains the authority for users, groups, and computer
+    accounts while Devario governs software separately.
+  </Card>
+</CardGrid>
+
+## Built for coexistence
+
+Devario is not positioned as another general-purpose distribution or a
+universal replacement for every Windows workstation. A business can start with
+one compatible group—such as a browser-first back-office team, shared
+workstation pool, or training room—while Windows remains in place for
+specialized applications, drivers, and peripherals.
+
+That makes adoption a measured operational decision:
+
+1. Qualify a role with strong Linux application and hardware compatibility.
+2. Deploy a small Devario cohort beside the existing Windows fleet.
+3. Validate login, software delivery, updates, recovery, and support effort.
+4. Expand by device group only when the evidence is good.
+
+<Aside type="caution" title="Development-stage platform">
+  Devario has a bootable operating-system and installer foundation, a
+  Shelly-only package-management boundary, and a Remora development build.
+  Production hardening, release operations, broad hardware validation, and the
+  complete installer-led domain-login and GPO workflow remain in progress.
+</Aside>
+
+## Where to go next
+
+<CardGrid>
+  <Card title="Understand the platform" icon="puzzle">
+    See how Remora, Shelly, Devario endpoints, and Active Directory divide
+    responsibility in the [platform architecture](/devario/platform/).
+  </Card>
+  <Card title="Check business fit" icon="analytics">
+    Review the initial customer profile, suitable workloads, and qualification
+    boundaries in [Devario for business](/devario/for-business/).
+  </Card>
+  <Card title="Plan a pilot" icon="rocket">
+    Use the [pilot program](/devario/pilot/) to define a cohort, application
+    baseline, rollout plan, and measurable success criteria.
+  </Card>
+  <Card title="Review readiness" icon="information">
+    Separate what exists today from planned production work on the [product
+    readiness](/devario/readiness/) page.
+  </Card>
+</CardGrid>
+
+<LinkButton
+  href="mailto:developers@seafoamlabs.org?subject=Devario%20pilot"
+  variant="primary"
+  icon="email"
+  iconPlacement="start"
+>
+  Talk to us about a pilot
+</LinkButton>
