@@ -1,0 +1,131 @@
+---
+title: Pilot program
+description: Define and measure a low-risk Devario pilot for one compatible employee cohort.
+sidebar:
+  label: Pilot program
+  order: 3
+---
+
+import {
+  Aside,
+  Card,
+  CardGrid,
+  LinkButton,
+  Steps,
+} from "@astrojs/starlight/components";
+
+A Devario pilot starts with one compatible employee group and a written
+scorecard. The purpose is to test the operational promise in a real mixed
+fleet—not to prove that every role should move to Linux.
+
+## Before the pilot
+
+Choose a cohort that has:
+
+- browser-first, SaaS, remote-desktop, or cross-platform workflows;
+- clearly documented applications and peripherals;
+- an Active Directory or Samba AD test environment;
+- a named IT or MSP owner who can approve policy and support users;
+- representative hardware available for installation and recovery testing;
+  and
+- an agreed fallback path to the previous workstation environment.
+
+<Aside type="note" title="Start small enough to learn">
+  A useful first pilot can be a handful of representative devices. Cohort
+  quality, observable outcomes, and access to users matter more than a large
+  device count.
+</Aside>
+
+## Four-stage pilot motion
+
+<Steps>
+
+1. **Qualify**
+
+   Select one role. Document required applications, authentication, network
+   access, peripherals, data locations, recovery needs, and workflows that
+   would disqualify Linux.
+
+2. **Deploy**
+
+   Install Devario on representative hardware, establish device and Remora
+   trust, enroll it in the directory, assign the baseline, and converge the
+   approved software state.
+
+3. **Validate**
+
+   Test first login, everyday work, self-service software, required and
+   prohibited packages, staged updates, temporary outages, support escalation,
+   reinstallation, and recovery.
+
+4. **Expand or stop**
+
+   Compare results with the agreed scorecard. Add a device group only when the
+   application fit and operating outcomes are acceptable. Record a clear stop
+   decision when they are not.
+
+</Steps>
+
+## Suggested scorecard
+
+Set targets with the pilot partner before deployment.
+
+| Measure                | What to record                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| Enrollment time        | Time from booting installation media to a managed, directory-enrolled device       |
+| First-login success    | Authorized users who can start an Aqueous session on the first supported attempt   |
+| Application delivery   | Required applications installed successfully from the assigned baseline or catalog |
+| Update compliance      | Devices reaching the target channel and version inside the rollout window          |
+| Workflow compatibility | Required daily tasks completed without an unsupported workaround                   |
+| Support effort         | Incidents, time to resolution, repeated issues, and user training required         |
+| Outage behavior        | Login and software behavior during planned AD, Remora, or repository interruption  |
+| Recovery               | Time and steps required to repair, roll back, or reimage a device                  |
+
+## What to test
+
+<CardGrid>
+  <Card title="Identity" icon="padlock">
+    Domain enrollment, authorized and denied users, group changes, first login,
+    cached login policy, local administration, and break-glass access.
+  </Card>
+  <Card title="Software policy" icon="setting">
+    Baseline convergence, required and prohibited packages, pins, self-service
+    applications, inventory, and failed transaction reporting.
+  </Card>
+  <Card title="Updates" icon="random">
+    Test-to-staged promotion, maintenance windows, restart signals, interrupted
+    downloads, retry behavior, and return to compliance.
+  </Card>
+  <Card title="Daily work" icon="laptop">
+    Browsers, SaaS, office documents, printing, meetings, VPN, storage, remote
+    desktops, accessibility needs, and every cohort-specific peripheral.
+  </Card>
+</CardGrid>
+
+## Roles and decisions
+
+| Owner            | Responsibility                                                                         |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Business sponsor | Confirms the cohort, business outcome, acceptable disruption, and expansion decision   |
+| IT or MSP lead   | Owns directory access, policy, networking, support, device recovery, and the scorecard |
+| Devario team     | Supports qualification, deployment, product diagnostics, and implementation feedback   |
+| Pilot users      | Exercise real workflows and report friction, missing capabilities, and support needs   |
+
+## Exit criteria
+
+A pilot should end with evidence for each of these decisions:
+
+- Is the cohort's application and peripheral compatibility acceptable?
+- Can IT enroll, govern, update, support, and recover devices predictably?
+- Do users have a reliable login and complete their daily work?
+- Which product gaps block a broader deployment?
+- Should the organization expand, repeat with a revised baseline, or stop?
+
+<LinkButton
+  href="mailto:developers@seafoamlabs.org?subject=Devario%20design-partner%20pilot"
+  variant="primary"
+  icon="email"
+  iconPlacement="start"
+>
+  Discuss a design-partner pilot
+</LinkButton>

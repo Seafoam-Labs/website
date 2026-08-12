@@ -193,3 +193,104 @@
     @apply text-transparent;
   }
 }
+
+/* Devario informational pages */
+.devario-statement {
+  display: grid;
+  gap: 0.65rem;
+  margin-block: 2rem 2.5rem;
+  padding: clamp(1.4rem, 4vw, 2.25rem);
+  border: 1px solid color-mix(in srgb, var(--color-seafoam) 35%, transparent);
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(45, 212, 168, 0.16),
+      transparent 35%
+    ),
+    linear-gradient(135deg, #081820, #0d2630);
+}
+
+.devario-statement span {
+  color: #5eead4;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.devario-statement strong {
+  max-width: 36rem;
+  color: #f8fafc;
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.architecture {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: stretch;
+  gap: 0.65rem;
+  margin-block: 1.75rem 2.5rem;
+}
+
+.architecture-layer {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.75rem;
+  background: var(--sl-color-gray-6);
+}
+
+.architecture-layer span,
+.architecture-layer small {
+  color: var(--sl-color-gray-3);
+}
+
+.architecture-layer span {
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.architecture-layer strong {
+  color: var(--sl-color-white);
+  line-height: 1.2;
+}
+
+.architecture-layer small {
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.architecture-control,
+.architecture-endpoint {
+  border-color: color-mix(
+    in srgb,
+    var(--color-seafoam) 42%,
+    var(--sl-color-gray-5)
+  );
+}
+
+.architecture-arrow {
+  align-self: center;
+  color: var(--color-seafoam);
+  font-weight: 800;
+}
+
+@media (max-width: 46rem) {
+  .architecture {
+    grid-template-columns: 1fr;
+  }
+
+  .architecture-arrow {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+}

@@ -1,0 +1,111 @@
+---
+title: Product readiness
+description: A transparent view of Devario's implemented foundation and remaining production work.
+sidebar:
+  label: Product readiness
+  order: 4
+---
+
+import { Aside, Badge, Card, CardGrid } from "@astrojs/starlight/components";
+
+Devario has enough working foundation to validate the product thesis. It is not
+yet represented as a production-certified platform or a completed enterprise
+management suite.
+
+This page distinguishes current implementation from intended behavior so pilot
+planning can be based on evidence rather than roadmap language.
+
+## Current status
+
+| Area                                                         | Status                                                         | Remaining work                                                                             |
+| ------------------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Core operating system, live desktop, and Calamares installer | <Badge text="Current" variant="success" size="small" />        | Complete release-candidate hardware coverage and production hardening                      |
+| Shelly-only package-management boundary                      | <Badge text="Implemented" variant="success" size="small" />    | Continue integration and repository validation as the supported endpoint interface matures |
+| Signed Devario repository workflow                           | <Badge text="Local workflow" variant="note" size="small" />    | Operationalize production keys, signing, publication, rotation, and recovery               |
+| Remora server, endpoint, policy, and reporting               | <Badge text="Development ready" variant="note" size="small" /> | Production deployment, security hardening, observability, backup, and support operations   |
+| Active Directory enrollment                                  | <Badge text="Locally validated" variant="note" size="small" /> | Complete installer integration and broader environment testing                             |
+| Domain login and applicable GPO logon rights                 | <Badge text="In progress" variant="caution" size="small" />    | Complete SSSD/PAM integration, enforcement, recovery, and production validation            |
+
+<Aside type="caution" title="What these labels do not claim">
+  They do not represent production certification, customer traction, revenue,
+  guaranteed hardware compatibility, complete Windows GPO parity, or a service
+  level agreement.
+</Aside>
+
+## What can be evaluated today
+
+<CardGrid>
+  <Card title="Tangible workstation" icon="laptop">
+    A bootable live environment, Aqueous desktop, and guided Calamares installer
+    make the endpoint experience testable on representative hardware.
+  </Card>
+  <Card title="Trusted package foundation" icon="approve-check-circle">
+    Devario's patched Shelly path covers native package operations without a
+    runtime dependency on Pacman executables.
+  </Card>
+  <Card title="Management implementation" icon="setting">
+    The Remora development build provides a concrete basis for policy, endpoint,
+    inventory, channel, and reporting validation.
+  </Card>
+  <Card title="Defined pilot measures" icon="list-format">
+    Enrollment, login, deployment, compliance, support, outage, and recovery
+    outcomes can be agreed before a design-partner pilot begins.
+  </Card>
+</CardGrid>
+
+## Path to pilot readiness
+
+### Complete the missing integration path
+
+- integrate AD enrollment and applicable GPO access configuration into the OS
+  installation flow;
+- complete domain login and group-to-access behavior;
+- define the supported Remora-to-Shelly machine interface; and
+- establish production repository signing and publication.
+
+### Harden and validate operations
+
+- test BIOS and UEFI installation on representative hardware;
+- validate Intel, AMD, and NVIDIA configurations appropriate to pilot cohorts;
+- test update interruption, retry, rollback, reimage, and break-glass recovery;
+- deploy Remora with monitoring, backup, certificate, and secret-management
+  procedures; and
+- complete security review and operational runbooks.
+
+### Prove repeatability
+
+- recruit compatible design partners;
+- run small mixed-fleet pilots with written scorecards;
+- measure support effort and outage behavior; and
+- turn pilot evidence into product, packaging, and qualification decisions.
+
+## Security principles
+
+Devario's production design follows these boundaries:
+
+- trust signed packages and repository metadata, not network location alone;
+- authenticate every endpoint to Remora and encrypt control traffic in transit;
+- use short-lived or delegated authority for domain joins rather than retaining
+  a reusable Domain Administrator password;
+- preserve a local break-glass administrator for directory outages and
+  recovery;
+- grant local administration through explicit directory groups;
+- record policy and package activity without recording credentials or
+  domain-join secrets; and
+- promote operating-system changes through controlled test, staged, and
+  production rings.
+
+## Known scope boundaries
+
+- Windows-connected identity is not automatic roaming of user files or
+  preferences.
+- GPO work is focused on applicable SSSD login rights, not complete Windows
+  Group Policy parity.
+- A user's first domain login normally requires access to a domain controller.
+- Windows-only applications, unsupported hardware, and specialized peripherals
+  require qualification by cohort.
+- Pricing, packaging, customer demand, and channel economics remain commercial
+  hypotheses until validated with design partners.
+
+For an operational evaluation, use the [pilot program](/devario/pilot/) to
+define a compatible cohort, deployment plan, and measurable success criteria.
