@@ -200,28 +200,29 @@
   gap: 0.65rem;
   margin-block: 2rem 2.5rem;
   padding: clamp(1.4rem, 4vw, 2.25rem);
-  border: 1px solid color-mix(in srgb, var(--color-seafoam) 35%, transparent);
-  border-radius: 1rem;
+  border: 1px solid
+    color-mix(in srgb, var(--sl-color-text-accent) 30%, transparent);
+  /*border-radius: 1rem;*/
   background:
     radial-gradient(
       circle at 90% 10%,
-      rgba(45, 212, 168, 0.16),
+      color-mix(in srgb, var(--sl-color-accent) 12%, transparent),
       transparent 35%
     ),
-    linear-gradient(135deg, #081820, #0d2630);
+    var(--sl-color-black);
 }
 
 .devario-statement span {
-  color: #5eead4;
+  color: var(--sl-color-text-accent);
   font-size: 0.72rem;
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
 .devario-statement strong {
   max-width: 36rem;
-  color: #f8fafc;
+  color: var(--sl-color-white);
   font-size: clamp(1.55rem, 4vw, 2.35rem);
   letter-spacing: -0.035em;
   line-height: 1.1;
@@ -273,14 +274,14 @@
 .architecture-endpoint {
   border-color: color-mix(
     in srgb,
-    var(--color-seafoam) 42%,
+    var(--sl-color-accent) 42%,
     var(--sl-color-gray-5)
   );
 }
 
 .architecture-arrow {
   align-self: center;
-  color: var(--color-seafoam);
+  color: var(--sl-color-text-accent);
   font-weight: 800;
 }
 
