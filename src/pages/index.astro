@@ -44,6 +44,100 @@ import jetbrains from "../assets/icons/jetbrains.svg";
   }}
   hasSidebar={false}
 >
+  <section class="devario-showcase" aria-labelledby="devario-title">
+    <div class="devario-copy">
+      <p class="devario-eyebrow">
+        <span aria-hidden="true"></span>
+        Managed workstation platform
+      </p>
+
+      <h2 id="devario-title">
+        Managed Linux.<br />
+        <span>Without enterprise complexity.</span>
+      </h2>
+
+      <p class="devario-intro">
+        Devario gives small businesses one way to govern Linux software fleets,
+        while keeping the familiar identity layer and mixed Windows environments
+        they already rely on.
+      </p>
+
+      <div class="devario-actions">
+        <a
+          class="devario-primary"
+          href="mailto:developers@seafoamlabs.org?subject=Devario%20pilot"
+        >
+          Talk to us about a pilot
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="devario-secondary" href="#devario-stack">See how it works</a>
+      </div>
+    </div>
+
+    <div class="devario-orbit" aria-label="The Devario workstation stack">
+      <div class="orbit-ring orbit-ring-one" aria-hidden="true"></div>
+      <div class="orbit-ring orbit-ring-two" aria-hidden="true"></div>
+      <div class="orbit-line orbit-line-one" aria-hidden="true"></div>
+      <div class="orbit-line orbit-line-two" aria-hidden="true"></div>
+
+      <div class="orbit-node orbit-node-remora">
+        <strong>Remora</strong>
+        <span>Control</span>
+      </div>
+      <div class="orbit-node orbit-node-shelly">
+        <strong>Shelly</strong>
+        <span>Execute</span>
+      </div>
+      <div class="orbit-core">
+        <strong>Devario</strong>
+        <span>Managed Linux</span>
+      </div>
+      <div class="orbit-node orbit-node-aqueous">
+        <strong>Aqueous</strong>
+        <span>Experience</span>
+      </div>
+      <div class="orbit-node orbit-node-ad">
+        <strong>AD</strong>
+        <span>Identity</span>
+      </div>
+    </div>
+
+    <div class="devario-stack" id="devario-stack">
+      <div>
+        <span class="stack-number">01</span>
+        <h3>One policy surface</h3>
+        <p>
+          Remora defines catalogs, device groups, rollout channels, and the
+          desired software state for the fleet.
+        </p>
+      </div>
+      <div>
+        <span class="stack-number">02</span>
+        <h3>Trusted execution</h3>
+        <p>
+          Shelly verifies signed artifacts, resolves dependencies, applies
+          package transactions, and reports the result.
+        </p>
+      </div>
+      <div>
+        <span class="stack-number">03</span>
+        <h3>Familiar identity</h3>
+        <p>
+          Active Directory remains authoritative, so teams can introduce Linux
+          by role instead of planning a big-bang migration.
+        </p>
+      </div>
+    </div>
+
+    <div class="devario-status" aria-label="Devario development status">
+      <span><i></i> Core OS and installer implemented</span>
+      <span><i></i> Remora development build ready</span>
+      <span class="status-validation"
+        ><i></i> AD enrollment validated locally</span
+      >
+    </div>
+  </section>
+
   <AnchorHeading level="2" id="projects">Projects</AnchorHeading>
 
   <CardGrid>
@@ -128,3 +222,378 @@ import jetbrains from "../assets/icons/jetbrains.svg";
     </a>
   </div>
 </StarlightPage>
+
+<style>
+  .devario-showcase {
+    --devario-ink: #f4f8fa;
+    --devario-muted: #a9bac1;
+    --devario-line: rgba(148, 186, 194, 0.24);
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+    gap: 2rem 2.5rem;
+    margin: 1rem 0 4.5rem;
+    padding: clamp(2rem, 5vw, 4.5rem);
+    overflow: hidden;
+    border: 1px solid rgba(69, 209, 178, 0.22);
+    border-radius: 1.5rem;
+    color: var(--devario-ink);
+    background:
+      radial-gradient(
+        circle at 85% 20%,
+        rgba(54, 198, 168, 0.16),
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at 5% 100%,
+        rgba(45, 104, 137, 0.22),
+        transparent 35%
+      ),
+      linear-gradient(135deg, #081820, #0b1d26 58%, #0a1820);
+    box-shadow: 0 1.5rem 4rem rgba(2, 15, 22, 0.22);
+    isolation: isolate;
+  }
+
+  .devario-showcase::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 44px 44px;
+    content: "";
+    mask-image: linear-gradient(to right, transparent, black 60%);
+  }
+
+  .devario-copy {
+    align-self: center;
+    min-width: 0;
+  }
+
+  .devario-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0 0 1rem;
+    color: #5ce2c1;
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.16em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .devario-eyebrow span {
+    width: 1.2rem;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  .devario-showcase h2 {
+    margin: 0;
+    color: var(--devario-ink);
+    font-size: clamp(2.45rem, 5vw, 4.4rem);
+    font-weight: 760;
+    letter-spacing: -0.055em;
+    line-height: 0.98;
+  }
+
+  .devario-showcase h2 span {
+    color: #5ce2c1;
+  }
+
+  .devario-intro {
+    max-width: 39rem;
+    margin: 1.5rem 0 0;
+    color: var(--devario-muted);
+    font-size: clamp(1rem, 1.7vw, 1.15rem);
+    line-height: 1.65;
+  }
+
+  .devario-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.4rem;
+    margin-top: 1.75rem;
+  }
+
+  .devario-actions a {
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .devario-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.6rem;
+    color: #05221d;
+    background: #5ce2c1;
+    box-shadow: 0 0.65rem 1.6rem rgba(20, 184, 166, 0.16);
+    transition:
+      transform 140ms ease,
+      background-color 140ms ease;
+  }
+
+  .devario-primary:hover {
+    color: #05221d;
+    background: #81edd3;
+    transform: translateY(-2px);
+  }
+
+  .devario-secondary {
+    color: var(--devario-ink);
+    transition: color 140ms ease;
+  }
+
+  .devario-secondary:hover {
+    color: #5ce2c1;
+  }
+
+  .devario-orbit {
+    position: relative;
+    align-self: center;
+    aspect-ratio: 1;
+    min-width: 18rem;
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+
+  .orbit-ring,
+  .orbit-line,
+  .orbit-core,
+  .orbit-node {
+    position: absolute;
+  }
+
+  .orbit-ring {
+    border: 1px solid var(--devario-line);
+    border-radius: 50%;
+  }
+
+  .orbit-ring-one {
+    inset: 15%;
+    transform: rotate(22deg) scaleY(0.64);
+  }
+
+  .orbit-ring-two {
+    inset: 18% 8%;
+    border-color: rgba(57, 209, 191, 0.56);
+    border-style: dashed;
+    transform: rotate(-18deg) scaleY(0.58);
+  }
+
+  .orbit-line {
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 1px;
+    background: rgba(141, 179, 187, 0.34);
+    transform-origin: center;
+  }
+
+  .orbit-line-one {
+    transform: translate(-50%, -50%) rotate(46deg);
+  }
+
+  .orbit-line-two {
+    transform: translate(-50%, -50%) rotate(-47deg);
+  }
+
+  .orbit-core,
+  .orbit-node {
+    display: grid;
+    place-content: center;
+    border: 1px solid rgba(148, 186, 194, 0.34);
+    border-radius: 50%;
+    text-align: center;
+  }
+
+  .orbit-core strong,
+  .orbit-node strong {
+    color: var(--devario-ink);
+    font-size: clamp(0.75rem, 1.55vw, 1rem);
+    line-height: 1.2;
+  }
+
+  .orbit-core span,
+  .orbit-node span {
+    margin-top: 0.35rem;
+    color: #82979f;
+    font-size: clamp(0.42rem, 0.8vw, 0.55rem);
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .orbit-core {
+    top: 50%;
+    left: 50%;
+    width: 40%;
+    aspect-ratio: 1;
+    border-color: #52d9b9;
+    background: linear-gradient(
+      145deg,
+      rgba(64, 179, 161, 0.34),
+      rgba(20, 60, 74, 0.94)
+    );
+    box-shadow:
+      0 0 0 0.55rem rgba(48, 205, 177, 0.07),
+      0 1rem 3rem rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, -50%);
+  }
+
+  .orbit-core strong {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+  }
+
+  .orbit-node {
+    width: 28%;
+    aspect-ratio: 1;
+    background: rgba(7, 21, 29, 0.88);
+    backdrop-filter: blur(4px);
+  }
+
+  .orbit-node-remora {
+    top: 2%;
+    left: 4%;
+  }
+
+  .orbit-node-shelly {
+    top: 5%;
+    right: 0;
+  }
+
+  .orbit-node-aqueous {
+    bottom: 2%;
+    left: 5%;
+  }
+
+  .orbit-node-ad {
+    right: 2%;
+    bottom: 1%;
+  }
+
+  .devario-stack {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--devario-line);
+    border-bottom: 1px solid var(--devario-line);
+  }
+
+  .devario-stack > div {
+    padding: 1.5rem 1.5rem 1.5rem 0;
+  }
+
+  .devario-stack > div + div {
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--devario-line);
+  }
+
+  .stack-number {
+    color: #5ce2c1;
+    font-size: 0.7rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+  }
+
+  .devario-stack h3 {
+    margin: 0.45rem 0 0;
+    color: var(--devario-ink);
+    font-size: 1rem;
+  }
+
+  .devario-stack p {
+    margin: 0.55rem 0 0;
+    color: var(--devario-muted);
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+
+  .devario-status {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .devario-status span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.38rem 0.7rem;
+    border: 1px solid rgba(148, 186, 194, 0.28);
+    border-radius: 999px;
+    color: #c3d0d5;
+    background: rgba(255, 255, 255, 0.045);
+    font-size: 0.69rem;
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  .devario-status i {
+    width: 0.42rem;
+    height: 0.42rem;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #48dcb7;
+    box-shadow: 0 0 0.7rem rgba(72, 220, 183, 0.5);
+  }
+
+  .devario-status .status-validation i {
+    background: #a78bfa;
+    box-shadow: 0 0 0.7rem rgba(167, 139, 250, 0.5);
+  }
+
+  @media (max-width: 50rem) {
+    .devario-showcase {
+      grid-template-columns: 1fr;
+    }
+
+    .devario-orbit {
+      width: min(24rem, 100%);
+    }
+  }
+
+  @media (max-width: 36rem) {
+    .devario-showcase {
+      margin-inline: -0.6rem;
+      padding: 1.5rem;
+      border-radius: 1rem;
+    }
+
+    .devario-showcase h2 {
+      font-size: clamp(2.15rem, 12vw, 3.1rem);
+    }
+
+    .devario-orbit {
+      min-width: 0;
+    }
+
+    .devario-stack {
+      grid-template-columns: 1fr;
+    }
+
+    .devario-stack > div {
+      padding: 1.1rem 0;
+    }
+
+    .devario-stack > div + div {
+      padding-left: 0;
+      border-top: 1px solid var(--devario-line);
+      border-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .devario-primary {
+      transition: none;
+    }
+  }
+</style>
