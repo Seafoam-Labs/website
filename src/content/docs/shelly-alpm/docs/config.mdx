@@ -2,216 +2,277 @@
 title: Shelly Configuration
 sidebar:
   label: Configuration
-description: Learn how to configure Shelly ALPM cli and gui from the json configuration file.
+description: Learn how to configure Shelly ALPM CLI (config.json) and GUI (settings.json).
 ---
 
-## Default Configuration
+In Shelly v3, configuration is split into two separate JSON files located in `~/.config/shelly/`:
 
-Below is the default configuration. If there is a breaking issue with the way you have Shelly working on your system, one of the first things
-you can do is either copy this default configuration file or simply `rm ~/.config/shelly/config.json` and start over as Shelly will create a new one
-with default values.
+- `config.json` - Used for configuring the command-line interface (`shelly`).
+- `settings.json` - Used for configuring the graphical user interface (`shelly-ui`) and background tray service
+  (`shelly-notifications`).
 
-```json
-{
-  "FileSizeDisplay": "Bytes",
-  "DefaultExecution": "UpgradeAll",
-  "ParallelDownloadCount": 10,
-  "AccentColor": "",
-  "Culture": "",
-  "DarkMode": true,
-  "AurEnabled": true,
-  "ShellySearchEnabled": true,
-  "AurWarningConfirmed": false,
-  "FlatPackEnabled": true,
-  "ConsoleEnabled": false,
-  "WindowWidth": 2251,
-  "WindowHeight": 1175,
-  "DefaultView": "HomeScreen",
-  "UseKdeTheme": false,
-  "UseOldMenu": true,
-  "TrayEnabled": true,
-  "TrayCheckIntervalHours": 10,
-  "NoConfirm": false,
-  "NewInstall": false,
-  "CurrentVersion": "2.2.3",
-  "UseWeeklySchedule": false,
-  "DaysOfWeek": [],
-  "Time": null,
-  "WebViewEnabled": true,
-  "ShellyIconsEnabled": true,
-  "AppImageEnabled": true,
-  "NewInstallInitSettings": true,
-  "UseSymbolicTray": true,
-  "TrayIconPath": "",
-  "TrayUpdatesIconPath": "",
-  "DefaultPageDropDown": 0,
-  "ProgressBarStyle": "Pacman",
-  "ProgressBarFps": 7,
-  "ProgressBarWidth": 24,
-  "OutputMode": "singlepane",
-  "SinglePaneMaxStickies": 6,
-  "SuppressFingerprintWarning": false,
-  "RecommendedEnabled": true
-}
-```
+If there is a breaking issue with your configuration, you can edit these files directly, use `shelly config reset` to
+restore CLI defaults, or remove them (e.g., `rm ~/.config/shelly/config.json ~/.config/shelly/settings.json`) to allow
+Shelly to regenerate default configuration files on start.
 
-## Environment Variables
+## CLI Configuration (`config.json`)
 
-If you set the environment variable `SHELLY_ELEVATOR` then Shelly will use the designated privlege elevator in the cli rather than detecting the elevator in path. Shelly will fall back to sudo if nothing is detected.
-The natively detected elevators are currently: `doas` and `sudo`
-
-## Deprecated Configuration Fields
-
-These fields are no longer used and will be removed in the future. They were used in the past when Shelly was still in early development using Avalonia.
-
-1. AccentColor
-2. DarkMode
-3. ConsoleEnabled
-4. UseKdeTheme
-5. DefaultPageDropDown
-
-## GUI Configuration Fields
-
-The following fields are used to configure the GUI. Changing these values will modify the GUI but have no effect on the CLI.
-
-1. ShellySearchEnabled
-   - If set to false, the Shelly Search page will not be available in the GUI.
-2. AurWarningConfirmed
-   - If set to true, the user has confirmed that they understand the risks of installing packages from the AUR.
-3. WindowWidth
-   - The width of the GUI window.
-4. WindowHeight
-   - The height of the GUI window.
-5. DefaultView
-   - The default view to show when the GUI starts.
-6. NoConfirm
-   - If set to true, all confirmation decisions will be automatically accepted.
-7. WebViewEnabled
-   - If set to false, the WebView will not be available in the GUI.
-8. ShellyIconsEnabled
-   - If set to false, the use of Shelly icons will be disabled.
-9. AppImageEnabled
-   - If set to false, the use of AppImage will be disabled.
-10. NewInstallInitSettings
-    - If set to false, the GUI will not ask the user to initialize the settings on the first run.
-11. NewInstall
-    - If set to true, the GUI will assume that the user is starting Shelly for the first time.
-12. UseOldMenu
-    - If set to true, the GUI will use the vertical menu instead of the horizontal menu.
-13. RecommendedEnabled
-    - If set to true, the GUI will show recommended packages that are available for you to install on your system.
-14. SuppressFingerprintWarning
-    - If set to true, the GUI will not show the fingerprint warning if fingerprint is detected on the system but still not support
-
-## CLI Configuration Fields
-
-The following fields are used to configure the CLI. Changing these values will modify the CLI but have no effect on the GUI.
-
-1. SinglePaneMaxStickies
-   - The maximum number of sticky lines to show in the single pane view.
-2. OutputMode
-   - The output mode to use. Can be either `singlepane` or `split`.
-3. ProgressBarWidth
-   - The width of the progress bar in the cli output.
-4. ProgressBarFps
-   - The frames per second to use for the progress bar.
-5. ProgressBarStyle
-   - The style of the progress bar to use. Can be either `Pacman` or `Blocks`. Pacman renders the same as `pacman` with ILoveCandy.
-     Blocks is the default style and renders blocks that fill up the width of the progress bar.
-6. FileSizeDisplay
-   - The file size display to use. Accepted values are `Bytes`,`Megabytes`,`Gigabytes`,`Terabytes`.
-7. DefaultExecution
-   - The default execution mode to use. Can be either `UpgradeAll`, `UpdgradeStandard`, `UpgradeFlatpak`,`UpgradeAur`,`Sync` or `SyncForce`(Neither are recommended), `ListInstalled`.
-
-## Tray Configuration Fields
-
-The following fields are used to configure the tray icon.
-
-1. UseSymbolicTray
-   - If set to true, the tray icon will use the symbolic tray icon.
-2. TrayIconPath
-   - The path to the tray icon to use. If blank uses the provided icon.
-3. TrayUpdatesIconPath
-   - The path to the tray icon to use when there are updates available. If blank uses the provided icon.
-4. DaysOfWeek
-   - The days of the week to check for updates.
-5. Time
-   - The time of day to check for updates.
-6. UseWeeklySchedule
-   - If set to true, allows use of DaysOfWeek and Time settings.
-7. TrayEnabled
-   - If set to false, the tray service will not start when Shelly is opened.
-8. TrayCheckIntervalHours
-   - The number of hours between checking for updates.
-
-## Shared Configuration Fields
-
-The following fields are used to configure the shared settings.
-
-1. AurEnabled
-
-- If set to false, the AUR package manager will not be available.
-
-2. FlatPackEnabled
-
-- If set to false, the Flatpak package manager will not be available in the GUI.
-
-3. ParallelDownloadCount
-
-- The number of parallel downloads to use. Default is 10. Setting this to 1 will disable parallel downloads. Higher than 10 is not recommended as it can cause you to get rate limited from your package repositories.
-
-4. Culture
-
-- The culture to use this is a groundwork setting for language translation support.
-
-5. CurrentVersion
-
-- The current version of Shelly. This is used simply for tracking purposes, and generally should not be changed.
-
-## Configurations of the developers
-
-Zoey's config file:
+Below is the authoritative default configuration for the Shelly CLI (`~/.config/shelly/config.json`):
 
 ```json
 {
   "FileSizeDisplay": "Megabytes",
-  "DefaultExecution": "UpgradeAll",
   "ParallelDownloadCount": 10,
-  "AccentColor": "",
+  "DownloadAddressFamilyPolicy": "PreferIPv4",
+  "ProgressBarStyle": "Blocks",
+  "ProgressBarWidth": 24,
+  "OutputMode": "singlepane",
+  "AppImageInstallPath": null
+}
+```
+
+### CLI Fields
+
+The following fields configure the CLI (`shelly`). Modifying these options affects only CLI operations.
+
+1. `FileSizeDisplay`
+   - Display format for file and package sizes in CLI output.
+   - **Options:** `"Bytes"`, `"Megabytes"`, `"Gigabytes"` (default: `"Megabytes"`).
+2. `ParallelDownloadCount`
+   - Maximum number of concurrent downloads used by the ALPM download engine. Setting this to `1` disables parallel
+     downloads. Higher values can cause rate limiting from package mirrors.
+   - **Type:** integer (default: `10`).
+3. `DownloadAddressFamilyPolicy`
+   - Network address resolution and connection policy used during package downloads.
+   - **Options:**
+     - `"PreferIPv4"` (default) - Prefers IPv4 connections.
+     - `"PreferIPv6"` - Uses Happy Eyeballs connection racing with an IPv6 preference.
+     - `"IPv4Only"` - Forces IPv4-only connections.
+     - `"IPv6Only"` - Forces IPv6-only connections.
+4. `ProgressBarStyle`
+   - Visual animation and layout style of download and transaction progress bars.
+   - **Options:**
+     - `"Blocks"` (default) - Renders solid Unicode block segments filling the progress bar width.
+     - `"Pacman"` - Renders a Pac-Man animation eating power pellets, matching `pacman`'s `ILoveCandy` mode.
+5. `ProgressBarWidth`
+   - Character column width of the progress bar in the CLI terminal output.
+   - **Type:** integer (default: `24`).
+6. `OutputMode`
+   - Layout mode for terminal progress and log output.
+   - **Options:** `"singlepane"` (default).
+7. `AppImageInstallPath`
+   - Custom filesystem path where AppImage binaries are downloaded and integrated into the desktop environment. When set
+     to `null` or omitted, defaults to `~/.local/bin` (`$XDG_BIN_HOME`).
+   - **Type:** string or `null` (default: `null`).
+
+## GUI Configuration (`settings.json`)
+
+Below is the default configuration for the Shelly GUI and system tray service (`~/.config/shelly/settings.json`):
+
+```json
+{
   "Culture": "",
-  "DarkMode": true,
-  "AurEnabled": true,
-  "ShellySearchEnabled": true,
-  "AurWarningConfirmed": false,
-  "FlatPackEnabled": true,
-  "ConsoleEnabled": false,
-  "WindowWidth": 2251,
-  "WindowHeight": 1175,
-  "DefaultView": "HomeScreen",
-  "UseKdeTheme": false,
-  "UseOldMenu": true,
-  "TrayEnabled": true,
-  "TrayCheckIntervalHours": 10,
+  "NewInstall": true,
   "NoConfirm": false,
-  "NewInstall": false,
-  "CurrentVersion": "2.2.3",
-  "UseWeeklySchedule": false,
-  "DaysOfWeek": [],
-  "Time": null,
-  "WebViewEnabled": true,
+  "AurEnabled": false,
+  "AurWarningConfirmed": false,
+  "AppImageEnabled": false,
+  "FlatPackEnabled": false,
+  "RecommendedEnabled": true,
   "ShellyIconsEnabled": true,
-  "AppImageEnabled": true,
-  "NewInstallInitSettings": true,
+  "ShellySearchEnabled": false,
+  "WebviewEnabled": false,
+  "DefaultPageDropDown": "packages",
+  "NavMode": "sidebar",
+  "WindowLastWidth": 0,
+  "WindowLastHeight": 0,
+  "PackageInstallView": "grid",
+  "PackageManagementCascadeDelete": true,
+  "PackageManagementRemoveConfigs": false,
+  "PackageManagementRemoveOptionalDeps": true,
+  "PackageInstallUpgrade": false,
+  "PackageInstallShowHidden": false,
+  "PackageInstallShowExplicitOnly": false,
+  "PackageInstallShowDependsOnly": false,
+  "PackageInstallShowDetailPane": false,
+  "AurInstallUseChroot": false,
+  "AurInstallRunChecks": false,
+  "AurInstallShowDetailPane": false,
+  "AurInstallDisableDevel": false,
+  "AurRemoveCascadeDelete": true,
+  "AurUpdateRunChecks": false,
+  "AurUpdateShowHidden": false,
+  "SearchShowDetailPane": false,
+  "TrayEnabled": false,
+  "TrayAutoStart": false,
+  "TrayCheckIntervalHours": 72,
   "UseSymbolicTray": true,
   "TrayIconPath": "",
   "TrayUpdatesIconPath": "",
-  "DefaultPageDropDown": 0,
-  "ProgressBarStyle": "Pacman",
-  "ProgressBarFps": 7,
-  "ProgressBarWidth": 24,
-  "OutputMode": "singlepane",
-  "SinglePaneMaxStickies": 6,
-  "SuppressFingerprintWarning": false,
-  "RecommendedEnabled": false
+  "UseUiForUpdate": false,
+  "UseWeeklySchedule": false,
+  "DaysOfWeek": [],
+  "Time": ""
 }
 ```
+
+### GUI Fields
+
+The following fields configure the GUI (`shelly-ui`) and background notifications (`shelly-notifications`). Modifying
+these values does not alter CLI defaults.
+
+#### General & Navigation
+
+1. `Culture`
+   - Language and locale code for UI localization (e.g., `""` for system default, `"en"`, `"de_DE"`, `"es"`, `"fr_FR"`,
+     `"ja_JP"`, `"ru_RU"`, `"zh_CN"`).
+   - **Type:** string (default: `""`).
+2. `NewInstall`
+   - Indicates whether Shelly is running for the first time. When `true`, Shelly presents initial onboarding and feature
+     setup prompts.
+   - **Type:** boolean (default: `true`).
+3. `NoConfirm`
+   - When `true`, automatically accepts confirmation dialogs without blocking for user interaction.
+   - **Type:** boolean (default: `false`).
+4. `ShellyIconsEnabled`
+   - Enables or disables displaying package icons throughout the user interface.
+   - **Type:** boolean (default: `true`).
+5. `ShellySearchEnabled`
+   - Enables or disables the Shelly Search view in the application.
+   - **Type:** boolean (default: `false`).
+6. `WebviewEnabled`
+   - Enables embedded web view functionality for displaying package details and documentation web pages.
+   - **Type:** boolean (default: `false`).
+7. `DefaultPageDropDown`
+   - Sets the default view/tab loaded when launching `shelly-ui`.
+   - **Options:** `"recommend"`, `"packages"`, `"aur"`, `"flatpak"`, `"app_image"`, `"shelly_search"`, `"update"`
+     (default: `"packages"`).
+8. `NavMode`
+   - Navigation layout mode for the graphical window.
+   - **Options:** `"sidebar"` (vertical sidebar) or `"topbar"` (horizontal top bar) (default: `"sidebar"`).
+9. `WindowLastWidth` / `WindowLastHeight`
+   - Remembers the last window dimensions in pixels for restoration across sessions.
+   - **Type:** integer (default: `0`).
+
+#### Package Sources & Ecosystems
+
+1. `AurEnabled`
+   - Enables or disables Arch User Repository (AUR) package management features.
+   - **Type:** boolean (default: `false`).
+2. `AurWarningConfirmed`
+   - Records whether the user has acknowledged the AUR usage and security disclaimer dialog.
+   - **Type:** boolean (default: `false`).
+3. `AppImageEnabled`
+   - Enables or disables AppImage integration and update tracking.
+   - **Type:** boolean (default: `false`).
+4. `FlatPackEnabled`
+   - Enables or disables Flatpak application management via `libflatpak` and the companion backend.
+   - **Type:** boolean (default: `false`).
+5. `RecommendedEnabled`
+   - Displays curated recommended software packages in the UI.
+   - **Type:** boolean (default: `true`).
+
+#### Standard Package Management
+
+1. `PackageInstallView`
+   - Layout style for browsing repository packages.
+   - **Options:** `"grid"` (card/grid layout) or `"list"` (tabular list layout) (default: `"grid"`).
+2. `PackageManagementCascadeDelete`
+   - When removing packages, recursively removes dependencies that are no longer required by any other installed package
+     (`-Rs`).
+   - **Type:** boolean (default: `true`).
+3. `PackageManagementRemoveConfigs`
+   - When removing packages, removes configuration files and backups created by the package (`-Rn`).
+   - **Type:** boolean (default: `false`).
+4. `PackageManagementRemoveOptionalDeps`
+   - When removing packages, removes optional dependencies that were installed alongside the package.
+   - **Type:** boolean (default: `true`).
+5. `PackageInstallUpgrade`
+   - Performs a complete system database and package upgrade (`-Syu`) before installing new standard packages.
+   - **Type:** boolean (default: `false`).
+6. `PackageInstallShowHidden`
+   - Displays packages tagged as hidden or internal system components in package lists.
+   - **Type:** boolean (default: `false`).
+7. `PackageInstallShowExplicitOnly`
+   - Filters the installed packages list to display only explicitly installed packages.
+   - **Type:** boolean (default: `false`).
+8. `PackageInstallShowDependsOnly`
+   - Filters the installed packages list to display only packages installed as dependencies.
+   - **Type:** boolean (default: `false`).
+9. `PackageInstallShowDetailPane`
+   - Toggles the side detail pane in the standard package management view.
+   - **Type:** boolean (default: `false`).
+
+#### AUR Package Management
+
+1. `AurInstallUseChroot`
+   - Builds AUR packages inside a clean `systemd-nspawn` / chroot container rather than on the host system.
+   - **Type:** boolean (default: `false`).
+2. `AurInstallRunChecks`
+   - Executes the `check()` test routines in `PKGBUILD` scripts during AUR package compilation.
+   - **Type:** boolean (default: `false`).
+3. `AurInstallShowDetailPane`
+   - Toggles the side detail pane in the AUR package view.
+   - **Type:** boolean (default: `false`).
+4. `AurInstallDisableDevel`
+   - Skips checking development and VCS packages (e.g., `-git`, `-svn`, `-hg`) during AUR update checks.
+   - **Type:** boolean (default: `false`).
+5. `AurRemoveCascadeDelete`
+   - Recursively removes unneeded dependencies when uninstalling AUR packages.
+   - **Type:** boolean (default: `true`).
+6. `AurUpdateRunChecks`
+   - Executes `check()` test routines during AUR package upgrades.
+   - **Type:** boolean (default: `false`).
+7. `AurUpdateShowHidden`
+   - Displays hidden packages in the AUR updates view.
+   - **Type:** boolean (default: `false`).
+
+#### Search
+
+1. `SearchShowDetailPane`
+   - Toggles the side detail pane in search results.
+   - **Type:** boolean (default: `false`).
+
+#### System Tray & Background Updates
+
+1. `TrayEnabled`
+   - Enables and starts the Shelly system tray daemon (`shelly-notifications`).
+   - **Type:** boolean (default: `false`).
+2. `TrayAutoStart`
+   - Manages a systemd user service (`shelly-tray.service`) to start the background tray daemon automatically on session
+     login.
+   - **Type:** boolean (default: `false`).
+3. `TrayCheckIntervalHours`
+   - Number of hours between automatic background package update checks.
+   - **Type:** integer (default: `72`).
+4. `UseSymbolicTray`
+   - Uses monochrome symbolic icons for the system tray icon rather than colored icons.
+   - **Type:** boolean (default: `true`).
+5. `TrayIconPath`
+   - Absolute filesystem path to a custom idle tray icon. If left blank, the bundled Shelly tray icon is used.
+   - **Type:** string (default: `""`).
+6. `TrayUpdatesIconPath`
+   - Absolute filesystem path to a custom tray icon displayed when pending updates are detected. If left blank, the
+     bundled update icon is used.
+   - **Type:** string (default: `""`).
+7. `UseUiForUpdate`
+   - When clicking an update notification:
+     - `true` - Launches the graphical interface (`shelly-ui --tray-updates`).
+     - `false` - Opens an interactive CLI update session (`shelly`) inside your desktop's default terminal emulator.
+   - **Type:** boolean (default: `false`).
+8. `UseWeeklySchedule`
+   - Enables scheduled periodic update checks at specific days and times instead of interval-based checks.
+   - **Type:** boolean (default: `false`).
+9. `DaysOfWeek`
+   - Array of days of the week on which scheduled update checks run. Accepted day names: `"sunday"`, `"monday"`,
+     `"tuesday"`, `"wednesday"`, `"thursday"`, `"friday"`, `"saturday"` (or numeric indices `0`–`6`).
+   - **Type:** array of strings/integers (default: `[]`).
+10. `Time`
+    - Time of day (format `"HH:MM"` or `"HH:MM:SS"`) when scheduled weekly update checks execute.
+    - **Type:** string (default: `""`).
+
+## Environment Variables
+
+If you set the environment variable `SHELLY_ELEVATOR`, Shelly will use the designated privilege elevator in the CLI
+rather than detecting one in `$PATH`. Shelly falls back to `sudo` if nothing is detected. The natively detected
+elevators are currently `doas` and `sudo`.
