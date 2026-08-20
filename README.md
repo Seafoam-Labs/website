@@ -1,6 +1,7 @@
 # Seafoam Labs
 
-Website for Seafoam Labs, built with [Astro](https://github.com/withastro/astro) and [Starlight](https://github.com/withastro/starlight).
+Website for Seafoam Labs, built with [Astro](https://github.com/withastro/astro) and
+[Starlight](https://github.com/withastro/starlight).
 
 ## Requirements
 
@@ -11,7 +12,7 @@ Website for Seafoam Labs, built with [Astro](https://github.com/withastro/astro)
 
 Inside of the project, you'll see the following folders and files:
 
-```
+```text
 .
 ├─ public/
 ├─ src/
@@ -28,19 +29,27 @@ Inside of the project, you'll see the following folders and files:
 └─ tsconfig.json
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on
+its file name.
 
-Custom RSS feed is generated from the Markdown files in `src/content/news/`. Each file is exposed as a route based on its file name, and the content is used to populate the RSS feed that are defined under `src/pages` for example `src/pages/shelly-alpm/feeds/news/rss.xml.ts` which corresponds to the URL `/shelly-alpm/feeds/news/rss.xml`.
+Custom RSS feed is generated from the Markdown files in `src/content/news/`. Each file is exposed as a route based on
+its file name, and the content is used to populate the RSS feed that are defined under `src/pages` for example
+`src/pages/shelly-alpm/feeds/news/rss.xml.ts` which corresponds to the URL `/shelly-alpm/feeds/news/rss.xml`.
 
-Astro [custom pages](https://starlight.astro.build/guides/pages/#custom-pages) are placed in the `src/pages/` directory. Each file is exposed as a route based on its file name.
+Astro [custom pages](https://starlight.astro.build/guides/pages/#custom-pages) are placed in the `src/pages/` directory.
+Each file is exposed as a route based on its file name.
 
 Images can be added to `src/assets/` and embedded in Markdown with a relative link.
 
 **Styling Note:**  
-When styling components, prefer to use the theme variables from [Starlight's `props.css`](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) instead of Tailwind CSS classes whenever possible. This helps maintain consistency with the design scheme.
+When styling components, prefer to use the theme variables from
+[Starlight's `props.css`](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) instead
+of Tailwind CSS classes whenever possible. This helps maintain consistency with the design scheme.
 
-**Conceptual Note:**
-There is a separation between "content" (Markdown files in `src/content/`) and "pages" (Astro components in `src/pages/`). Content is for writing documentation, blog and RSS updates, while pages are for "standalone" content (e.g. marketing or direct links) and custom routes. This separation helps keep things organized and makes it easier to manage different types of information.
+**Conceptual Note:** There is a separation between "content" (Markdown files in `src/content/`) and "pages" (Astro
+components in `src/pages/`). Content is for writing documentation, blog and RSS updates, while pages are for
+"standalone" content (e.g. marketing or direct links) and custom routes. This separation helps keep things organized and
+makes it easier to manage different types of information.
 
 Static assets, like favicons, can be placed in the `public/` directory.
 
@@ -71,12 +80,12 @@ All commands are run from the root of the project, from a terminal:
 
 ### Formatting
 
-- https://github.com/withastro/prettier-plugin-astro
-- https://github.com/tailwindlabs/prettier-plugin-tailwindcss
+- <https://github.com/withastro/prettier-plugin-astro>
+- <https://github.com/tailwindlabs/prettier-plugin-tailwindcss>
 
 ### Linting
 
-- https://github.com/eslint/eslint
-- https://github.com/typescript-eslint/typescript-eslint
-- https://github.com/ota-meshi/eslint-plugin-astro
-- https://docs.astro.build/en/guides/typescript/#type-checking
+- <https://github.com/eslint/eslint>
+- <https://github.com/typescript-eslint/typescript-eslint>
+- <https://github.com/ota-meshi/eslint-plugin-astro>
+- <https://docs.astro.build/en/guides/typescript/#type-checking>
