@@ -2,43 +2,88 @@
 title: AppImage Configuration
 sidebar:
   label: AppImage
-description: Learn setup updates for AppImages within Shelly.
+description: Learn how to configure and manage AppImage updates within Shelly.
 ---
 
 ## Setting Updates
 
-Shelly supports updating AppImages in two ways:
+Shelly supports checking for and installing AppImage updates through two mechanisms:
 
-1. A static URL
-2. A Repository from GitHub, GitLab, Codeberg, or Forgejo.
+1. **Static URL**
+2. **Repository** (GitHub, GitLab, Codeberg, or Forgejo)
+
+---
 
 ### Static URL
 
-Enter the URL to the AppImage which you have downloaded. Shelly will use this to check for updates.
+The **Static URL** option serves as a fallback update mechanism for AppImages that are
+distributed outside of supported git forge release feeds (GitHub, GitLab, Codeberg, or Forgejo).
+
+#### When to Use a Static URL
+
+Use a static URL when the upstream project provides a permanent link ("permalink") that always
+points to the latest binary. Examples include:
+
+- `https://example.com/downloads/app-latest.AppImage`
+- `https://example.com/builds/nightly/app-x86_64.AppImage`
+
+The URL remains constant over time, while the binary hosted at that location is updated upstream
+whenever a new version is released.
+
+:::tip[No Manual URL Editing Needed]
+Do **not** use a Static URL for version-tagged release assets (such as
+`.../releases/download/v1.0.0/app-1.0.0.AppImage`). If the application is hosted on GitHub, GitLab,
+Codeberg, or Forgejo, configure a [Repository](#repository) instead. Shelly will automatically
+fetch the latest asset without requiring you to update the URL manually for each new release.
+:::
+
+#### How Static URL Update Detection Works
+
+Because a permalink URL contains no version string, Shelly detects updates using HTTP cache validators:
+
+1. **HTTP HEAD Request**: Shelly sends a lightweight `HEAD` request to the configured URL without
+   downloading the full binary.
+2. **Cache Token Inspection**: Shelly inspects the HTTP headers, preferring `ETag` first and falling
+   back to `Last-Modified`.
+3. **Metadata Tracking**: On a successful update, Shelly records the version embedded in the AppImage
+   (if extractable, for display) and stores the `ETag` or `Last-Modified` token as the installed release tag.
+4. **Update Suppression**: On subsequent update checks, Shelly compares the server's current token
+   against the stored release tag. If they match, the update is suppressed, preventing unnecessary
+   re-downloads of the same file.
+
+---
 
 ### Repository
 
-You will need the Repo Owner and Repo Name. Shelly will then check for updates from this repository.
+Use this option when an AppImage is hosted on a supported git forge (GitHub, GitLab, Codeberg, or
+Forgejo). Shelly connects directly to the forge's release API to track new releases and download
+assets automatically.
 
-For example, if we were to add OSU as an AppImage from GitHub, the repo url would be:
-[https://github.com/ppy/osu](https://github.com/ppy/osu)
+You will need the **Repo Owner** and **Repo Name**.
 
-We would then enter
+For example, to track osu! releases from GitHub:
 
-ppy/osu in the repo url field.
+- Repository URL: `https://github.com/ppy/osu`
+- Value to enter: `ppy/osu`
 
-Then Shelly will check for updates from the ppy/osu repository using the most recent release or from the latest
-pre-release based on your settings.
+Shelly will query the repository and check for updates using the most recent stable release (or the
+latest pre-release, depending on your configuration).
 
-### Key Details for updates
+---
 
-1. Shelly will check the version from the `.desktop` file and compare it to the latest release.
-2. If the version is `Unknown`, Shelly will update to the latest release, and track the version via the tags for the
-   future.
-3. If your AppImage has a self-update feature, this is the best way to update and track updates. You can use the sync
-   feature to keep your AppImage info up to date.
+### Key Details for Updates
+
+1. **Version Matching**: Shelly inspects the version defined in the application's `.desktop` file
+   and compares it to the latest upstream release.
+2. **Unknown Versions**: If the local version is marked as `Unknown`, Shelly updates to the latest
+   release and tracks subsequent updates via release tags.
+3. **Self-Updating Applications**: If an AppImage includes its own built-in updater, allowing the
+   application to update itself is often the most reliable method. You can use Shelly's sync feature
+   to keep your local metadata in sync.
+
+---
 
 ## Syncing AppImages
 
-1. Sometimes you may want to sync your AppImages with the latest release. This is most useful for self-updating
-   AppImages.
+You can use the sync feature to align Shelly's metadata, icons, and binary with the currently installed AppImage.
+This is especially useful for self-updating AppImages that have updated outside of Shelly.
