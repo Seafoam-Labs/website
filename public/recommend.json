@@ -48,7 +48,6 @@
       "firefox",
       "floorp-bin",
       "helium-browser-bin",
-      "librewolf-bin",
       "mullvad-browser-bin",
       "qutebrowser",
       "torbrowser-launcher",
@@ -68,8 +67,7 @@
       "neochat",
       "signal-desktop",
       "telegram-desktop",
-      "vesktop",
-      "wire-desktop"
+      "vesktop"
     ]
   },
   {
@@ -110,7 +108,6 @@
       "jdownloader2",
       "localsend",
       "nextcloud-client",
-      "nitroshare",
       "qbittorrent",
       "rqbit-desktop",
       "warpinator"
@@ -200,7 +197,6 @@
       "onlyoffice-bin",
       "skrooge",
       "wps-office",
-      "yozo-office",
       "zettlr"
     ]
   },
