@@ -1,0 +1,159 @@
+---
+title: AUR Safety Guide
+sidebar:
+  label: AUR Safety Practices
+description: A concise guide to reviewing AUR packages, recognizing security risks, and protecting your Arch Linux system.
+---
+
+The **Arch User Repository (AUR)** contains community-maintained build recipes. Unlike packages in the official Arch
+repositories, AUR submissions are not vetted before publication.
+
+Installing an AUR package runs its `PKGBUILD`—a Bash script—on your computer. That script downloads the source, builds a
+package, and may include additional installation hooks.
+
+:::danger[The rule that matters most]
+**Trust maintainers, not package names.** Treat every `PKGBUILD` and `.install` file as executable code,
+including updates to packages you already use.
+:::
+
+## Before Using the AUR
+
+Prefer software from the **official Arch repositories** when available. For desktop applications, a Flatpak may provide
+useful sandboxing. AppImages are portable, but are not automatically sandboxed or safer—the publisher and download must
+still be trusted.
+
+Shelly searches official repositories, Flatpaks, and the AUR from one place, making alternatives easy to
+compare.
+
+Before installing an AUR package:
+
+1. Open its page on [aur.archlinux.org](https://aur.archlinux.org/).
+2. Check the maintainer, votes, recent comments, and last update.
+3. Be especially cautious if the package was recently orphaned, adopted, or transferred.
+4. Confirm that the package name and upstream URLs are genuine, not look-alikes.
+5. Read the `PKGBUILD`, `.install` files, and any patches or binary files.
+
+A previously safe package can become unsafe after a maintainer change or malicious update.
+
+## Review the Build Recipe
+
+Focus on these parts of the `PKGBUILD`:
+
+- **`source=()`** — Downloads come from the official project or publisher. Avoid unknown forks, URL shorteners, and
+  file-sharing sites.
+- **`sha256sums=()` / `b2sums=()`** — Each file has a checksum. `'SKIP'` needs a legitimate reason, such as a changing
+  VCS source.
+- **`validpgpkeys=()`** — Fingerprints match keys published through an independent, official upstream channel.
+- **`depends=()` / `makedepends=()`** — Dependencies are relevant and expected.
+- **`prepare()` / `build()`** — Commands prepare and compile the declared source—nothing more.
+- **`package()`** — Files are copied into `$pkgdir`, not directly into your live system.
+- **`.install` files** — Install and upgrade hooks contain only necessary setup. These run during the package
+  transaction and require extra scrutiny.
+
+### Stop When You See These Red Flags
+
+- **Undeclared downloads:** `curl` or `wget` inside `prepare()`, `build()`, `package()`, or install hooks.
+- **Hidden or dynamic commands:** `eval`, encoded payloads, `base64 -d | sh`, split command names, or unreadable code.
+- **Privilege escalation:** `sudo`, `doas`, `pkexec`, `run0`, or `su` inside a build recipe.
+- **Access to private data:** reading or changing `~/.ssh`, `~/.gnupg`, browser profiles, shell startup files, or
+  unrelated paths in `$HOME`.
+- **Direct system modification:** writing to `/usr`, `/etc`, or other host paths instead of staging files under
+  `$pkgdir`.
+- **Unexpected changes:** a new source domain, dependency, install hook, or binary blob without a clear explanation.
+
+A keyword alone is not proof of malware, but unexplained behavior is reason enough to stop and investigate.
+
+:::note[Shelly security checks]
+Shelly scans AUR recipes for suspicious commands, obfuscation, decode-and-execute patterns, Unicode spoofing, and other
+risks. Automated scanning helps, but does not replace human review. See
+[Shelly Security Checks](/shelly-alpm/docs/security/).
+:::
+
+## Verify Integrity and Authenticity
+
+Checksums detect whether a downloaded file differs from the version expected by the maintainer. PGP signatures can also
+confirm that a release was signed by an upstream key.
+
+**Never bypass a failed check** with `--skipinteg`, `--skipchecksums`, or `--skippgpcheck`. A failure may be
+harmless, but it may also indicate tampering or an incorrect source. Check the AUR comments and upstream release
+information before continuing.
+
+If a PGP key is missing, verify its full fingerprint through an official upstream source before importing it:
+
+```sh
+gpg --recv-keys <VERIFIED-FINGERPRINT>
+# Or with Shelly:
+shelly keyring recv <VERIFIED-FINGERPRINT>
+```
+
+Importing a key only by an unverified ID does not establish trust.
+
+### Binary Packages
+
+Packages ending in `-bin` install precompiled software. They are convenient, but you cannot verify how the binary was
+built. Confirm that:
+
+- the file comes directly from the official publisher;
+- the package does not repackage an unofficial binary; and
+- its checksum or signature matches information published by the vendor.
+
+## Review Every Update
+
+Do not approve an AUR update only because you trusted the previous version. Review the diff for:
+
+- changed source URLs or checksums;
+- new dependencies or binary files;
+- changes to `prepare()`, `build()`, `package()`, or `.install` hooks; and
+- recent maintainer changes or package adoption.
+
+Shelly displays PKGBUILD diffs and scan results before confirmation. For a manually cloned AUR repository, use:
+
+```sh
+git log --oneline -n 5
+git diff HEAD~1
+```
+
+If a change is unclear, postpone the update and check the package comments or ask the maintainer.
+
+## Reduce the Impact of a Bad Package
+
+### Build in a Clean Chroot
+
+A normal AUR build can read files owned by your user. A clean chroot isolates the build from your home directory
+and also catches undeclared dependencies.
+
+Use `shelly install aur [<packages>...] --chroot` to build in a clean chroot.
+
+Isolation reduces risk during the build; it does not make the installed application trustworthy.
+
+*NB: Some packages may not build in a clean chroot.*
+
+### Audit and Recover
+
+Periodically list packages that are not in the official repositories:
+
+```sh
+shelly list aur
+```
+
+Remove packages you no longer need and review unfamiliar entries. Keep the system updated with `shelly upgrade`, and
+check Arch news with `shelly news` before major upgrades.
+
+Filesystem snapshots with Snapper or Timeshift can make recovery easier after a broken package. They **cannot** recover
+credentials or private data that malware has already stolen.
+
+## Quick Checklist
+
+Before installing or updating an AUR package, confirm:
+
+- No suitable official-repository or other official alternative exists.
+- The package name, maintainer, comments, and adoption history look trustworthy.
+- Sources point to the genuine upstream project.
+- Checksums and PGP fingerprints are present and independently verifiable.
+- Build and install scripts contain no unexplained downloads, obfuscation, privilege escalation, or access to private
+  files.
+- The update diff contains only expected changes.
+- Integrity checks remain enabled.
+- Preferably, the package is built in a clean chroot.
+
+When in doubt, **do not install or update the package until you understand what it does**.
