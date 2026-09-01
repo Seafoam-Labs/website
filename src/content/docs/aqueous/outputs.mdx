@@ -1,0 +1,182 @@
+---
+title: Outputs and HDR
+description: Configure monitors, profiles, hotplug, adaptive sync, HDR, and the embedded output service.
+sidebar:
+  label: Outputs and HDR
+  order: 7
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Physical display policy belongs in `~/.config/aqueous/outputs.toml`. Aqueous
+stages accepted changes and commits the complete multi-output state atomically;
+if the backend rejects the transaction, it restores the last working state.
+
+## Discover outputs
+
+```sh
+aqueousctl outputs
+aqueousctl outputs --json
+```
+
+The output snapshot includes connector identity, make/model/serial, physical
+size, every advertised mode, current and preferred modes, logical position,
+transform, scale, adaptive-sync state, and a stable `sha256:` EDID identity
+when the required metadata is available.
+
+## Declarative output policy
+
+```toml
+[display]
+apply_on_start = true
+apply_on_reload = true
+fallback_profile = "internal-only"
+
+[[output]]
+name = "eDP-1"
+enabled = true
+mode = "1920x1200@60"
+scale = 1.25
+transform = "normal"
+position = [0, 0]
+adaptive_sync = false
+primary = true
+
+[[output]]
+name = "DP-*"
+enabled = true
+mode = "2560x1440@144"
+scale = 1.0
+position = [1536, 0]
+adaptive_sync = true
+```
+
+`name` accepts connector globs. Use `edid = "sha256:..."` when a connector
+name is not stable. Later matching entries override earlier entries, making it
+possible to define a broad dock policy followed by one specific monitor.
+
+- `mode` uses `WIDTHxHEIGHT@HZ`.
+- `scale` accepts `0.5` through `3.0`.
+- `position` is in logical output-layout coordinates.
+- `transform` accepts `normal`, `90`, `180`, `270`, `flipped`, and the three
+  rotated flipped variants.
+- `primary` is a deterministic action/focus fallback. It does not steal focus
+  from an explicitly selected output.
+
+When `position` is absent, Aqueous arranges otherwise unconfigured outputs in a
+non-overlapping horizontal row. A first output-management transaction that
+places every still-automatic output at `(0, 0)` is treated as uninitialized;
+its mode and scale updates are retained while positions are recomputed.
+
+`rotate_output_clockwise` (default `Super+Ctrl+R`) rotates only the enabled
+output directly beneath the pointer. This is a runtime transaction and does
+not rewrite `outputs.toml`, so a later reload may restore the configured
+transform.
+
+## Named profiles
+
+Profiles contain the same fields as ordinary output blocks:
+
+```toml
+[[display.profile]]
+name = "internal-only"
+
+[[display.profile.output]]
+name = "eDP-1"
+enabled = true
+position = [0, 0]
+primary = true
+
+[[display.profile.output]]
+name = "DP-*"
+enabled = false
+```
+
+The embedded output service can apply a profile at runtime. A
+`fallback_profile` is attempted after a normal configured transaction is
+rejected.
+
+Output specifications are validated independently. Valid settings for one
+monitor can still apply when another connector or mode is unavailable, while
+the accepted visible changes remain one atomic backend commit. Service replies
+distinguish complete success, partial application, and per-spec rejection.
+
+## HDR10 output
+
+```toml
+[[output]]
+name = "DP-1"
+hdr = true
+hdr_level = "auto" # auto | 100 | 400 | 1000 cd/m²
+sdr_white_level = 200 # 80–1000 cd/m²
+auto_hdr = true
+auto_hdr_boost = 0.5 # 0.0–1.0
+```
+
+`hdr = true` requests 10-bit scanout, BT.2020 primaries, and the ST 2084 PQ
+transfer function with static HDR10 mastering metadata. Aqueous rejects it
+unless the connector, renderer color transform, and primary scanout path expose
+the required capabilities. Disabling HDR restores the normal 8-bit sRGB
+profile.
+
+`hdr_level` chooses the mastering/target peak. `auto` selects the nearest
+100/400/1000 preset from the display's EDID desired-content peak and falls back
+to 1000 when unavailable. `sdr_white_level` maps SDR diffuse white on the HDR
+output; the Windows-scRGB protocol description retains its defined
+`1.0 = 80 cd/m²` scale independently.
+
+Aqueous exposes Windows-scRGB and Windows-BT.2100 color descriptions through
+color-management-v1 for Wine/Proton when the renderer supports the complete
+encodings. SDR outputs continue to report SDR luminance, preventing false HDR
+detection.
+
+## Auto HDR
+
+Auto HDR expands eligible SDR highlights toward the output's configured peak.
+By default, fullscreen windows and windows declaring `content_type = "game"`
+are eligible. Override that choice with a window rule:
+
+```toml
+[[window]]
+app_id = "steam_app_*"
+hdr_expand = true
+```
+
+Native PQ, Windows-scRGB/BT.2100, layer-shell, and lock-screen content is never
+expanded. Auto HDR requires the Vulkan effects build; `auto_hdr_boost = 0`
+reduces it to the configured SDR white level without highlight expansion.
+
+## Hotplug and output ownership
+
+Connecting or removing an output creates or destroys its native compositor
+object, reapplies configured policy, updates workspace/output protocols, and
+prunes stale per-output layout state. A floating drag crossing an output's
+logical rectangle transfers the window to that output's active workspace. If
+the source disappears, Aqueous recovers the window to the nearest enabled
+output and keeps a reachable portion visible.
+
+## Embedded output service
+
+Aqueous hosts a same-user Unix socket at:
+
+```text
+$XDG_RUNTIME_DIR/aqueous/outputd.sock
+```
+
+It preserves the display-panel JSON contract without a separate
+`aqueous-outputd` process. Operations include `list`, `set`, `reload`,
+`apply_profile`, and `save_profile`. The `set` and profile operations support
+mode, position, transform, scale, adaptive sync, primary selection, HDR level,
+SDR white, and Auto HDR fields. Listed outputs also report HDR capability,
+active state, render format, EDID luminance, supported primaries and transfer
+functions, and Auto HDR capability.
+
+The Noctalia [settings application](/aqueous/settings/) consumes this service
+for its connected-output canvas while writing persistent overrides to
+`outputs.toml` only when you select **Apply**.
+
+<Aside type="note">
+  HDR, adaptive sync, and overlay promotion remain hardware- and driver-
+  dependent. A rejected capability is reported instead of being silently
+  presented as active.
+</Aside>

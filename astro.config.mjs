@@ -120,6 +120,10 @@ export default defineConfig({
                   label: "wm.toml",
                 },
                 {
+                  link: "aqueous/docs/toml/outputs/",
+                  label: "outputs.toml",
+                },
+                {
                   link: "aqueous/docs/toml/rules/",
                   label: "rules.toml",
                 },

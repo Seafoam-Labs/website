@@ -1,18 +1,17 @@
 ---
 title: Visual Effects
-description: Configure Aqueous blur, opacity, rounded corners, and workspace motion.
+description: Configure Aqueous blur, opacity, rounded corners, motion, scaling, HDR, and direct overlays.
 sidebar:
   label: Visual Effects
-  order: 8
+  order: 12
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-Aqueous applies visual policy in the compositor after layout geometry is
-resolved. The default build uses Aqueous's Vulkan effects backend for backdrop
-blur and rounded corners. Opacity and workspace-transition policy are configured
-independently in `wm.toml`; see the [wm.toml reference](/aqueous/docs/toml/wm/)
-for every accepted key.
+The default build uses Aqueous's Vulkan renderer integration for rounded
+corners, damage-aware backdrop blur, HDR color processing, and Auto HDR. Layout
+geometry remains final and stable; motion is applied at render time instead of
+repeatedly reconfiguring clients.
 
 ## Backdrop blur
 
@@ -28,18 +27,16 @@ vibrancy = 0.0
 vibrancy_darkness = 0.0
 ```
 
-Higher radius and pass counts produce a stronger blur and require more render
-work. `noise` adds stable screen-space grain; `contrast` and `brightness` use
-`1.0` as neutral; `vibrancy` and `vibrancy_darkness` control saturation. Set
-`enabled = false` when you want to remove blur work entirely.
+Higher radius and pass counts increase blur and render cost. `noise` adds
+stable screen-space grain; contrast and brightness use `1.0` as neutral;
+vibrancy controls saturation and its dark-color contribution.
 
-Global blur is the capability switch. Rules decide which matching window or
-layer-shell surface receives it:
+Global blur is the capability switch. Ordered rules select individual windows,
+layer surfaces, and layer popups:
 
 ```toml
 [[window]]
-app_id = "mpv"
-layout = "monocle"
+content_type = "video"
 blur = false
 
 [[layer]]
@@ -48,12 +45,11 @@ blur = true
 blur_popups = true
 ```
 
-`blur_popups` takes effect only when the matching layer has `blur = true`. See
-[Window Rules](/aqueous/window-rules/) for matching and ordering details.
+The renderer caches and damages blur regions around scene changes rather than
+blindly redrawing the entire desktop. Set `enabled = false` to remove global
+blur work.
 
 ## Window opacity
-
-Use one stable opacity for every window:
 
 ```toml
 [opacity]
@@ -62,7 +58,7 @@ value = 0.94
 focus_sensitive = false
 ```
 
-Or make focus visually clearer:
+Or distinguish focus:
 
 ```toml
 [opacity]
@@ -72,24 +68,12 @@ focused = 1.0
 unfocused = 0.90
 ```
 
-All opacity values are fractions from `0.0` (transparent) through `1.0`
-(opaque). When `focus_sensitive = true`, `focused` and `unfocused` are applied
-per window; otherwise Aqueous uses `value`.
+Opacity values range from `0.0` through `1.0`. A rule's `opacity` value wins
+over global/focus-sensitive policy. Full opacity is recommended for
+latency-sensitive games, direct-overlay candidates, and media that should
+avoid blending.
 
-A matching rule's `opacity` takes precedence over the global or focus-sensitive
-value:
-
-```toml
-[[window]]
-app_id = "mpv"
-layout = "monocle"
-opacity = 1.0
-```
-
-Remember that window rules currently require an explicit layout and that a
-matched rule selects that layout for the output/workspace.
-
-## Workspace transitions
+## Workspace and placement motion
 
 ```toml
 [workspace_transition]
@@ -97,14 +81,79 @@ enabled = true
 rate = 0.0
 ```
 
-`rate = 0.0` selects the compiled default. A larger positive value makes the
-slide settle more quickly. Window-placement and workspace animations can be
-compiled out entirely with `-Danimations=false`; configuration cannot enable
-an effect that is absent from the build.
+`rate = 0` uses the compiled default; a larger positive value settles the
+slide more quickly. Workspace transitions retain the outgoing workspace until
+the slide completes and use inert surface clones, so clients are not repeatedly
+configured during motion.
 
-## Rounded corners
+Window placement animation is also compositor-side. Damage-driven frames
+advance only visual state that is changing. Build with `-Danimations=false` to
+remove placement and workspace motion completely.
 
-Vulkan-effects builds apply a fixed 12-pixel corner radius to normal window
-content and borders. Fullscreen content remains square. There is currently no
-TOML key for changing the radius; builds with `-Dvulkan-effects=false` use
-square corners.
+## Rounded corners and decorations
+
+Vulkan-effects builds apply a fixed 12-pixel radius to normal window content
+and borders. Fullscreen content is square. There is no TOML radius setting;
+`-Dvulkan-effects=false` builds a square, no-blur diagnostic compositor.
+
+`[layout].force_ssd = true` asks SSD-capable XDG clients to use compositor-side
+decoration. CSD-only clients may keep their own title bars; their move/resize
+requests still integrate with stacking/freeform presentation.
+
+## Fractional client buffers
+
+```toml
+[scaling]
+buffer_policy = "native"
+```
+
+`native` advertises the exact output scale. `integer-ceil` keeps logical
+geometry unchanged while requesting the next integer backing-buffer scale from
+fractional-aware roots and popups. It may sharpen specific toolkit text but
+increases buffer pixel count, memory, and GPU bandwidth. Prefer a selective
+window rule:
+
+```toml
+[[window]]
+app_id = "com.example.Editor"
+layout = "tile"
+buffer_scale_policy = "integer-ceil"
+```
+
+## HDR and Auto HDR
+
+HDR output selection, peak mastering level, SDR white, and Auto HDR boost are
+per-output settings. Color-management-v1 advertises supported parametric and
+Windows HDR descriptions, while rules can override highlight expansion by
+window or content type. See [Outputs and HDR](/aqueous/outputs/#hdr10-output).
+
+## DRM overlay planes
+
+Direct overlay promotion is disabled by default and startup-only:
+
+```toml
+[render]
+overlay_planes = true
+
+[[window]]
+content_type = "video"
+overlay_plane = "prefer"
+opacity = 1.0
+blur = false
+```
+
+Aqueous tests one candidate per output and automatically composes on backend
+rejection or whenever capture, overlap, effects, clipping, scale, transform,
+software cursors, or buffer constraints make direct presentation unsuitable.
+Inspect every decision and counter with:
+
+```sh
+aqueousctl overlay-planes
+aqueousctl overlay-planes --json
+```
+
+<Aside type="tip">
+  Effects are explicit policy. Disable global work you do not use, then use
+  content-type or identity rules for games and video instead of applying one
+  expensive visual policy to every surface.
+</Aside>

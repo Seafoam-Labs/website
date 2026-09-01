@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: Organize wm.toml and Aqueous's layout, input, and rule sidecars.
+description: Organize Aqueous's five TOML files, reload behavior, and managed commands.
 sidebar:
   label: Configuration
   order: 3
@@ -13,75 +13,110 @@ import {
   LinkCard,
 } from "@astrojs/starlight/components";
 
-Aqueous keeps its configuration in four small TOML files. [`wm.toml`](/aqueous/docs/toml/wm/)
-is the entry point; the other files are optional overlays that keep layout,
-input, and window policy easy to navigate.
+Aqueous uses five focused TOML files. Only `wm.toml` is required; the other
+files are sidecars for keeping each policy area understandable.
 
 <FileTree>
 
 - ~/.config/aqueous/
-  - wm.toml outputs, keybindings, commands, struts, and global policy
-  - layout.toml layout engines, slots, and workspace/output defaults
-  - input.toml keyboard, mouse, touchpad, and trackpoint policy
-  - rules.toml per-window behavior and game-mode policy
+  - wm.toml keybindings, commands, struts, global effects, and state policy
+  - outputs.toml physical outputs, HDR, positions, and profiles
+  - layout.toml layouts, options, slots, snap zones, and mappings
+  - input.toml keyboard, focus, gestures, mouse, and touchpad policy
+  - rules.toml ordered window/layer rules and Game Mode policy
+  - appearance.toml settings-plugin typography source of truth, not read by the compositor
 
 </FileTree>
 
-## How parsing and reloads work
+## Parsing and reloads
 
 Aqueous accepts a deliberately small TOML-compatible subset: sections,
-repeated tables, key/value assignments, arrays used by bindings and positions,
-inline maps used by `exec.env`, and `#` comments. Unknown keys and malformed
-values are ignored individually, while valid recognized values elsewhere in
-the file still apply.
+repeated tables, key/value assignments, binding and position arrays, inline
+maps for `exec.env`, and `#` comments. Unknown keys and malformed values are
+ignored individually while valid recognized values elsewhere still apply.
 
-The compositor checks the resolved files once per second. A changed file is
-loaded into a complete replacement snapshot and then applied in one manage
-cycle. This includes keybindings, input settings, layouts, rules, effects, and
-output configuration. Press `Super+R` to run the same reload immediately.
+The compositor fingerprints the resolved files once per second. Changed files
+are parsed into complete replacement snapshots and applied in one manage cycle,
+so a cycle never sees half of an update. This includes keybindings, layouts,
+rules, input, effects, and output policy. `reload_config` performs the same
+reload immediately; `reload_rules` refreshes only `rules.toml`.
 
 ```toml
 [keybinds]
 reload_config = "Super+R"
-# reload_rules = "Super+Shift+R" # optional: reload only rules.toml
+reload_rules = "Super+Shift+R"
 ```
 
-<Aside type="tip">
-  Keep each setting in one file. Sidecars merge over `wm.toml`, but avoiding
-  duplicate declarations makes precedence obvious when you return to the
-  configuration later.
-</Aside>
+A rule parse failure preserves the previous valid rule snapshot. A missing
+optional rule file disables rules; other missing sidecars leave the values
+from `wm.toml` or compiled defaults in place.
 
 ## File discovery
 
-For the standard setup, put all four files in `~/.config/aqueous/`. Advanced
-setups can select alternate paths with environment variables or sidecar
-selectors:
+| File           | Search order (first match wins)                                                                                                                      |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wm.toml`      | `$AQUEOUS_CONFIG`, `$XDG_CONFIG_HOME/aqueous/wm.toml`, `~/.config/aqueous/wm.toml`, `/etc/xdg/aqueous/wm.toml`                                       |
+| `outputs.toml` | `$AQUEOUS_OUTPUTS`, `$XDG_CONFIG_HOME/aqueous/outputs.toml`, `~/.config/aqueous/outputs.toml`, `/etc/xdg/aqueous/outputs.toml`                       |
+| `layout.toml`  | existing `~/.config/aqueous/layout.toml`, `$AQUEOUS_LAYOUT`, `[layout].path`, `$XDG_CONFIG_HOME/aqueous/layout.toml`, `/etc/xdg/aqueous/layout.toml` |
+| `input.toml`   | `$AQUEOUS_INPUT`, `[input].path`, `$XDG_CONFIG_HOME/aqueous/input.toml`, `~/.config/aqueous/input.toml`, `/etc/xdg/aqueous/input.toml`               |
+| `rules.toml`   | `$AQUEOUS_RULES`, `[rules].path`, `$XDG_CONFIG_HOME/aqueous/rules.toml`, `~/.config/aqueous/rules.toml`                                              |
 
-| File          | Search order (first match wins)                                                                                                                      |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `wm.toml`     | `$AQUEOUS_CONFIG`, `$XDG_CONFIG_HOME/aqueous/wm.toml`, `~/.config/aqueous/wm.toml`, `/etc/xdg/aqueous/wm.toml`                                       |
-| `layout.toml` | existing `~/.config/aqueous/layout.toml`, `$AQUEOUS_LAYOUT`, `[layout].path`, `$XDG_CONFIG_HOME/aqueous/layout.toml`, `/etc/xdg/aqueous/layout.toml` |
-| `input.toml`  | `$AQUEOUS_INPUT`, `[input].path`, `$XDG_CONFIG_HOME/aqueous/input.toml`, `~/.config/aqueous/input.toml`, `/etc/xdg/aqueous/input.toml`               |
-| `rules.toml`  | `$AQUEOUS_RULES`, `[rules].path`, `$XDG_CONFIG_HOME/aqueous/rules.toml`, `~/.config/aqueous/rules.toml`                                              |
+`~` is expanded in explicit paths. A relative layout path is resolved beside
+`wm.toml`; use an absolute or `~`-prefixed input or rules path.
 
-`~` is expanded in explicit paths. A relative `[layout].path` is resolved next
-to `wm.toml`; use an absolute or `~`-prefixed path for `[input].path` and
-`[rules].path`.
-
-<Aside type="caution" title="layout.toml has compatibility-first discovery">
-  An existing `~/.config/aqueous/layout.toml` takes precedence over
-  `$AQUEOUS_LAYOUT` and `[layout].path`. Remove or rename that file before using
-  an alternate layout path.
+<Aside type="caution" title="layout.toml keeps compatibility-first discovery">
+  An existing `~/.config/aqueous/layout.toml` wins before `$AQUEOUS_LAYOUT` and
+  `[layout].path`. Rename that file before selecting an alternate location.
 </Aside>
 
-## A practical `wm.toml`
+## How files combine
 
-This example is intentionally compact. It configures two outputs, reserves no
-extra panel space, defines the commands used by built-in bindings, and points
-to the three sidecars.
+`layout.toml` and `input.toml` overlay matching values from `wm.toml` one
+recognized key at a time. Omitted values continue to inherit. Define a mapping
+or device policy in one place when possible so precedence remains obvious.
+
+Physical display values in `outputs.toml` are preferred. Once that file
+contains declarative display policy, matching `wm.toml` output entries form the
+base and `outputs.toml` supplies later overrides. Omitted fields still inherit;
+a file containing profiles only does not silently opt an existing setup into
+the new precedence.
+
+Layout resolution uses this order:
+
+1. A live layout selected for the output/workspace.
+2. An output-scoped `[[workspace]]` mapping.
+3. A workspace-only mapping.
+4. The matching output's default layout.
+5. `[layout].default`.
+
+## Minimal configuration
 
 ```toml
+# ~/.config/aqueous/wm.toml
+[struts]
+top = 0
+bottom = 0
+left = 0
+right = 0
+
+[actions]
+toggle_start_menu = "noctalia msg panel-toggle launcher"
+spawn_terminal = "ghostty"
+screenshot = "grim -g \"$(slurp)\" - | wl-copy"
+lock_screen = "noctalia msg lock"
+
+[layout]
+path = "~/.config/aqueous/layout.toml"
+
+[input]
+path = "~/.config/aqueous/input.toml"
+
+[rules]
+path = "~/.config/aqueous/rules.toml"
+```
+
+```toml
+# ~/.config/aqueous/outputs.toml
 [display]
 apply_on_start = true
 apply_on_reload = true
@@ -93,87 +128,25 @@ mode = "1920x1200@60"
 scale = 1.25
 position = [0, 0]
 primary = true
-layout = "scrolling"
 
 [[output]]
 name = "DP-1"
 enabled = true
 mode = "2560x1440@144"
 scale = 1.0
-position = [1536, 0] # logical coordinates after eDP-1's scale
+position = [1536, 0]
 adaptive_sync = true
-# Enable only on capable DRM outputs; uses the fixed HDR10 profile.
-hdr = true
-layout = "tile"
-
-[struts]
-top = 0
-bottom = 0
-left = 0
-right = 0
-
-[actions]
-toggle_start_menu = "noctalia msg panel-toggle launcher"
-spawn_terminal = "foot"
-lock_screen = "swaylock -f"
-
-[layout]
-path = "~/.config/aqueous/layout.toml"
-force_ssd = false
-
-[input]
-path = "~/.config/aqueous/input.toml"
-
-[rules]
-path = "~/.config/aqueous/rules.toml"
 ```
 
-Output positions use logical coordinates. If you omit `position`, Aqueous
-places otherwise unconfigured outputs in a non-overlapping horizontal row.
-Display fields accept connector-name globs such as `DP-*`; layout-only output
-matching uses an exact connector name. An `edid` selector is also accepted when
-connector names are not stable. Run `aqueousctl outputs` to see connector
-names, supported modes, and the current/preferred mode before writing a display
-block.
-
-<Aside type="note" title="Layer-shell panels usually reserve their own space">
-  `[struts]` adds fixed margins after layer-shell exclusive zones are applied.
-  Leave these values at zero when your bar already declares an exclusive zone;
-  otherwise you will reserve the panel area twice.
-</Aside>
-
-## Display transforms and profiles
-
-`transform` accepts `normal`, `90`, `180`, `270`, and the four `flipped-*`
-variants. `scale` must be between `0.5` and `3.0`. Set `hdr = true` only for a
-capable DRM output; Aqueous uses a fixed HDR10 profile (10-bit BT.2020 with PQ).
-
-Named profiles use the same display fields as `[[output]]` and can be selected
-through Aqueous's output-service API. A fallback profile can provide a safe
-configuration when a normal output transaction is rejected.
-
-```toml
-[display]
-fallback_profile = "internal-only"
-
-[[display.profile]]
-name = "internal-only"
-
-[[display.profile.output]]
-name = "eDP-1"
-enabled = true
-position = [0, 0]
-primary = true
-
-[[display.profile.output]]
-name = "DP-*"
-enabled = false
-```
+Output positions are logical coordinates after scaling. Unconfigured outputs
+receive non-overlapping horizontal positions. Live layer-shell exclusive zones
+are applied before `[struts]`; keep static struts at zero when a bar already
+reserves its own space.
 
 ## Managed commands
 
-Use repeated `[[exec]]` blocks for processes Aqueous should start or supervise.
-Both `name` and `command` are required.
+Repeated `[[exec]]` blocks start or supervise processes. Both `name` and
+`command` are required.
 
 ```toml
 [[exec]]
@@ -186,32 +159,44 @@ log = "/tmp/aqueous-wallpaper.log"
 env = { XDG_CURRENT_DESKTOP = "Aqueous" }
 ```
 
-- `startup` runs during compositor startup.
-- `reload` runs after a configuration reload.
+- `startup` is eligible at compositor startup.
+- `reload` runs after a full configuration reload.
 - `always` is eligible in both cases.
-- `once = true` prevents the same named command from being started twice.
-- `restart = true` retries a child that exits unsuccessfully.
+- `once` avoids duplicate children with the same name.
+- `restart` retries a child after a nonzero exit until it succeeds.
 
-The packaged Noctalia shell is managed by a systemd user service, so it does
-not need a second `[[exec]]` entry.
+The packaged Noctalia shell is already managed as a graphical-session service
+and does not need a duplicate `[[exec]]` entry.
 
-## Window-state behavior
+## State and client scaling
 
 ```toml
 [state]
-fullscreen_hides_bar = true
 maximize_full_output = false
+# fullscreen_hides_bar is accepted for compatibility; layer hiding is not implemented.
+
+[scaling]
+buffer_policy = "native" # native | integer-ceil
 ```
 
-`maximize_full_output = false` keeps maximized windows inside the output's
-usable area. The `fullscreen_hides_bar` compatibility key is parsed, but hiding
-upper layer-shell surfaces is not currently implemented.
+`maximize_full_output = false` keeps maximized windows in the usable area.
+`integer-ceil` asks compatible clients for a larger integer-scale backing
+buffer while retaining fractional logical geometry. Prefer a per-window rule
+when testing this higher-cost compatibility mode.
+
+## Edit with the settings application
+
+The Noctalia plugin provides typed controls for common settings and complete
+raw editors for all five files. Draft changes can be validated before Apply;
+the helper preserves comments and unknown keys, detects external edits, creates
+backups for multi-file writes, and never restarts the compositor. See
+[Settings application](/aqueous/settings/).
 
 <CardGrid>
-  <LinkCard title="wm.toml Reference" href="/aqueous/docs/toml/wm/" />
-  <LinkCard title="Keybindings" href="/aqueous/keybindings/" />
-  <LinkCard title="Layouts" href="/aqueous/layouts/" />
-  <LinkCard title="Input" href="/aqueous/input/" />
-  <LinkCard title="Window Rules" href="/aqueous/window-rules/" />
-  <LinkCard title="Visual Effects" href="/aqueous/visual-effects/" />
+  <LinkCard title="wm.toml reference" href="/aqueous/docs/toml/wm/" />
+  <LinkCard title="outputs.toml reference" href="/aqueous/docs/toml/outputs/" />
+  <LinkCard title="layout.toml reference" href="/aqueous/docs/toml/layout/" />
+  <LinkCard title="input.toml reference" href="/aqueous/docs/toml/input/" />
+  <LinkCard title="rules.toml reference" href="/aqueous/docs/toml/rules/" />
+  <LinkCard title="Command-line tools" href="/aqueous/command-line/" />
 </CardGrid>

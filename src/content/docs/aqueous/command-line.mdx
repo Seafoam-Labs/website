@@ -1,0 +1,117 @@
+---
+title: Command-line Tools
+description: Inspect Aqueous state and control live layouts with aqueousctl.
+sidebar:
+  label: Command-line Tools
+  order: 10
+---
+
+`aqueousctl` is a Wayland client installed with Aqueous. It reads compositor
+protocol state directly; it does not scrape logs or depend on a background IPC
+daemon.
+
+## Windows
+
+```sh
+aqueousctl windows
+aqueousctl windows --json
+```
+
+The table and JSON forms expose each managed window's stable identifier,
+backend, native `app_id` or XWayland class, title, output, workspace, geometry,
+active layout, committed content type, state flags, and matched-rule metadata.
+State includes focused, fullscreen, maximized, minimized, floating,
+always-above/below, fixed-position, and switcher/taskbar suppression where
+applicable.
+
+Use JSON when feeding a bar, script, diagnostic report, or test:
+
+```sh
+aqueousctl windows --json | jq '.[] | {title, output, workspace, layout, states}'
+```
+
+## Generate a window rule
+
+```sh
+aqueousctl inspect --rule
+```
+
+This emits ready-to-paste `[[window]]` entries for mapped windows. Native
+Wayland windows use `app_id`; XWayland windows use their `WM_CLASS` as `class`.
+The title is included as a commented optional matcher.
+
+## Scene graph and layer namespaces
+
+```sh
+aqueousctl scene
+aqueousctl scene --dot > scene.dot
+```
+
+The tree includes node IDs, parentage, node type, enabled state, labels, and
+geometry. It is useful for finding layer-shell namespaces, popup ownership,
+blur checkpoints, clipping, and stacking problems. `--dot` emits Graphviz DOT
+for visualization.
+
+## Outputs
+
+```sh
+aqueousctl outputs
+aqueousctl outputs --json
+```
+
+This is the full wlr-randr-style snapshot: output identity and description,
+physical size, enabled state, modes, current/preferred mode, position,
+transform, scale, adaptive sync, and `edid_sha256` where available. Use it
+before writing an output block or output-targeted rule.
+
+## Live workspace layout
+
+```sh
+aqueousctl layout --output DP-1 --json
+aqueousctl layout --output DP-1 --set stacking --json
+```
+
+The query returns the named output, its active workspace, and the effective
+layout. `--set` installs a runtime override for that output/workspace without
+editing a configuration file. It accepts the canonical layout IDs and returns
+a structured status on failure.
+
+## Overlay-plane diagnostics
+
+```sh
+aqueousctl overlay-planes
+aqueousctl overlay-planes --json
+```
+
+For each output, diagnostics show whether overlay promotion is enabled, backend
+capability, current decision phase, candidate window and geometry, buffer
+format/modifier, rejection reason, backoff, attempts, accepts/rejections,
+promotions, demotions, and fallback retries. This is the first place to check
+when an `overlay_plane = "prefer"` rule remains composed.
+
+## Compatibility clients
+
+`wlrctl toplevel list` remains usable through the legacy foreign-toplevel
+management protocol. Output-management clients can use
+`zwlr_output_manager_v1`; workspace-aware shells can use `ext-workspace-v1`.
+The Aqueous-specific window-information protocol adds the richer state consumed
+by `aqueousctl` and the settings application.
+
+## Compositor command line
+
+```text
+aqueous [options]
+```
+
+Useful options include:
+
+- `-h` and `-version`.
+- `-c <command>` to replace the default startup init command.
+- `-log-level error|warning|info|debug`.
+- `-no-xwayland` to disable embedded XWayland at runtime.
+- `-xwayland-scaling <mode>` to select the XWayland projection strategy.
+- `-drm-overlay-planes` or `-no-drm-overlay-planes` for rule-controlled DRM
+  overlay promotion.
+
+The normal policy is `internal`. `external` and `compare` modes are diagnostics
+that are available only in a build compiled with `-Dexternal-policy=true`.

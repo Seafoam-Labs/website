@@ -1,61 +1,46 @@
 ---
 title: Window Rules
-description: Match applications and configure placement, state, visuals, and game mode.
+description: Match applications and content to configure placement, state, visuals, scaling, HDR, and overlays.
 sidebar:
   label: Window Rules
-  order: 7
+  order: 9
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-Window rules live in `rules.toml`. See the [rules.toml
-reference](/aqueous/docs/toml/rules/) for the full list of accepted keys.
-Aqueous watches the file, re-evaluates managed windows after a change, and
-reloads it with the rest of the configuration when you press `Super+R`.
+Rules live in `rules.toml`. Aqueous hot-reloads the file, re-evaluates managed
+windows and layer surfaces, and preserves the previous snapshot after a parse
+failure.
 
-## Find a window's identity
-
-Use `aqueousctl` instead of guessing an application's identifiers:
+## Discover identities
 
 ```sh
 aqueousctl windows
 aqueousctl windows --json
 aqueousctl inspect --rule
+aqueousctl scene
 ```
 
-`aqueousctl inspect --rule` emits a ready-to-paste `[[window]]` block. Native
-Wayland applications normally match by `app_id`; XWayland applications use
-their `WM_CLASS` through `class`.
+`inspect --rule` emits ready-to-paste blocks. Native applications normally use
+`app_id`; XWayland applications use `class`. `scene` reveals layer-shell
+namespaces.
 
-## Matching behavior
+## Matching
 
-Rules are checked from top to bottom and the **first matching rule wins**. Each
-rule needs at least one of `app_id`, `class`, or `title`. When a rule has more
-than one matcher, all of them must match.
+Rules are evaluated from top to bottom and the **first match wins**. Every
+`[[window]]` block needs at least one of `app_id`, `class`, `title`, or
+`content_type`; a matcher-free block is discarded. When several matchers are
+present, all must match.
 
-Matchers are anchored, case-sensitive globs:
-
-- `*` matches any number of characters.
-- `?` matches exactly one character.
-- A value without wildcards must match the entire identifier.
+String matchers are anchored, case-sensitive globs: `*` matches any number of
+characters and `?` matches one. A string without wildcards must match the
+complete identifier.
 
 ```toml
 [[window]]
 app_id = "org.example.Editor"
 title = "Preferences*"
-layout = "float"
-floating = true
-width = 900
-height = 640
-```
-
-Put narrow rules before broad ones:
-
-```toml
-[[window]]
-app_id = "org.example.Editor"
-title = "Preferences*"
-layout = "float"
+layout = "stacking"
 floating = true
 width = 900
 height = 640
@@ -66,106 +51,130 @@ layout = "tile"
 workspace = 2
 ```
 
-<Aside type="caution" title="Always set layout explicitly">
-  The current rule snapshot defaults an omitted `layout` to `game-mode`. Add a
-  layout to every rule, including rules that primarily change opacity or
-  placement. Be aware that a matched layout selects the layout for that
-  output/workspace, so choose it deliberately.
+Put narrow rules before broad rules.
+
+<Aside type="caution" title="Set layout on identity rules">
+  The current rule snapshot defaults an omitted layout to Game Mode. Give
+  app-ID/class/title rules an explicit layout, even when their main purpose is
+  opacity or placement. Content-type-only rules are visual-only and are exempt.
 </Aside>
 
-## Floating placement
+## Complete field reference
 
-```toml
-[[window]]
-class = "Pavucontrol"
-title = "Volume Control"
-layout = "float"
-floating = true
-workspace = 2
-width = 960
-height = 640
-x = 80
-y = 60
-fullscreen = false
-ignore_struts = false
-opacity = 0.96
-```
+### Matchers
 
-`width` and `height` are positive pixel dimensions. `x` and `y` are offsets
-from the usable area's origin; a zero value centers that axis. Setting
-`layout = "float"` also enables floating placement, so the explicit
-`floating = true` is optional but can make a complete rule easier to scan.
+| Field          | Values and behavior                                                                     |
+| -------------- | --------------------------------------------------------------------------------------- |
+| `app_id`       | Glob for native `xdg_toplevel.app_id`.                                                  |
+| `class`        | Glob for X11 `WM_CLASS`.                                                                |
+| `title`        | Glob for the current window title.                                                      |
+| `content_type` | `none`, `photo`, `video`, or `game`, matching the client's `wp_content_type_v1` commit. |
 
-## Rule-owned state and manual overrides
+Any rule containing `content_type` is deliberately restricted to `blur`,
+`opacity`, `hdr_expand`, `buffer_scale_policy`, and `overlay_plane`, even when
+it also contains an identity matcher. Content type often arrives after map, so
+it must not move or rearrange an established window.
 
-Rules can set `workspace`, `floating`, and `fullscreen`, but Aqueous does not
-fight the user. A manual workspace move, floating toggle, or fullscreen toggle
-overrides that property until a different matcher becomes active.
+### Layout, placement, and state
 
-```toml
-[[window]]
-app_id = "org.example.Video"
-layout = "monocle"
-workspace = 4
-fullscreen = true
-ignore_struts = true
-opacity = 1.0
-```
+| Field              | Values and behavior                                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `layout`           | Any top-level layout ID; `float`, `floating`, and `stack` alias `stacking`. Selecting a stacking alias also marks the window floating. |
+| `output`           | Exact enabled connector name. Without workspace, use that output's active workspace.                                                   |
+| `workspace`        | 1-based workspace. Without output, retain normal admission output.                                                                     |
+| `floating`         | Force or clear persistent floating presentation.                                                                                       |
+| `fullscreen`       | Request true fullscreen. It is not treated as a Game Mode anchor.                                                                      |
+| `ignore_struts`    | Use the full output instead of its usable area.                                                                                        |
+| `stack_layer`      | `below`, `normal`, or `above`.                                                                                                         |
+| `focus`            | `false` excludes the window from compositor focus actions.                                                                             |
+| `fixed_position`   | Reject compositor pointer and keyboard geometry changes.                                                                               |
+| `skip_switcher`    | Exclude from MRU cycling and overview.                                                                                                 |
+| `skip_taskbar`     | Export taskbar suppression through window-info state.                                                                                  |
+| `placement_policy` | `cascade`, `center`, `under-pointer`, or `minimal-overlap`.                                                                            |
+| `width`, `height`  | Positive floating dimensions.                                                                                                          |
+| `x`, `y`           | Offsets from the usable-area origin; zero centers that axis.                                                                           |
 
-`ignore_struts = true` uses the full output instead of the configured usable
-area. A fullscreen rule is treated as actual fullscreen rather than as a game
-mode anchor.
+Output and workspace form one initial-placement target. Rules do not activate
+an inactive workspace. A missing/disabled output falls back to normal admission
+and does not move the established window when that output later appears.
 
-## Game mode
+### Game Mode geometry
 
-Game mode gives one matched window an anchor rectangle and arranges companion
-windows in the remaining left and right columns.
+| Field    | Values and behavior                                                           |
+| -------- | ----------------------------------------------------------------------------- |
+| `anchor` | `center`, `top`, `bottom`, `left`, or `right`.                                |
+| `size`   | `native`, exact pixels such as `2560x1440`, or fractions such as `0.70x0.80`. |
+| `scale`  | Positive multiplier applied after resolving the requested size.               |
 
 ```toml
 [game_mode]
-remainder_layout = "grid"
+remainder_layout = "scrolling"
 fallback_layout = "tile"
 gaps_inner = 8
 
 [[window]]
 app_id = "steam_app_*"
-title = "*"
 layout = "game-mode"
+output = "DP-1"
 workspace = 9
 anchor = "center"
 size = "0.70x0.80"
 scale = 1.0
-fullscreen = false
-ignore_struts = false
-opacity = 1.0
 blur = false
+opacity = 1.0
 ```
 
-Anchor options are:
+The remainder and fallback accept all leaf layouts. Each surviving side column
+receives an independent remainder instance. A flush edge anchor collapses that
+side, and the fallback fills the output when no anchor matches.
 
-- `anchor`: `center`, `top`, `bottom`, `left`, or `right`
-- `size = "native"`: use the client's requested size
-- `size = "2560x1440"`: request an exact pixel size
-- `size = "0.70x0.80"`: use fractions of the output area
-- `scale`: multiply the resolved size by a positive factor
+### Visual, buffer, HDR, and overlay policy
 
-`remainder_layout` and `fallback_layout` accept any layout except `game-mode`.
-The fallback is used when game mode is selected but no matching anchor is
-present. If the anchor touches an edge, the column on that edge collapses and
-all companion windows use the surviving column.
+| Field                 | Values and behavior                                            |
+| --------------------- | -------------------------------------------------------------- |
+| `blur`                | Per-window blur eligibility; global blur must also be enabled. |
+| `opacity`             | `0.0` through `1.0`, overriding global/focus opacity.          |
+| `buffer_scale_policy` | `native` or `integer-ceil`.                                    |
+| `hdr_expand`          | Force or suppress Auto HDR highlight expansion.                |
+| `overlay_plane`       | `off` or `prefer`.                                             |
 
-<Aside type="note">
-  `blur = false` keeps a game or video window out of the backdrop-blur mask. It
-  takes effect only when global blur is enabled in `wm.toml`. See [Visual
-  Effects](/aqueous/visual-effects/) for the global quality and cost settings.
-</Aside>
+`integer-ceil` requests a larger integer-scale client buffer without changing
+logical geometry. It can sharpen some toolkit output while increasing memory
+and GPU bandwidth; Aqueous ships no application-specific opt-ins.
+
+Overlay preference requires `[render].overlay_planes = true` before startup or
+the `-drm-overlay-planes` switch. Aqueous tests one deterministic candidate per
+output. It composes normally when TEST_ONLY rejects the state, when content
+overlaps, during capture/software-cursor forcing, or when scaling, transforms,
+effects, opacity, clipping, or format constraints require composition.
+
+```toml
+[[window]]
+content_type = "game"
+blur = false
+opacity = 1.0
+hdr_expand = true
+overlay_plane = "prefer"
+```
+
+## Rule ownership and manual overrides
+
+Workspace/output placement, floating, fullscreen, and stack layer have
+lifecycle ownership. When a rule first becomes active, Aqueous remembers the
+previous value and applies the request. A manual move or state toggle marks
+that property overridden, so later manage cycles do not fight the user. A
+different matching rule starts a fresh ownership lifecycle.
+
+Blur, opacity, HDR expansion, scaling, and overlay preference are visual or
+client-presentation properties and are recalculated from the active rule.
+
+Only one fullscreen owner is retained per output. Fullscreen has no border and
+uses the full output; maximized windows use the usable area unless global state
+policy says otherwise.
 
 ## Layer-shell rules
 
-`[[layer]]` rules control blur for panels, launchers, notifications, and other
-layer-shell clients. Discover a surface's namespace with `aqueousctl scene`.
-Like window rules, layer rules use case-sensitive `*` and `?` globs and the
-first match wins, so put exact exceptions before broad patterns.
+`[[layer]]` rules are also ordered first-match globs:
 
 ```toml
 [[layer]]
@@ -179,15 +188,17 @@ blur = false
 blur_popups = false
 ```
 
-`blur_popups` applies to the layer surface's XDG popups and nested popups, and
-requires `blur = true`. Global blur must also be enabled in `wm.toml`.
+`namespace` is required. `blur_popups` covers XDG popups and nested popups only
+when the main layer is also blurred. Main surfaces and popups currently use
+rectangular blur bounds rather than their pixel alpha.
 
-## Reload only the rule file
-
-`reload_rules` has no default chord. Bind it when you are iterating on rules and
-do not want to run reload-time commands from `wm.toml`:
+## Reload only rules
 
 ```toml
 [keybinds]
 reload_rules = "Super+Shift+R"
 ```
+
+This avoids running reload-time `[[exec]]` commands while iterating on rules.
+The Noctalia [settings application](/aqueous/settings/) also provides an
+ordered rule editor with validation and content-type safety.
