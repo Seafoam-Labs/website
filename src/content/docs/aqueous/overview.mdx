@@ -6,50 +6,114 @@ sidebar:
   order: 0
 ---
 
-**Aqueous** is a Wayland compositor and window manager built as one native Zig
-process. Its layout engines, rules, keybindings, input policy, workspaces, and
-output management all run inside the compositor, which keeps configuration
-changes predictable and avoids a chain of helper processes or IPC round trips.
+import { CardGrid, LinkCard, Aside } from "@astrojs/starlight/components";
 
-Aqueous began as a fork of [River](https://codeberg.org/river/river), but now
-owns its window-management policy and configuration format. It retains the
-small, focused feel of a tiling window manager while adding compositor-side
-motion and optional Vulkan-rendered visuals.
+**Aqueous** is a Wayland compositor and window manager written in Zig. Layouts,
+rules, keybindings, input policy, workspaces, display management, motion, and
+visual effects run together in one native process. It began as a fork of River,
+but its current window-management policy and TOML configuration are
+Aqueous-owned and integrated directly into the compositor.
 
-## Highlights
+## What Aqueous can do
 
-- Eight built-in layouts: `tile`, `monocle`, `grid`, `rows`, `dwindle`,
-  `scrolling`, `float`, and `game-mode`
-- Per-output and per-workspace layout selection
-- First-match window rules for layout, workspace, floating geometry, state,
-  opacity, and game-mode placement
-- Native output configuration for modes, scale, transforms, adaptive sync,
-  positions, hotplug, and named profiles
-- XKB and libinput settings for keyboards, mice, touchpads, and trackpoints
-- Optional Vulkan-rendered rounded corners and backdrop blur, plus focus-aware
-  opacity and animated workspace transitions
-- A workspace-local window overview (`Super+W`) for browsing and focusing every
-  window on the active workspace
-- Native XWayland support alongside modern Wayland protocols
-- A packaged Noctalia shell configuration for a ready-to-use desktop session
+- Switch between ten native layouts on each output and workspace: `tile`,
+  `monocle`, `grid`, `rows`, `dwindle`, `reverse-dwindle`, `scrolling`,
+  `stacking`, `game-mode`, and `composable`.
+- Use stacking as a complete freeform desktop with persistent geometry and
+  z-order, MRU focus, focus raising, placement policies, edge resistance,
+  keyboard movement and resizing, half/quarter snapping, and four custom snap
+  zones. The legacy names `float`, `floating`, and `stack` remain accepted.
+- Divide a workspace into as many as four normalized composable regions, each
+  running an independent leaf layout with its own ordering and state.
+- Arrange PaperWM-style scrolling columns, including vertical stacks, viewport
+  navigation, column consume/expel actions, pointer rearrangement, and
+  portrait-aware placement.
+- Apply first-match window and layer-shell rules for identity, content type,
+  output, workspace, layout, floating geometry, placement, stack layer, focus,
+  task switcher visibility, fullscreen, scaling, opacity, blur, HDR expansion,
+  and DRM overlay preference.
+- Configure modes, scale, transforms, logical positions, adaptive sync, HDR,
+  Auto HDR, primary-output fallback, hotplug behavior, and named output
+  profiles through atomic compositor transactions.
+- Configure XKB, repeat, focus policy, mice, touchpads, pointer constraints,
+  gestures, tablets, and input-method/text-input clients.
+- Use compositor-side rounded corners, damage-aware backdrop blur,
+  focus-sensitive opacity, animated window placement, sliding workspace
+  transitions, and a workspace-local window overview.
+- Run native Wayland and optional embedded XWayland applications without an
+  external XWayland bridge or policy client.
 
-## Configuration at a glance
+## Layouts and interaction
 
-Aqueous uses four focused TOML files under `~/.config/aqueous/`:
+Aqueous resolves final placements from stable window handles, then applies the
+result as one manage cycle. Fullscreen, maximized, minimized, floating,
+transient, and rule-owned state are handled consistently around that result.
 
-- `wm.toml` for outputs, bindings, commands, struts, and global policy
-- `layout.toml` for layout defaults, engine options, slots, and overrides
-- `input.toml` for XKB, keyboard repeat, and libinput policy
-- `rules.toml` for per-window behavior and game-mode policy
+Pointer actions follow the active layout. `Super`+left-drag rearranges tiled
+windows; `Super`+right-drag resizes tiles or scrolling members and manipulates
+freeform windows. Client-side title-bar move/resize, maximize, minimize, and
+fullscreen requests are integrated for both XDG and XWayland windows when the
+request is valid. Floating windows can cross differently scaled or transformed
+outputs while remaining reachable.
 
-The compositor watches these files and publishes validated replacement
-snapshots when they change. Most edits become visible within a second, or
-immediately when you press the configured `reload_config` binding. Use
-`aqueousctl` to inspect window identities, layer-shell namespaces, output modes,
-and active layouts instead of guessing values for a configuration file.
+The `Super+W` overview displays frozen thumbnails of every focusable window on
+the active workspace, including scrolling windows outside the viewport. It is
+keyboard navigable and does not reconfigure clients while open.
 
-Start with [Installation](/aqueous/installation/), then build a clean setup in
-the [Configuration](/aqueous/configuration/) guide.
+## Visuals, color, and capture
+
+The default build uses Aqueous's Vulkan effects backend for rounded corners and
+backdrop blur. Opacity can be global, focus-sensitive, or selected by a rule.
+Animations and Vulkan effects can also be excluded at build time.
+
+Capable DRM outputs can use a 10-bit BT.2020/PQ HDR10 profile with selectable
+peak mastering level and SDR white level. Aqueous exposes Windows scRGB and
+BT.2100 color descriptions for Wine/Proton and can optionally expand eligible
+SDR highlights toward the HDR peak. Rule-selected direct overlay promotion is
+available as an opt-in, with automatic fallback to composition.
+
+Screen capture, task switchers, panels, launchers, portals, session lockers,
+clipboard managers, virtual input tools, and color-aware applications are
+served through standard Wayland, ext, and wlroots protocols.
+
+## Configuration and desktop tools
+
+Aqueous discovers five compatible TOML files under `~/.config/aqueous/`:
+
+- `wm.toml` — keybindings, commands, struts, global effects, and policy.
+- `outputs.toml` — preferred physical output policy and profiles.
+- `layout.toml` — layout defaults, options, slots, snap zones, and mappings.
+- `input.toml` — XKB, keyboard, focus, gesture, and libinput policy.
+- `rules.toml` — window/layer rules and Game Mode policy.
+
+They are parsed into validated replacement snapshots and hot-reloaded on the
+Wayland event loop. Invalid individual values are ignored, and rule parse
+failures retain the last valid rule snapshot.
+
+The packaged desktop also includes:
+
+- `aqueousctl`, for inspecting windows, outputs, scene nodes, overlay-plane
+  decisions, and live workspace layouts.
+- A Noctalia settings plugin with typed controls, a draggable monitor canvas,
+  complete stacking and rule editors, raw advanced file editing, validation,
+  stale-write protection, backups, and toolkit typography synchronization.
+- A first-run welcome application that discovers installed software and can
+  install selected repository, AUR, and Flatpak applications through Shelly.
+
+<Aside type="note">
+  Noctalia is the packaged shell, not a compositor dependency. Aqueous supports
+  standard layer-shell clients and can run with another compatible desktop
+  shell.
+</Aside>
+
+<CardGrid>
+  <LinkCard title="Installation" href="/aqueous/installation/" />
+  <LinkCard title="Configuration" href="/aqueous/configuration/" />
+  <LinkCard title="Layouts" href="/aqueous/layouts/" />
+  <LinkCard title="Outputs and HDR" href="/aqueous/outputs/" />
+  <LinkCard title="Settings application" href="/aqueous/settings/" />
+  <LinkCard title="Command-line tools" href="/aqueous/command-line/" />
+</CardGrid>
 
 ## Project source
 

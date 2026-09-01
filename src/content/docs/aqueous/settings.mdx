@@ -1,0 +1,154 @@
+---
+title: Settings Application
+description: Configure Aqueous safely through its Noctalia v5 settings plugin.
+sidebar:
+  label: Settings Application
+  order: 4
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Aqueous Settings is a native Noctalia v5 plugin. Add its **Aqueous** widget to
+a bar, then click the widget to open a theme-native flyout. The plugin edits the
+same TOML files as the compositor; it is not a second configuration system.
+
+## Install or enable the plugin
+
+The normal Aqueous package installs the plugin and its `aqueous-config` Zig
+helper. Fresh Noctalia profiles are seeded with the source, enabled plugin, and
+bar widget. Existing profiles receive a one-time registration attempt without
+overwriting their bars or re-enabling a plugin the user later disables.
+
+To register a standalone installation manually:
+
+```sh
+noctalia msg plugins source add aqueous path /usr/share/aqueous/noctalia-plugins
+noctalia msg plugins enable aqueous/settings
+```
+
+Then add **Aqueous Settings** from Noctalia's bar widget picker. You can also
+open the panel directly:
+
+```sh
+noctalia msg panel-toggle aqueous/settings:panel
+```
+
+## Available pages
+
+### Overview
+
+The overview shows the resolved configuration paths, whether each file is
+writable, helper/schema information, and a live workspace layout selector.
+The selector queries `aqueousctl` for a chosen output and can change that
+output's active workspace layout immediately without editing TOML.
+
+### Appearance
+
+Typed controls cover:
+
+- Global blur quality, noise, contrast, brightness, and vibrancy.
+- Stable or focus-sensitive opacity.
+- Workspace transition enablement and rate.
+- Static struts and maximize/fullscreen compatibility behavior.
+- Desktop font family and point size.
+
+Typography is stored in `~/.config/aqueous/appearance.toml` and synchronized
+to Noctalia, GSettings, GTK 3, GTK 4, and qt5ct/qt6ct when those adapters are
+installed or configured. Each target reports available, active, and synced
+state. KDE/Plasma-specific configuration is intentionally not changed.
+
+### Layouts
+
+The layouts page exposes all ten layouts, global gaps/borders/master settings,
+four layout slots, scrolling and recursive-layout options, and the complete
+stacking policy. Legacy `float`, `floating`, and `stack` values are presented as
+one canonical **Stacking** choice.
+
+Stacking controls include placement policy, cascade offset, fine/coarse move
+steps, resize step, snap gap and threshold, edge resistance, and top-edge
+maximize. Snap zones `a` through `d` have normalized coordinate editors,
+previews, and half/third/quarter presets.
+
+If several legacy stacking option sections coexist, the panel warns rather
+than silently choosing one. An explicit normalization operation merges known
+and unknown entries into `[layout.options.stacking]` and removes the aliases.
+Ordinary typed edits continue to update the effective existing alias in place.
+
+### Input
+
+Typed controls cover focus-follows-pointer, focus-new-windows, freeform raising
+and delay, XKB layout/variant/options, keyboard repeat, legacy global pointer
+speed, and mouse/touchpad libinput settings.
+
+### Displays
+
+The display canvas combines configured `[[output]]` entries with Noctalia's
+connected outputs. Monitor cards use a common scale, reflect their relative
+logical resolution, and remain visible when configured but offline. Drag a
+card before, after, above, or below another display; select normal or flipped
+rotation; or enter exact logical X/Y coordinates.
+
+Dragging creates a draft only. **Apply** writes position/transform overrides to
+the matching `outputs.toml` entry. Other display settings continue to inherit
+from `wm.toml` until explicitly changed. General display-policy fields include
+startup/reload application and fallback profile.
+
+### Rules
+
+The ordered window-rule editor can add, duplicate, move, update, and delete
+rules. It covers identity and content-type matchers, layout/output/workspace,
+floating/state policy, stack layer, focus/task-list hints, placement and size,
+opacity/blur, client-buffer scaling, HDR expansion, and overlay preference.
+
+When content type is the only matcher, the editor disables placement fields to
+make the compositor's safety rule obvious. Aqueous treats every rule containing
+`content_type` as visual-only, so placement values combined with it are ignored.
+Rules require at least one matcher, and typed values are validated before
+writing. Game Mode companion and fallback layout settings are available on the
+same page.
+
+### Keybinds
+
+Every built-in action is listed, including currently unbound stacking actions.
+A field accepts one chord or comma-separated chords. Custom entries expose
+both chord and verb and can be created or deleted; a snap-zone preset produces
+the correct `builtin:snap_zone:<a-d>` form. The page also edits launcher,
+terminal, screenshot, and lock commands.
+
+### Advanced
+
+The raw editors expose the complete effective `wm.toml`, `outputs.toml`,
+`layout.toml`, `input.toml`, `rules.toml`, and plugin-owned `appearance.toml`.
+Use this page for composable regions, output profiles, gestures, managed
+commands, workspace mappings, layer rules, or any newer option not yet given a
+typed control.
+
+## Safe editing model
+
+<Steps>
+
+1. The helper resolves the same environment, XDG, and sidecar paths as Aqueous.
+   A system file under `/etc/xdg` is shown as inherited; Apply creates a user
+   override instead of modifying it.
+
+2. Edits remain drafts until **Apply**. **Validate** performs the same schema
+   and structural checks without writing.
+
+3. Each request carries the generation that was loaded. If another program
+   changes a file, stale Apply is rejected and your draft remains available.
+
+4. Existing comments, ordering, whitespace, and unknown keys survive typed
+   changes. Raw files receive structural validation and the compositor's 1 MiB
+   size limit.
+
+5. Multi-file changes are copied to the plugin's persistent backup directory,
+   then written with atomic replacement. Aqueous's normal hot reload applies
+   the result; the plugin never restarts the compositor.
+
+</Steps>
+
+<Aside type="note">
+  Toolkit synchronization is observable per target rather than presented as a
+  false cross-process transaction. `appearance.toml` remains the source of truth
+  if an optional toolkit adapter is unavailable.
+</Aside>

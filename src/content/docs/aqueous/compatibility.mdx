@@ -1,0 +1,110 @@
+---
+title: Wayland and XWayland Compatibility
+description: Protocol, desktop-shell, capture, input, color, and X11 compatibility in Aqueous.
+sidebar:
+  label: Compatibility
+  order: 11
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Aqueous is a wlroots 0.20 compositor with native Wayland clients and optional
+embedded XWayland. Its shell and tooling interfaces are protocols rather than
+hard-coded dependencies on Noctalia.
+
+## Application and rendering protocols
+
+Aqueous exposes the Wayland core compositor, subcompositor, shared-memory,
+seat, output, and data-device interfaces together with:
+
+- XDG shell, activation, decoration, foreign relationships, viewporter,
+  fractional scale, single-pixel buffers, cursor shapes, alpha modifiers, and
+  explicit content type.
+- Linux DMA-BUF and explicit DRM synchronization where the renderer/backend
+  support them.
+- Presentation timing and tearing control.
+- Color representation and color-management-v1, including parametric image
+  descriptions and the supported Windows HDR descriptions in the Vulkan
+  effects build.
+
+The default client-buffer policy advertises exact fractional output scale.
+`integer-ceil` is an opt-in global or per-window compatibility path for
+toolkits that produce softer output at fractional device coordinates.
+
+## Desktop shells and portals
+
+Standard shell and desktop components can use:
+
+- wlr layer shell for panels, launchers, notifications, and wallpapers.
+- `ext-workspace-v1` for per-output workspace lists and activation.
+- ext and wlr foreign-toplevel protocols for task lists and window discovery.
+- The Aqueous window-info protocol for layouts, content type, detailed states,
+  scene snapshots, and overlay diagnostics.
+- wlr output management, output power, gamma control, and XDG output.
+- ext idle notification, idle inhibit, and ext session lock.
+- XDG desktop portals through the packaged wlr/GTK portal configuration.
+
+Layer-shell exclusive zones feed directly into each output's usable area.
+Session-lock surfaces are handled outside ordinary window policy and Auto HDR.
+
+## Capture, sharing, and clipboard
+
+Capture clients can use wlr screencopy and export-DMA-BUF, plus the newer ext
+image-copy-capture protocol and output/toplevel capture-source protocols.
+Clipboard tools are supported through core selection, primary selection, and
+both ext and wlr data-control managers.
+
+Overlay-plane candidates fall back to normal composition while capture or a
+software cursor requires it, ensuring capture tools see the expected content.
+
+## Input protocols
+
+Aqueous supports relative pointer, pointer constraints, pointer gestures,
+tablet v2, text input v3, input method v2 and its popup surfaces, virtual
+pointer, virtual keyboard, XWayland keyboard grabs, and compositor-side idle
+notification. Holding the configured `untrap_pointer` binding temporarily
+releases a client pointer constraint and restores it when the key is released.
+
+## XWayland
+
+When built with `-Dxwayland=true`, Aqueous starts and manages XWayland itself.
+Rules match X11 `WM_CLASS` through `class`, and `aqueousctl` reports the X11
+backend and identity. Aqueous integrates X11 focus, transient relationships,
+fullscreen, maximize/minimize, floating geometry, and validated
+`_NET_WM_MOVERESIZE` interactions.
+
+The compositor can project XWayland through legacy or native-resolution
+scaling. Native mode keeps embedded XWayland on the renderer-selected GPU and
+uses per-output projection suitable for mixed-scale setups. Use
+`-no-xwayland` to disable XWayland for one session.
+
+## GPU selection and multi-GPU systems
+
+At startup Aqueous resolves the DRM device used for scanout/rendering and
+exports compatible client-selection variables when appropriate. This keeps
+clients and the Vulkan renderer on the same device in hybrid-GPU setups. The
+Vulkan effects build requires the renderer and the pinned wlroots render hook
+to expose the required integration.
+
+## Known protocol gaps
+
+The current compositor does not expose DRM lease v1, keyboard-shortcuts
+inhibit v1, or the legacy wlr input-inhibitor protocol. The practical effects
+are:
+
+- VR headsets that require DRM leasing are not yet supported.
+- Fullscreen clients cannot request temporary ownership of compositor-reserved
+  shortcuts.
+- Old lock tools that only understand wlr input inhibition should be replaced
+  with an ext-session-lock client.
+
+Staging XDG dialog/toplevel-drag protocols and superseded legacy generations
+of xdg-foreign, tablet, input-method, and text-input are also not exposed.
+Modern versions of those capabilities are supported where listed above.
+
+<Aside type="note">
+  Plasma- and GNOME-private shell APIs are not implemented. This does not
+  prevent standard Wayland applications from running, but desktop components
+  that require compositor-specific private APIs need a protocol-compatible
+  alternative.
+</Aside>

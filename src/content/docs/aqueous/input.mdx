@@ -1,6 +1,6 @@
 ---
 title: Input
-description: Configure XKB, keyboard repeat, and libinput devices in Aqueous.
+description: Configure XKB, focus, gestures, keyboard repeat, and libinput devices.
 sidebar:
   label: Input
   order: 6
@@ -8,33 +8,49 @@ sidebar:
 
 import { Aside } from "@astrojs/starlight/components";
 
-Put input policy in `~/.config/aqueous/input.toml`. See the
-[input.toml reference](/aqueous/docs/toml/input/) for the full list of accepted
-keys. The sidecar overlays any `[input]` sections in `wm.toml`, and changes
-apply to connected devices as well as devices added later.
+Put input policy in `~/.config/aqueous/input.toml`. The sidecar overlays matching
+`wm.toml` input and gesture values, and changes apply to connected devices and
+devices added later.
 
 ## Keyboard and focus
 
 ```toml
 [input]
 focus_follows_mouse = false
+focus_new_windows = false
+raise_on_focus = true
+raise_on_focus_delay_ms = 0
+num_lock_state = true
 
 xkb_layout = "us,de"
 xkb_variant = ""
 xkb_options = "caps:escape,grp:alt_shift_toggle"
-
 repeat_rate = 40
 repeat_delay = 400
 ```
 
-`repeat_rate` is measured in characters per second; `0` disables key repeat.
-`repeat_delay` is the delay in milliseconds before repeating begins. Empty or
-omitted XKB values fall back to xkbcommon's normal defaults.
+- `focus_follows_mouse` focuses the pointer target immediately, except where a
+  scrolling layout configures its own dwell delay.
+- `focus_new_windows` focuses a newly admitted focusable window after its
+  output/workspace rule is resolved. Inactive-workspace and non-focusable X11
+  arrivals do not steal focus.
+- `raise_on_focus` persistently raises a stacking/freeform window after the
+  optional delay.
+- `num_lock_state` sets the initial XKB Num Lock state.
+- `repeat_rate` is characters per second; zero disables repeat.
+- `repeat_delay` is milliseconds before repeat begins.
+
+Empty or omitted XKB values use xkbcommon defaults. Multiple layouts and
+variants use xkbcommon's comma-separated grammar.
+
+Physical keyboard events are queued through the seat. Internal bindings get
+the first opportunity to consume a press; otherwise an input-method grab,
+legacy binding protocol, or focused client receives it. A consumed press owns
+its corresponding release even if modifiers change.
 
 ## Mouse and touchpad
 
-Device options are overrides. Omit a key when you want the device's libinput
-default.
+Device sections are overrides. Omit a field to keep libinput's device default.
 
 ```toml
 [input.mouse]
@@ -43,6 +59,7 @@ accel_speed = 0.0
 natural_scroll = false
 left_handed = false
 middle_emulation = false
+dwt = false
 
 [input.touchpad]
 accel_profile = "adaptive"
@@ -50,27 +67,28 @@ accel_speed = 0.0
 natural_scroll = true
 tap = true
 dwt = true
+left_handed = false
+middle_emulation = false
 click_method = "clickfinger"
 scroll_method = "two-finger"
 ```
 
-Supported values are:
+Accepted values are:
 
-- `accel_profile`: `flat` or `adaptive`
-- `accel_speed`: `-1.0` through `1.0`
-- `click_method`: `clickfinger` or `button-areas`
-- `scroll_method`: `two-finger`, `edge`, or `no-scroll`
+- `accel_profile`: `flat` or `adaptive`.
+- `accel_speed`: `-1.0` through `1.0`.
+- `click_method`: `clickfinger` or `button-areas`.
+- `scroll_method`: `two-finger`, `edge`, or `no-scroll`.
 - Boolean switches: `natural_scroll`, `tap`, `dwt`, `left_handed`, and
-  `middle_emulation`
+  `middle_emulation`.
 
-Tap, click-method, and scroll-method settings are applied only to devices
-detected as touchpads.
+Tap, click, and scroll-method configuration is applied only to devices detected
+as touchpads.
 
 ## Gestures
 
-Gesture bindings can live in `input.toml` or `wm.toml`; the input sidecar wins
-when both define the same gesture. Gesture values use the same `builtin:`,
-`set_layout:`, and `spawn:` verbs as [custom keybindings](/aqueous/keybindings/#custom-chords).
+Gesture bindings use `<kind>_<fingers>_<direction>` and the same verbs as
+custom keyboard bindings:
 
 ```toml
 [gestures]
@@ -79,13 +97,41 @@ swipe_3_right = "builtin:focus_workspace_up"
 pinch_4_in = "builtin:toggle_start_menu"
 ```
 
-## Trackpoints and legacy pointer settings
+Swipes accept `left`, `right`, `up`, and `down`; pinches accept `in` and `out`.
+Finger counts are positive integers. The value may be `builtin:<action>`,
+`set_layout:<id-or-slot>`, or `spawn:<command>`. A matching gesture is consumed
+by Aqueous; unmatched gestures continue through the normal client path.
 
-`[input.trackpoint]` accepts the same device keys, but the current application
-path classifies every non-touchpad pointer as a mouse. Put effective trackpoint
-policy under `[input.mouse]` for now.
+## Pointer interactions and constraints
 
-Older configurations may use global pointer settings:
+Normal clicks use scene hit-testing. The configured primary modifier
+intercepts window-management drags before client delivery. Client drag-and-drop
+temporarily suppresses focus-follows-pointer so wlroots can own its pointer and
+keyboard grabs without focus changes underneath it.
+
+The `untrap_pointer` binding releases an active relative-pointer constraint
+while held and restores it on release. This is useful for games without
+permanently disabling pointer locking.
+
+Scrolling-layout wheel navigation uses the primary modifier to move by column
+and the primary modifier plus Alt to move within a column. Natural-scroll
+settings reverse those directions consistently.
+
+## Tablets and input methods
+
+At the protocol layer Aqueous supports tablet v2, text-input v3, input-method
+v2 and input popups, relative pointers, pointer gestures, virtual keyboards,
+and virtual pointers. These standard interfaces allow drawing tablets, on-
+screen keyboards, IMEs, accessibility tools, and test/automation clients to
+participate in normal seat focus.
+
+## Trackpoints and legacy pointer values
+
+`[input.trackpoint]` is accepted and retained, but the current libinput
+application path classifies every non-touchpad pointer as a mouse. Put effective
+trackpoint policy under `[input.mouse]` for now.
+
+Legacy global acceleration remains available:
 
 ```toml
 [input]
@@ -93,14 +139,12 @@ pointer_acceleration = false
 pointer_acceleration_factor = 0.0
 ```
 
-Per-device `accel_profile` and `accel_speed` take precedence. For a new setup,
-prefer the device sections because they express intent more clearly.
+Per-device profile and speed take precedence. Prefer the device sections in a
+new configuration.
 
 <Aside type="caution" title="Keep input policy in one file">
-  Most device fields track whether they were explicitly set, but the legacy
-  global pointer values and `focus_follows_mouse` merge by comparing against
-  defaults, while empty XKB strings do not replace inherited strings. A `false`,
-  `0.0`, or empty string in `input.toml` therefore cannot clear the matching
-  non-default value inherited from `wm.toml`. Avoid the ambiguity by defining
-  input settings only in `input.toml`.
+  Explicit tracking makes most sidecar values safe to clear, including focus and
+  raising fields. Legacy global pointer values and some empty XKB strings retain
+  compatibility merge behavior. Defining input policy in one file keeps that
+  precedence unambiguous.
 </Aside>

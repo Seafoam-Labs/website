@@ -1,6 +1,6 @@
 ---
 title: Layouts
-description: Configure Aqueous's eight layout engines and layout selection rules.
+description: Configure Aqueous's ten layout engines, stacking, scrolling, and composable regions.
 sidebar:
   label: Layouts
   order: 5
@@ -8,39 +8,36 @@ sidebar:
 
 import { Aside } from "@astrojs/starlight/components";
 
-Layout settings can live in `wm.toml`, but a dedicated `layout.toml` is easier
-to maintain. See the [layout.toml reference](/aqueous/docs/toml/layout/) for
-the full list of accepted keys. The sidecar overlays `wm.toml` one recognized
-key at a time, so an omitted value keeps the setting already loaded from
-`wm.toml` or the compiled default.
+Layout policy belongs in `layout.toml`, although the same sections remain
+accepted in `wm.toml`. The sidecar overlays recognized values one key at a time.
 
 ## Layout engines
 
-| Engine      | Best suited to                                         |
-| ----------- | ------------------------------------------------------ |
-| `tile`      | A master area beside a stack of secondary windows      |
-| `monocle`   | One full-area window at a time                         |
-| `grid`      | Balanced rows and columns                              |
-| `rows`      | Full-width windows arranged in horizontal rows         |
-| `dwindle`   | Alternating recursive splits                           |
-| `scrolling` | PaperWM-style horizontal columns and viewport panning  |
-| `float`     | Remembered, native, or rule-provided floating geometry |
-| `game-mode` | One anchor window with companion windows beside it     |
+| Engine            | Behavior                                                              |
+| ----------------- | --------------------------------------------------------------------- |
+| `tile`            | Master area beside a vertically divided stack.                        |
+| `monocle`         | One full-area window, or a full-area z-stack.                         |
+| `grid`            | Balanced rows and columns.                                            |
+| `rows`            | Full-width horizontal rows.                                           |
+| `dwindle`         | Alternating recursive splits.                                         |
+| `reverse-dwindle` | Horizontally mirrored recursive splits.                               |
+| `scrolling`       | PaperWM-style columns with independent vertical stacks and viewports. |
+| `stacking`        | Full freeform/stacking desktop with persistent geometry and z-order.  |
+| `game-mode`       | One anchor with companion layouts in the remaining side columns.      |
+| `composable`      | As many as four independent leaf layouts in fixed normalized regions. |
 
-`floating` and `game_mode` are accepted aliases for `float` and `game-mode`.
+`float`, `floating`, and `stack` are compatibility aliases for `stacking`;
+`reverse_dwindle` and `game_mode` are accepted aliases for their dashed IDs.
 
-## A balanced starting point
+## Shared defaults and slots
 
 ```toml
-# ~/.config/aqueous/layout.toml
 [layout]
 default = "scrolling"
 gaps_outer = 8
 gaps_inner = 4
 master_ratio = 0.55
 master_count = 1
-
-# Colors use 0xAARRGGBB.
 border_width = 2
 border_focused = 0xFF88C0D0
 border_normal = 0xFF3B4252
@@ -54,58 +51,230 @@ tertiary = "monocle"
 quaternary = "grid"
 ```
 
-The four slots are targets for the `set_layout_primary`,
-`set_layout_secondary`, `set_layout_tertiary`, and `set_layout_quaternary`
-bindings.
-
-## Engine-specific options
-
-Every `[layout.options.<id>]` section accepts the common gap, master, and border
-keys. Only `monocle`, `dwindle`, and `scrolling` add engine-specific keys.
+Every leaf `[layout.options.<id>]` can override the common geometry and border
+fields for that engine. The four slots are targets for the corresponding
+`set_layout_*` actions and can contain any top-level layout ID.
 
 ```toml
-[layout.options.tile]
-master_ratio = 0.60
-master_count = 1
-
 [layout.options.monocle]
 hide_others = true
 show_borders = false
 
 [layout.options.dwindle]
-split_ratio = 0.50
+split_ratio = 0.5
 start_axis = "vertical" # vertical | horizontal
 
-[layout.options.scrolling]
-column_fraction = 0.50
-center_focused = true
-follow_new_windows = true
-snap_to_columns = false
-allow_overscroll = true
-
-[layout.options.float]
-border_width = 2
+[layout.options.reverse-dwindle]
+split_ratio = 0.5
+start_axis = "vertical"
 ```
 
-Ratios must be greater than `0` and less than `1`. Use TOML numbers and booleans
-for these options, not quoted strings.
+## Tile resizing
 
-<Aside type="note">
-  `[layout.options.game-mode]` accepts only common geometry and border keys.
-  Configure `remainder_layout`, `fallback_layout`, and the anchor gap under
-  `[game_mode]` in `rules.toml`.
-</Aside>
+`Super`+right-drag on a tile member resizes it without making it floating.
+Horizontal motion changes the shared master/stack split; vertical motion
+changes the selected member's height within its column while the other members
+share the remainder. The split persists as layout state.
 
-## Select layouts by output and workspace
+## Stacking layout
 
-An output can define its normal layout in either `wm.toml` or `layout.toml`.
-Workspace mappings are also accepted in both files; define each mapping in only
-one place.
+Stacking is a workspace-wide freeform layout, not merely a tiled layout with
+every window toggled floating. Ordinary members retain stacking-owned geometry
+across focus changes and temporary layout switches. A per-window floating
+toggle promotes a member to a persistent floating overlay; toggling again
+returns ownership to the workspace layout at the latest rectangle.
+
+```toml
+[layout.options.stacking]
+placement = "minimal-overlap" # cascade | center | under-pointer | minimal-overlap
+cascade_step = 32
+move_step = 10
+move_step_coarse = 50
+resize_step = 10
+snap_gap = 0
+snap_threshold = 24
+resistance = 12
+top_edge_maximize = true
+```
+
+New windows use native/rule geometry when provided, otherwise the configured
+placement policy. `minimal-overlap` evaluates candidate positions against
+existing stacking members. Geometry is constrained by client minimum/maximum
+size hints and recovered after output mode, scale, transform, strut, or hotplug
+changes so a reachable portion remains available.
+
+Focus maintains workspace-local MRU order. `raise_on_focus` and its delay are
+configured under `[input]`. Windows can be raised/lowered explicitly or placed
+in `below`, `normal`, and `above` semantic layers through a rule or toggle.
+Transient dialogs remain associated with their parent; fullscreen remains
+above the ordinary stack.
+
+### Pointer movement and snapping
+
+- `Super`+left-drag moves a stacking member or persistent floating overlay.
+- `Super`+right-drag resizes from the chosen edge/corner.
+- A validated XDG title-bar move/resize request uses the same path. XWayland
+  `_NET_WM_MOVERESIZE` is accepted only during a focused pointer press.
+- Edge resistance attracts the moving rectangle to output and other window
+  edges.
+- Reaching an output edge previews and commits half/quarter snapping. The top
+  edge maximizes to the usable area when `top_edge_maximize = true`; otherwise
+  it selects the top half.
+- Crossing another output transfers ownership to that output's active
+  workspace while preserving logical size and pointer offset.
+
+### Custom snap zones
+
+Up to four named normalized regions resolve independently against each output's
+current usable area:
+
+```toml
+[layout.snap-zone.a]
+x = 0.0
+y = 0.0
+width = 0.6666667
+height = 1.0
+
+[layout.snap-zone.b]
+x = 0.6666667
+y = 0.0
+width = 0.3333333
+height = 1.0
+
+[keybinds.custom]
+"Super+Alt+1" = "builtin:snap_zone:a"
+"Super+Alt+Space" = "builtin:cycle_snap_zone"
+```
+
+Coordinates and dimensions must be finite and normalized within the usable
+area. Invalid or incomplete zones are ignored independently.
+
+### Keyboard freeform actions
+
+All stacking actions are built-ins but remain unbound unless configured. They
+include:
+
+- `raise_window`, `lower_window`, `toggle_always_above`, and
+  `toggle_always_below`.
+- Fine and coarse `nudge_floating_<direction>` movement.
+- `resize_floating_<direction>` and `shrink_floating_<direction>`.
+- Halves, quarters, top, bottom, center, custom zones, zone cycling, and
+  `unsnap`.
+- Horizontal/vertical partial maximize and full fit-to-output.
+- Move-to-edge and grow-to-edge actions in all four directions.
+
+These actions also operate on a persistent floating overlay while another
+workspace layout is active.
+
+## Scrolling columns
+
+```toml
+[layout.options.scrolling]
+column_fraction = 0.5
+center_focused = true
+follow_new_windows = true
+prefer_vertical_on_portrait = false
+snap_to_columns = false
+allow_overscroll = true
+focus_follows_mouse_delay_ms = 0
+```
+
+Each column owns its width and an independent vertical member viewport. New
+windows normally create columns; portrait-aware mode appends them to the active
+column when that scrolling instance is taller than wide. This works inside
+composable regions and Game Mode remainders as well as on a full output.
+
+Focus left/right crosses columns and up/down crosses members. The built-ins can
+consume the first window from the right, expel a member into a new column, move
+a whole column, toggle one column to full viewport width, or pan without
+changing keyboard focus. Clipped focused members are revealed automatically.
+
+With the primary modifier held, vertical wheel steps pan by column; adding Alt
+moves within the focused column. On portrait-arranged instances the axes swap.
+Natural scrolling is respected, high-resolution motion is accumulated, and a
+captured navigation step does not leak into the client.
+
+`Super`+left-drag uses top/bottom insertion zones to stack a window within a
+column and middle-left/right zones to form an adjacent column.
+`Super`+right-drag changes the column width horizontally and the selected member
+height vertically. `Super`+double-left-click restores configured width and
+default full-viewport member height.
+
+## Composable regions
+
+Composable mode divides the strut-adjusted usable area into one to four regions
+named `a` through `d`:
+
+```toml
+[layout]
+default = "composable"
+
+[layout.composable.a]
+layout = "tile"
+p1 = [0.0, 0.0]
+p2 = [0.5, 0.0]
+p3 = [0.5, 1.0]
+p4 = [0.0, 1.0]
+
+[layout.composable.b]
+layout = "scrolling"
+p1 = [0.5, 0.0]
+p2 = [1.0, 0.0]
+p3 = [1.0, 1.0]
+p4 = [0.5, 1.0]
+```
+
+Points are normalized clockwise corners of a nonzero axis-aligned rectangle.
+Regions may touch or leave gaps but cannot overlap. An invalid configured
+region makes composable mode fall back to full-area tile.
+
+Children may use any leaf layout, including stacking, but cannot nest Game Mode
+or composable. Each region keeps independent order, viewport, and floating
+state. New windows enter the active region; pointer and layout actions route to
+the member's child. Cross-region drops exchange membership.
+
+```toml
+[keybinds.custom]
+"Super+Alt+1" = "builtin:focus_composable:a"
+"Super+Alt+Shift+1" = "builtin:move_to_composable:a"
+```
+
+Region arguments accept `a`–`d` or `1`–`4`.
+
+## Game Mode
+
+Game Mode chooses one matched anchor and exposes the remaining full-height left
+and right columns to independent companion-layout instances. An edge anchor
+collapses that side; top/bottom strips around a shorter centered anchor remain
+unused.
+
+```toml
+# rules.toml
+[game_mode]
+remainder_layout = "grid"
+fallback_layout = "tile"
+gaps_inner = 8
+
+[[window]]
+app_id = "steam_app_*"
+layout = "game-mode"
+workspace = 9
+anchor = "center"
+size = "0.70x0.80"
+scale = 1.0
+```
+
+The remainder and fallback accept every leaf layout. Game Mode delegates
+rearrangement and scrolling actions to an active remainder while keeping the
+anchor fixed. If no matching anchor is present, the fallback fills the usable
+area.
+
+## Per-output and workspace selection
 
 ```toml
 [[output]]
 name = "DP-1"
-layout = "tile"
+layout = "scrolling"
 
 [[workspace]]
 workspace = 2
@@ -113,17 +282,15 @@ layout = "monocle"
 
 [[workspace]]
 output = "DP-1"
-workspace = 3
-layout = "dwindle"
+workspace = 4
+layout = "stacking"
 ```
 
-Layout selection resolves from highest to lowest priority:
+Workspace numbers are 1-based. The layout can also be changed live with
+`aqueousctl layout --output NAME --set LAYOUT --json` or a layout binding.
 
-1. A layout selected at runtime for the active workspace
-2. An output-and-workspace mapping
-3. A workspace-only mapping
-4. The matching output's default
-5. `[layout].default`
-
-Runtime selection is stored per workspace, so switching away and back preserves
-the layout you chose for that workspace during the session.
+<Aside type="tip">
+  The [settings application](/aqueous/settings/) exposes typed controls for
+  engine options and custom snap zones. Use its Advanced editor for composable
+  rectangles and workspace/output mappings.
+</Aside>

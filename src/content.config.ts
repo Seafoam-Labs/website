@@ -24,6 +24,12 @@ export const collections = {
         language: "toml",
       },
       {
+        id: "aqueous-outputs-toml",
+        title: "Aqueous outputs.toml Reference",
+        url: "https://raw.githubusercontent.com/Seafoam-Labs/Aqueous/refs/heads/master/outputs.toml",
+        language: "toml",
+      },
+      {
         id: "aqueous-layout-toml",
         title: "Aqueous layout.toml Reference",
         url: "https://raw.githubusercontent.com/Seafoam-Labs/Aqueous/refs/heads/master/layout.toml.example",
