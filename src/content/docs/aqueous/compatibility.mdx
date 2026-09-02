@@ -39,13 +39,28 @@ Standard shell and desktop components can use:
 - `ext-workspace-v1` for per-output workspace lists and activation.
 - ext and wlr foreign-toplevel protocols for task lists and window discovery.
 - The Aqueous window-info protocol for layouts, content type, detailed states,
-  scene snapshots, and overlay diagnostics.
+  scene snapshots, decoration negotiation, and overlay diagnostics.
 - wlr output management, output power, gamma control, and XDG output.
 - ext idle notification, idle inhibit, and ext session lock.
 - XDG desktop portals through the packaged wlr/GTK portal configuration.
 
 Layer-shell exclusive zones feed directly into each output's usable area.
 Session-lock surfaces are handled outside ordinary window policy and Auto HDR.
+
+## Client and server decorations
+
+Aqueous implements `xdg-decoration` mode negotiation. With
+`[layout].force_ssd = true`, a client that creates an xdg-decoration object is
+configured for server-side decoration even when it requests client-side mode.
+Repeated client requests receive a configure response even when policy keeps
+the same effective mode.
+
+Applications that do not create the protocol object—or that paint a custom
+toolbar/title bar into their normal content—are not removable by compositor
+policy. Use an application setting or a typed `[[application]]` launch profile
+for those clients. See
+[Rounded corners and decorations](/aqueous/visual-effects/#rounded-corners-and-decorations)
+for configuration and diagnostics.
 
 ## Capture, sharing, and clipboard
 

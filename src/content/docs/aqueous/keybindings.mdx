@@ -188,6 +188,7 @@ The pixel increments, gap, resistance, and top-edge behavior come from
 ```toml
 [keybinds.custom]
 "Super+E" = "spawn:nemo"
+"Super+Shift+V" = "launch:vesktop-ssd"
 "Super+Shift+S" = "builtin:screenshot"
 "Alt+F4" = "builtin:close_focused"
 "Super+Alt+2" = "builtin:snap_zone:work/terminal"
@@ -197,9 +198,15 @@ The pixel increments, gap, resistance, and top-edge behavior come from
 ```
 
 - `spawn:<command>` runs a detached `/bin/sh -c` command.
+- `launch:<profile>` directly executes a named `[[application]]` profile with
+  its typed argument and environment arrays, without a shell.
 - `set_layout:<id-or-slot>` selects a layout directly.
 - `builtin:<action>` invokes any canonical built-in action, including argument
   forms for snap zones and composable regions.
+
+Use `launch:` for application-specific Wayland or decoration switches where
+argument boundaries matter. Profiles are defined in `wm.toml`; see
+[Application launch profiles](/aqueous/configuration/#application-launch-profiles).
 
 `builtin:cycle_snap_layout_reverse` cycles named layouts in the opposite
 direction. Named layout and zone actions are consumed only on a full stacking

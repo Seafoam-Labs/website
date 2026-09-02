@@ -32,8 +32,9 @@ files are sidecars for keeping each policy area understandable.
 
 Aqueous accepts a deliberately small TOML-compatible subset: sections,
 repeated tables, key/value assignments, binding and position arrays, inline
-maps for `exec.env`, and `#` comments. Unknown keys and malformed values are
-ignored individually while valid recognized values elsewhere still apply.
+maps for environment variables, and `#` comments. Unknown keys and malformed
+values are ignored individually while valid recognized values elsewhere still
+apply.
 
 The compositor fingerprints the resolved files once per second. Changed files
 are parsed into complete replacement snapshots and applied in one manage cycle,
@@ -167,6 +168,34 @@ env = { XDG_CURRENT_DESKTOP = "Aqueous" }
 
 The packaged Noctalia shell is already managed as a graphical-session service
 and does not need a duplicate `[[exec]]` entry.
+
+## Application launch profiles
+
+Repeated `[[application]]` blocks provide a shell-free path for applications
+that need toolkit-specific Wayland or decoration options:
+
+```toml
+[[application]]
+name = "vesktop-ssd"
+desktop_id = "vesktop.desktop"
+command = "/usr/bin/vesktop"
+args = ["--enable-features=WaylandWindowDecorations"]
+env = { ELECTRON_OZONE_PLATFORM_HINT = "auto" }
+
+[keybinds.custom]
+"Super+Shift+V" = "launch:vesktop-ssd"
+```
+
+`name` and `command` are required, and `command` must be an absolute executable
+path. A profile supports up to 16 arguments and 16 environment overrides.
+`desktop_id` is optional descriptive metadata. It does not change the system
+launcher or cause Aqueous to rewrite installed desktop entries.
+
+Unlike `spawn:`, `launch:` does not invoke `/bin/sh`. It passes every `args`
+element as a separate argument, inherits the compositor environment, replaces
+the named `env` entries, and executes the application directly. Shell
+expansion, pipelines, substitutions, and `~` expansion therefore do not apply.
+Use `spawn:` or `[[exec]]` when a command intentionally needs shell syntax.
 
 ## State and client scaling
 

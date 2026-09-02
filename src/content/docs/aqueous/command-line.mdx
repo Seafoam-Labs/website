@@ -20,15 +20,36 @@ aqueousctl windows --json
 The table and JSON forms expose each managed window's stable identifier,
 backend, native `app_id` or XWayland class, title, output, workspace, geometry,
 active layout, committed content type, state flags, and matched-rule metadata.
-State includes focused, fullscreen, maximized, minimized, floating,
-always-above/below, fixed-position, and switcher/taskbar suppression where
-applicable.
+JSON also includes the xdg-decoration capability, requested mode, effective
+mode, and whether a configure response is pending. State includes focused,
+fullscreen, maximized, minimized, floating, always-above/below, fixed-position,
+and switcher/taskbar suppression where applicable.
 
 Use JSON when feeding a bar, script, diagnostic report, or test:
 
 ```sh
 aqueousctl windows --json | jq '.[] | {title, output, workspace, layout, states}'
 ```
+
+To diagnose a client-side title bar while `force_ssd = true`:
+
+```sh
+aqueousctl windows --json |
+  jq '.[] | {app_id, title, decoration}'
+```
+
+The decoration object contains:
+
+| Field               | Meaning                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| `capability`        | `xdg-decoration` when the client created the protocol object; otherwise `unavailable`. |
+| `requested`         | The client's latest `none`, `client-side`, or `server-side` preference.                |
+| `effective`         | The mode most recently configured by Aqueous.                                          |
+| `configure_pending` | Whether the latest request is still waiting for a configure response.                  |
+
+With forced SSD, a cooperating client settles at `effective: server-side`.
+`capability: unavailable` means the compositor cannot negotiate away the
+application's decorations.
 
 ## Generate a window rule
 

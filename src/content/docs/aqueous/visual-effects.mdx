@@ -96,9 +96,38 @@ Vulkan-effects builds apply a fixed 12-pixel radius to normal window content
 and borders. Fullscreen content is square. There is no TOML radius setting;
 `-Dvulkan-effects=false` builds a square, no-blur diagnostic compositor.
 
-`[layout].force_ssd = true` asks SSD-capable XDG clients to use compositor-side
-decoration. CSD-only clients may keep their own title bars; their move/resize
-requests still integrate with stacking/freeform presentation.
+`[layout].force_ssd = true` selects server-side mode whenever a native XDG
+window creates an `xdg-decoration` object. Aqueous responds to every mode
+request, including repeated requests that do not change the effective mode,
+and recalculates the result when configuration reloads or the decoration
+object is recreated or destroyed.
+
+```toml
+[layout]
+force_ssd = true
+```
+
+This setting controls protocol negotiation; it cannot remove pixels that an
+application draws inside its own content buffer. A window with decoration
+capability `unavailable` did not create an `xdg-decoration` object, so Aqueous
+cannot safely strip its custom title bar. Use the application's own
+server-decoration or native-title-bar setting when it has one. For toolkit- or
+version-specific startup switches, use a shell-free
+[`[[application]]` launch profile](/aqueous/configuration/#application-launch-profiles).
+
+Inspect the negotiated state with:
+
+```sh
+aqueousctl windows --json |
+  jq '.[] | {app_id, title, decoration}'
+```
+
+For a cooperating client, `capability` is `xdg-decoration` and `effective`
+becomes `server-side`. `requested` records the latest client preference, while
+`configure_pending` identifies a request that has not yet received its
+configure response. `client-side` with `capability: unavailable` means an
+application-side workaround is required rather than a compositor policy
+change.
 
 ## Fractional client buffers
 
