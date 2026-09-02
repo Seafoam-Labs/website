@@ -30,7 +30,7 @@ Join case-insensitive tokens with `+`.
 - Primary modifier: `Super`, `Mod4`, `Logo`, or `Win`.
 - Other modifiers: `Ctrl`/`Control`, `Alt`/`Mod1`, and `Shift`.
 - Keys: printable ASCII, `F1`–`F24`, navigation/editing names, punctuation
-  names, `Print`, `CapsLock`, and common `XF86` media/display/brightness keys.
+  names, `Print`, `CapsLock`, `wheel`, and common `XF86` media/display/brightness keys.
 
 `AQUEOUS_MOD=Alt` makes Alt the primary modifier; in that mode literal Alt is
 still resolved consistently and Super remains available as an additional
@@ -91,7 +91,9 @@ Movement follows the active engine:
 | ---------------------------------------- | ----------------------------------- |
 | `scroll_viewport_left/right`             | `Super+Comma/Period` (legacy names) |
 | `scroll_viewport_left_arrow/right_arrow` | `Super+Left/Right`                  |
+| `scroll_viewport_left/right`             | `Super+wheel`                       |
 | `scroll_viewport_up/down`                | `Super+Up/Down`                     |
+| `scroll_viewport_up/down`                | `Super+Alt+wheel`                   |
 | `consume_window_into_column`             | `Super+Ctrl+J`                      |
 | `expel_window_from_column`               | `Super+Ctrl+K`                      |
 | `toggle_scrolling_full_width`            | `Super+Shift+Z`                     |
