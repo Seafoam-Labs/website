@@ -117,37 +117,71 @@ above the ordinary stack.
   `_NET_WM_MOVERESIZE` is accepted only during a focused pointer press.
 - Edge resistance attracts the moving rectangle to output and other window
   edges.
-- Reaching an output edge previews and commits half/quarter snapping. The top
+- Reaching an output edge previews the active named snap layout. Releasing
+  while a zone is selected commits its padded geometry. When no named zone is
+  selected, the ordinary half/quarter edge action remains available. The top
   edge maximizes to the usable area when `top_edge_maximize = true`; otherwise
   it selects the top half.
 - Crossing another output transfers ownership to that output's active
   workspace while preserving logical size and pointer offset.
 
-### Custom snap zones
+### Named stacking snap layouts
 
-Up to four named normalized regions resolve independently against each output's
-current usable area:
+Aqueous can define up to eight named layouts with sixteen normalized zones in
+each layout. A layout has a stable ID used by actions, a display name, and
+padding applied inside each resolved zone:
 
 ```toml
-[layout.snap-zone.a]
+[layout]
+snap_layout = "work"
+
+[layout.snap-layout.work]
+name = "Work"
+padding = 8
+
+[layout.snap-layout.work.zone.editor]
+name = "Editor"
 x = 0.0
 y = 0.0
 width = 0.6666667
 height = 1.0
 
-[layout.snap-zone.b]
+[layout.snap-layout.work.zone.terminal]
+name = "Terminal"
 x = 0.6666667
 y = 0.0
 width = 0.3333333
 height = 1.0
 
 [keybinds.custom]
-"Super+Alt+1" = "builtin:snap_zone:a"
-"Super+Alt+Space" = "builtin:cycle_snap_zone"
+"Super+Alt+1" = "builtin:snap_zone:work/editor"
+"Super+Alt+2" = "builtin:snap_zone:work/terminal"
+"Super+Alt+W" = "builtin:set_snap_layout:work"
+"Super+Alt+Space" = "builtin:cycle_snap_layout"
 ```
 
 Coordinates and dimensions must be finite and normalized within the usable
-area. Invalid or incomplete zones are ignored independently.
+area. Layout and zone IDs contain at most 32 letters, digits, hyphens, or
+underscores. The active layout is selected independently per output at runtime;
+`snap_layout` supplies the initial/default selection.
+
+While moving a stacking-owned window, entering the configured `snap_threshold`
+at any output edge displays all zones in the active layout and highlights the
+zone under the pointer. Release commits only the highlighted zone. A zone that
+does not touch any activation edge remains available through its direct
+keyboard action. Leaving the stacking output or cancelling the drag removes
+the preview without changing geometry.
+
+Named layout selection, preview, cycling, and zone actions are intentionally
+available only when that output's workspace is using `stacking`. They do not
+operate on persistent floating overlays in another layout or inside a
+composable child. This keeps snap-zone policy owned by the full stacking
+desktop rather than by the general floating presentation state.
+
+The legacy `[layout.snap-zone.a]` through `d`,
+`builtin:snap_zone:<a-d>`, and `builtin:cycle_snap_zone` forms remain accepted
+for existing configurations. The settings plugin can copy them into a named
+layout.
 
 ### Keyboard freeform actions
 
@@ -158,13 +192,14 @@ include:
   `toggle_always_below`.
 - Fine and coarse `nudge_floating_<direction>` movement.
 - `resize_floating_<direction>` and `shrink_floating_<direction>`.
-- Halves, quarters, top, bottom, center, custom zones, zone cycling, and
-  `unsnap`.
+- Halves, quarters, top, bottom, center, named stacking zones, layout/zone
+  cycling, and `unsnap`.
 - Horizontal/vertical partial maximize and full fit-to-output.
 - Move-to-edge and grow-to-edge actions in all four directions.
 
-These actions also operate on a persistent floating overlay while another
-workspace layout is active.
+General geometry actions also operate on a persistent floating overlay while
+another workspace layout is active. Named layout and named-zone actions are
+the exception: they require the workspace itself to use stacking.
 
 ## Scrolling columns
 
@@ -291,6 +326,6 @@ Workspace numbers are 1-based. The layout can also be changed live with
 
 <Aside type="tip">
   The [settings application](/aqueous/settings/) exposes typed controls for
-  engine options and custom snap zones. Use its Advanced editor for composable
-  rectangles and workspace/output mappings.
+  engine options and named stacking snap layouts. Use its Advanced editor for
+  composable rectangles and workspace/output mappings.
 </Aside>

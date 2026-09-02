@@ -163,17 +163,18 @@ unbound partial-maximize actions.
 These built-ins are intentionally unbound so existing configurations keep
 their chords:
 
-| Group                | Actions                                                                      |
-| -------------------- | ---------------------------------------------------------------------------- |
-| Stack order          | `raise_window`, `lower_window`, `toggle_always_above`, `toggle_always_below` |
-| Fine movement        | `nudge_floating_left/right/up/down`                                          |
-| Coarse movement      | `nudge_floating_coarse_left/right/up/down`                                   |
-| Grow an edge         | `resize_floating_left/right/up/down`                                         |
-| Shrink an edge       | `shrink_floating_left/right/up/down`                                         |
-| Standard snap        | `snap_left/right/up/down`, `snap_center`, four corner actions, `unsnap`      |
-| Custom snap          | `builtin:snap_zone:a` through `d`, `cycle_snap_zone`                         |
-| Fit/partial maximize | `fit_floating_to_output`, `toggle_maximize_horizontal/vertical`              |
-| Edge operations      | `move_floating_to_edge_<direction>`, `grow_floating_to_edge_<direction>`     |
+| Group                | Actions                                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Stack order          | `raise_window`, `lower_window`, `toggle_always_above`, `toggle_always_below`                                   |
+| Fine movement        | `nudge_floating_left/right/up/down`                                                                            |
+| Coarse movement      | `nudge_floating_coarse_left/right/up/down`                                                                     |
+| Grow an edge         | `resize_floating_left/right/up/down`                                                                           |
+| Shrink an edge       | `shrink_floating_left/right/up/down`                                                                           |
+| Standard snap        | `snap_left/right/up/down`, `snap_center`, four corner actions, `unsnap`                                        |
+| Named stacking snap  | `builtin:snap_zone:<layout>/<zone>`, `builtin:set_snap_layout:<layout>`, `builtin:cycle_snap_layout[_reverse]` |
+| Legacy custom snap   | `builtin:snap_zone:a` through `d`, `cycle_snap_zone`                                                           |
+| Fit/partial maximize | `fit_floating_to_output`, `toggle_maximize_horizontal/vertical`                                                |
+| Edge operations      | `move_floating_to_edge_<direction>`, `grow_floating_to_edge_<direction>`                                       |
 
 The pixel increments, gap, resistance, and top-edge behavior come from
 `[layout.options.stacking]`.
@@ -187,7 +188,9 @@ The pixel increments, gap, resistance, and top-edge behavior come from
 "Super+E" = "spawn:nemo"
 "Super+Shift+S" = "builtin:screenshot"
 "Alt+F4" = "builtin:close_focused"
-"Super+Alt+2" = "builtin:snap_zone:b"
+"Super+Alt+2" = "builtin:snap_zone:work/terminal"
+"Super+Alt+W" = "builtin:set_snap_layout:work"
+"Super+Alt+Space" = "builtin:cycle_snap_layout"
 "XF86AudioRaiseVolume" = "spawn:wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
 ```
 
@@ -195,6 +198,11 @@ The pixel increments, gap, resistance, and top-edge behavior come from
 - `set_layout:<id-or-slot>` selects a layout directly.
 - `builtin:<action>` invokes any canonical built-in action, including argument
   forms for snap zones and composable regions.
+
+`builtin:cycle_snap_layout_reverse` cycles named layouts in the opposite
+direction. Named layout and zone actions are consumed only on a full stacking
+workspace; they remain inert in every other layout, including for persistent
+floating overlays.
 
 If several declarations resolve to the same chord, the last declaration wins.
 A bound Caps Lock chord is consumed by Aqueous and does not toggle the lock;

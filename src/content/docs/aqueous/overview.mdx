@@ -21,8 +21,10 @@ Aqueous-owned and integrated directly into the compositor.
   `stacking`, `game-mode`, and `composable`.
 - Use stacking as a complete freeform desktop with persistent geometry and
   z-order, MRU focus, focus raising, placement policies, edge resistance,
-  keyboard movement and resizing, half/quarter snapping, and four custom snap
-  zones. The legacy names `float`, `floating`, and `stack` remain accepted.
+  keyboard movement and resizing, half/quarter snapping, and up to eight named
+  snap layouts with sixteen zones each. Edge previews and named-zone actions
+  are deliberately stacking-only. The legacy names `float`, `floating`, and
+  `stack` remain accepted.
 - Divide a workspace into as many as four normalized composable regions, each
   running an independent leaf layout with its own ordering and state.
 - Arrange PaperWM-style scrolling columns, including vertical stacks, viewport
@@ -95,8 +97,9 @@ The packaged desktop also includes:
 - `aqueousctl`, for inspecting windows, outputs, scene nodes, overlay-plane
   decisions, and live workspace layouts.
 - A Noctalia settings plugin with typed controls, a draggable monitor canvas,
-  complete stacking and rule editors, raw advanced file editing, validation,
-  stale-write protection, backups, and toolkit typography synchronization.
+  complete stacking and rule editors, named snap-layout and binding controls,
+  raw advanced file editing, validation, stale-write protection, backups, and
+  toolkit typography synchronization.
 - A first-run welcome application that discovers installed software and can
   install selected repository, AUR, and Flatpak applications through Shelly.
 

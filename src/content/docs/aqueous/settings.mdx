@@ -66,8 +66,18 @@ one canonical **Stacking** choice.
 
 Stacking controls include placement policy, cascade offset, fine/coarse move
 steps, resize step, snap gap and threshold, edge resistance, and top-edge
-maximize. Snap zones `a` through `d` have normalized coordinate editors,
-previews, and half/third/quarter presets.
+maximize. The named snap-layout editor can create as many as eight layouts with
+sixteen zones apiece, choose the default, edit stable layout and zone IDs,
+names, padding, and normalized geometry, and apply half/third/quarter presets.
+It can migrate legacy zones `a` through `d` into a named layout and create
+custom bindings for a layout, zone, or layout cycle. The legacy A-D coordinate
+editor remains available for existing configurations.
+
+Named zones are strictly stacking-only. Dragging a stacking-owned window to an
+output edge shows the active layout's zones; releasing over the selected zone
+commits it. Keyboard zone actions follow the same ownership check, so they do
+nothing in tiled, scrolling, Game Mode, or composable layouts—even when the
+focused window is a persistent floating overlay.
 
 If several legacy stacking option sections coexist, the panel warns rather
 than silently choosing one. An explicit normalization operation merges known
@@ -111,9 +121,11 @@ same page.
 
 Every built-in action is listed, including currently unbound stacking actions.
 A field accepts one chord or comma-separated chords. Custom entries expose
-both chord and verb and can be created or deleted; a snap-zone preset produces
-the correct `builtin:snap_zone:<a-d>` form. The page also edits launcher,
-terminal, screenshot, and lock commands.
+both chord and verb and can be created or deleted. Snap-layout shortcuts produce
+the correct `builtin:snap_zone:<layout>/<zone>`,
+`builtin:set_snap_layout:<layout>`, or `builtin:cycle_snap_layout` form and
+fall back to the legacy `builtin:snap_zone:a` preset when no named layout
+exists. The page also edits launcher, terminal, screenshot, and lock commands.
 
 ### Advanced
 
