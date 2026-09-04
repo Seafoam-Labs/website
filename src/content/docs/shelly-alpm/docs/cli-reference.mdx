@@ -14,93 +14,96 @@ value searches standard repositories and the AUR, then prompts for a package to 
 
 ## Commands
 
-| Command               | Description                                                                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shelly search`       | Search ALPM repositories, the AUR, or cached Flatpak AppStream catalogs.                                                                             |
-| `shelly install`      | Install packages or applications from ALPM repositories, the AUR, AppImages, Flatpak remotes, or local Flatpak files, and repair installed Flatpaks. |
-| `shelly upgrade`      | Upgrade standard, AUR, AppImage, or Flatpak packages, including all supported backends together.                                                     |
-| `shelly downgrade`    | Select and install an older version of a standard package.                                                                                           |
-| `shelly mark`         | Manage IgnorePkg and HoldPkg package marks, or change an installed package's explicit/dependency reason.                                             |
-| `shelly news`         | Read Arch Linux news and track viewed entries.                                                                                                       |
-| `shelly list-updates` | List available updates for standard, AUR, AppImage, or Flatpak packages.                                                                             |
-| `shelly list`         | List installed standard packages, AppImages, AUR packages, or Flatpak applications.                                                                  |
-| `shelly backup`       | Back up explicitly installed packages as type-grouped TOML.                                                                                          |
-| `shelly utility`      | Repair Shelly directory ownership, manage pacfiles, or generate CLI documentation and shell completions.                                             |
-| `shelly purify`       | Remove corrupted or orphaned ALPM packages, optionally clean the package cache, or remove unused Flatpak dependencies.                               |
-| `shelly remove`       | Remove standard or local packages, AUR packages, AppImages, or Flatpak applications.                                                                 |
-| `shelly sync`         | Synchronize ALPM package databases, AppImage metadata, or cached Flatpak AppStream metadata.                                                         |
-| `shelly update`       | Update selected standard, AUR, or Flatpak packages.                                                                                                  |
-| `shelly config`       | Read and modify Shelly configuration.                                                                                                                |
-| `shelly keyring`      | Initialize, inspect, refresh, populate, receive, or locally sign keys in the pacman keyring.                                                         |
-| `shelly run`          | Launch or stop a Flatpak or AppImage application.                                                                                                    |
+| Command | Description |
+| --- | --- |
+| `shelly search` | Search ALPM repositories, the AUR, or cached Flatpak AppStream catalogs. |
+| `shelly install` | Install packages or applications from ALPM repositories, the AUR, AppImages, Flatpak remotes, or local Flatpak files, and repair installed Flatpaks. |
+| `shelly upgrade` | Upgrade standard, AUR, AppImage, or Flatpak packages, including all supported backends together. |
+| `shelly downgrade` | Select and install an older version of a standard package. |
+| `shelly mark` | Manage IgnorePkg and HoldPkg package marks, or change an installed package's explicit/dependency reason. |
+| `shelly news` | Read Arch Linux news and track viewed entries. |
+| `shelly list-updates` | List available updates for standard, AUR, AppImage, or Flatpak packages. |
+| `shelly list` | List installed standard packages, AppImages, AUR packages, or Flatpak applications. |
+| `shelly backup` | Back up explicitly installed packages as type-grouped TOML. |
+| `shelly utility` | Repair Shelly directory ownership, manage pacfiles, or generate CLI documentation and shell completions. |
+| `shelly purify` | Remove corrupted or orphaned ALPM packages, optionally clean the package cache, or remove unused Flatpak dependencies. |
+| `shelly remove` | Remove standard or local packages, AUR packages, AppImages, or Flatpak applications. |
+| `shelly sync` | Synchronize ALPM package databases, AppImage metadata, or cached Flatpak AppStream metadata. |
+| `shelly update` | Update selected standard, AUR, or Flatpak packages. |
+| `shelly config` | Read and modify Shelly configuration. |
+| `shelly keyring` | Manage pacman package-signing keys and user PKGBUILD source-signing keys. |
+| `shelly run` | Launch or stop a Flatpak or AppImage application. |
+| `shelly build` | Builds a PKGBUILD into an installable package |
 
 ## Shortcodes
 
-| Shortcode | Command                        |
-| --------- | ------------------------------ |
-| `-Ss`     | `shelly search standard`       |
-| `-Sa`     | `shelly search aur`            |
-| `-Sf`     | `shelly search flatpak`        |
-| `-Is`     | `shelly install standard`      |
-| `-Ii`     | `shelly install appimage`      |
-| `-Ia`     | `shelly install aur`           |
-| `-If`     | `shelly install flatpak`       |
-| `-Us`     | `shelly upgrade standard`      |
-| `-Ux`     | `shelly upgrade all`           |
-| `-Ui`     | `shelly upgrade appimage`      |
-| `-Ua`     | `shelly upgrade aur`           |
-| `-Uf`     | `shelly upgrade flatpak`       |
-| `-D`      | `shelly downgrade`             |
-| `-Mg`     | `shelly mark ignore`           |
-| `-Mo`     | `shelly mark hold`             |
-| `-Me`     | `shelly mark explicit`         |
-| `-Md`     | `shelly mark dependency`       |
-| `-N`      | `shelly news`                  |
-| `-Px`     | `shelly list-updates all`      |
-| `-Ps`     | `shelly list-updates standard` |
-| `-Pi`     | `shelly list-updates appimage` |
-| `-Pa`     | `shelly list-updates aur`      |
-| `-Pf`     | `shelly list-updates flatpak`  |
-| `-Ls`     | `shelly list standard`         |
-| `-Li`     | `shelly list appimage`         |
-| `-La`     | `shelly list aur`              |
-| `-Lf`     | `shelly list flatpak`          |
-| `-B`      | `shelly backup`                |
-| `-T`      | `shelly utility`               |
-| `-Tr`     | `shelly utility repository`    |
-| `-Zs`     | `shelly purify standard`       |
-| `-Zf`     | `shelly purify flatpak`        |
-| `-Rs`     | `shelly remove standard`       |
-| `-Ri`     | `shelly remove appimage`       |
-| `-Ra`     | `shelly remove aur`            |
-| `-Rf`     | `shelly remove flatpak`        |
-| `-Ys`     | `shelly sync`                  |
-| `-Yi`     | `shelly sync appimage`         |
-| `-Yf`     | `shelly sync flatpak`          |
-| `-Es`     | `shelly update standard`       |
-| `-Ea`     | `shelly update aur`            |
-| `-Ef`     | `shelly update flatpak`        |
-| `-C`      | `shelly config`                |
-| `-Cg`     | `shelly config get`            |
-| `-Cs`     | `shelly config set`            |
-| `-Cr`     | `shelly config reset`          |
-| `-Cp`     | `shelly config parallel`       |
-| `-Ki`     | `shelly keyring init`          |
-| `-Kl`     | `shelly keyring list`          |
-| `-Kr`     | `shelly keyring refresh`       |
-| `-Ks`     | `shelly keyring lsign`         |
-| `-Kp`     | `shelly keyring populate`      |
-| `-Kv`     | `shelly keyring recv`          |
-| `-Xf`     | `shelly run flatpak`           |
-| `-Xi`     | `shelly run appimage`          |
+| Shortcode | Command |
+| --- | --- |
+| `-Ss` | `shelly search standard` |
+| `-Sa` | `shelly search aur` |
+| `-Sf` | `shelly search flatpak` |
+| `-Is` | `shelly install standard` |
+| `-Ii` | `shelly install appimage` |
+| `-Ia` | `shelly install aur` |
+| `-If` | `shelly install flatpak` |
+| `-Us` | `shelly upgrade standard` |
+| `-Ux` | `shelly upgrade all` |
+| `-Ui` | `shelly upgrade appimage` |
+| `-Ua` | `shelly upgrade aur` |
+| `-Uf` | `shelly upgrade flatpak` |
+| `-D` | `shelly downgrade` |
+| `-Mg` | `shelly mark ignore` |
+| `-Mo` | `shelly mark hold` |
+| `-Me` | `shelly mark explicit` |
+| `-Md` | `shelly mark dependency` |
+| `-N` | `shelly news` |
+| `-Px` | `shelly list-updates all` |
+| `-Ps` | `shelly list-updates standard` |
+| `-Pi` | `shelly list-updates appimage` |
+| `-Pa` | `shelly list-updates aur` |
+| `-Pf` | `shelly list-updates flatpak` |
+| `-Ls` | `shelly list standard` |
+| `-Li` | `shelly list appimage` |
+| `-La` | `shelly list aur` |
+| `-Lf` | `shelly list flatpak` |
+| `-B` | `shelly backup` |
+| `-T` | `shelly utility` |
+| `-Tr` | `shelly utility repository` |
+| `-Zs` | `shelly purify standard` |
+| `-Zf` | `shelly purify flatpak` |
+| `-Rs` | `shelly remove standard` |
+| `-Ri` | `shelly remove appimage` |
+| `-Ra` | `shelly remove aur` |
+| `-Rf` | `shelly remove flatpak` |
+| `-Ys` | `shelly sync` |
+| `-Yi` | `shelly sync appimage` |
+| `-Yf` | `shelly sync flatpak` |
+| `-Es` | `shelly update standard` |
+| `-Ea` | `shelly update aur` |
+| `-Ef` | `shelly update flatpak` |
+| `-C` | `shelly config` |
+| `-Cg` | `shelly config get` |
+| `-Cs` | `shelly config set` |
+| `-Cr` | `shelly config reset` |
+| `-Cp` | `shelly config parallel` |
+| `-Ki` | `shelly keyring init` |
+| `-Kl` | `shelly keyring list` |
+| `-Kr` | `shelly keyring refresh` |
+| `-Ks` | `shelly keyring lsign` |
+| `-Kp` | `shelly keyring populate` |
+| `-Kv` | `shelly keyring recv` |
+| `-Xf` | `shelly run flatpak` |
+| `-Xi` | `shelly run appimage` |
+| `-A` | `shelly build` |
 
 ## Global Options
 
-| Option             | Type   | Description                                          |
-| ------------------ | ------ | ---------------------------------------------------- |
-| `--no-confirm, -n` | `bool` | Use safe automatic answers instead of prompting      |
-| `--ui-mode, -U`    | `bool` | Emit framed output for the Shelly UI                 |
-| `--json, -j`       | `bool` | Output structured JSON where the command supports it |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--no-confirm, -n` | `bool` | Use safe automatic answers instead of prompting |
+| `--ui-mode, -U` | `bool` | Emit framed output for the Shelly UI |
+| `--json, -j` | `bool` | Output structured JSON where the command supports it |
+| `--aur-url <aur-url>` | `string` | Base URL of the AUR service used for Git clones and RPC requests |
 
 ## Command Reference
 
@@ -110,11 +113,11 @@ Search ALPM repositories, the AUR, or cached Flatpak AppStream catalogs.
 
 Subcommands:
 
-| Command                  | Description                                                                                                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Command | Description |
+| --- | --- |
 | `shelly search standard` | Search ALPM repository and installed packages, or Shelly-managed local binary packages. With a package and no source modifier, show exact package details. |
-| `shelly search aur`      | Search the AUR RPC, fetch exact package PKGBUILDs, append high-confidence standard repository matches, or show complete metadata for one AUR package.      |
-| `shelly search flatpak`  | Search cached AppStream catalogs from every configured system and user Flatpak remote, with local pagination and remote-reference sizes and permissions.   |
+| `shelly search aur` | Search the AUR RPC, fetch exact package PKGBUILDs, append high-confidence standard repository matches, or show complete metadata for one AUR package. |
+| `shelly search flatpak` | Search cached AppStream catalogs from every configured system and user Flatpak remote, with local pagination and remote-reference sizes and permissions. |
 
 #### `shelly search standard`
 
@@ -129,25 +132,25 @@ shelly search standard [<package>] [options]
 
 Arguments:
 
-| Argument    | Arity | Description                                                                                 |
-| ----------- | ----- | ------------------------------------------------------------------------------------------- |
-| `<package>` | 0..1  | Package name or search term; without a source modifier, an exact name opens package details |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 0..1 | Package name or search term; without a source modifier, an exact name opens package details |
 
 Options:
 
-| Option                 | Type   | Description                                                                 |
-| ---------------------- | ------ | --------------------------------------------------------------------------- |
-| `--repos, -r`          | `bool` | List repositories parsed from pacman.conf and ignore other search modifiers |
-| `--available, -v`      | `bool` | Search packages from the configured ALPM synchronization databases          |
-| `--installed, -i`      | `bool` | Search packages from the local ALPM database                                |
-| `--local, -l`          | `bool` | Search Shelly-managed binary packages installed under /opt/shelly           |
-| `--limit, -t <limit>`  | `int`  | Maximum number of search results to return per page                         |
-| `--page, -p <page>`    | `int`  | Page number for paginated results                                           |
-| `--show-hidden, -w`    | `bool` | Include packages hidden by pacman IgnorePkg configuration                   |
-| `--detail, --info, -d` | `bool` | Show complete metadata for one exact ALPM package name                      |
-| `--group, -g`          | `bool` | List package groups or restrict available packages to the requested group   |
-| `--explicit, -e`       | `bool` | Shows only explicitly installed pacakges                                    |
-| `--depends, -D`        | `bool` | Shows only dependency packages                                              |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--repos, -r` | `bool` | List repositories parsed from pacman.conf and ignore other search modifiers |
+| `--available, -v` | `bool` | Search packages from the configured ALPM synchronization databases |
+| `--installed, -i` | `bool` | Search packages from the local ALPM database |
+| `--local, -l` | `bool` | Search Shelly-managed binary packages installed under /opt/shelly |
+| `--limit, -t <limit>` | `int` | Maximum number of search results to return per page |
+| `--page, -p <page>` | `int` | Page number for paginated results |
+| `--show-hidden, -w` | `bool` | Include packages hidden by pacman IgnorePkg configuration |
+| `--detail, --info, -d` | `bool` | Show complete metadata for one exact ALPM package name |
+| `--group, -g` | `bool` | List package groups or restrict available packages to the requested group |
+| `--explicit, -e` | `bool` | Shows only explicitly installed pacakges |
+| `--depends, -D` | `bool` | Shows only dependency packages |
 
 #### `shelly search aur`
 
@@ -162,17 +165,17 @@ shelly search aur <query>... [options]
 
 Arguments:
 
-| Argument  | Arity | Description                                                                                                |
-| --------- | ----- | ---------------------------------------------------------------------------------------------------------- |
-| `<query>` | 1..\* | Search words joined for an AUR RPC query, or exact AUR package names when --pkgbuild or --detail is passed |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<query>` | 1..* | Search words joined for an AUR RPC query, or exact AUR package names when --pkgbuild or --detail is passed |
 
 Options:
 
-| Option                 | Type   | Description                                                                |
-| ---------------------- | ------ | -------------------------------------------------------------------------- |
-| `--standard, -s`       | `bool` | Append high-confidence standard ALPM repository matches to the AUR results |
-| `--pkgbuild, -p`       | `bool` | Fetch and display the PKGBUILD for each exact AUR package name             |
-| `--detail, --info, -d` | `bool` | Show complete metadata for one exact AUR package name                      |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--standard, -s` | `bool` | Append high-confidence standard ALPM repository matches to the AUR results |
+| `--pkgbuild, -p` | `bool` | Fetch and display the PKGBUILD for each exact AUR package name |
+| `--detail, --info, -d` | `bool` | Show complete metadata for one exact AUR package name |
 
 #### `shelly search flatpak`
 
@@ -187,16 +190,16 @@ shelly search flatpak <query> [options]
 
 Arguments:
 
-| Argument  | Arity | Description                                                                             |
-| --------- | ----- | --------------------------------------------------------------------------------------- |
-| `<query>` | 1..1  | Application name or ID matched against the configured remotes' local AppStream catalogs |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<query>` | 1..1 | Application name or ID matched against the configured remotes' local AppStream catalogs |
 
 Options:
 
-| Option                | Type  | Description                                         |
-| --------------------- | ----- | --------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--limit, -t <limit>` | `int` | Maximum number of search results to return per page |
-| `--page, -p <page>`   | `int` | Page number for paginated results                   |
+| `--page, -p <page>` | `int` | Page number for paginated results |
 
 ### `shelly install`
 
@@ -205,12 +208,12 @@ and repair installed Flatpaks.
 
 Subcommands:
 
-| Command                   | Description                                                                                                                                          |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shelly install standard` | Install ALPM repository packages, local Arch or Shelly binary archives, and package archives downloaded from HTTP(S) URLs.                           |
-| `shelly install appimage` | Install a local AppImage into the configured AppImage directory and update Shelly's AppImage metadata database.                                      |
-| `shelly install aur`      | Fetch, review, build, and install one or more AUR packages, install one package's build dependencies, or install one package at an exact Git commit. |
-| `shelly install flatpak`  | Install a Flatpak application, runtime, .flatpakref file, or bundle, or repair an installed Flatpak while preserving its configuration.              |
+| Command | Description |
+| --- | --- |
+| `shelly install standard` | Install ALPM repository packages, local Arch or Shelly binary archives, and package archives downloaded from HTTP(S) URLs. |
+| `shelly install appimage` | Install a local AppImage into the configured AppImage directory and update Shelly's AppImage metadata database. |
+| `shelly install aur` | Fetch, review, build, and install one or more AUR packages, install one package's build dependencies, or install one package at an exact Git commit. |
+| `shelly install flatpak` | Install a Flatpak application, runtime, .flatpakref file, or bundle, or repair an installed Flatpak while preserving its configuration. |
 
 #### `shelly install standard`
 
@@ -225,18 +228,18 @@ shelly install standard [<packages>...] [options]
 
 Arguments:
 
-| Argument     | Arity | Description                                                                                            |
-| ------------ | ----- | ------------------------------------------------------------------------------------------------------ |
-| `<packages>` | 0..\* | One or more repository names, repository-qualified names, local archive paths, or HTTP(S) package URLs |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | One or more repository names, repository-qualified names, local archive paths, or HTTP(S) package URLs |
 
 Options:
 
-| Option             | Type   | Description                                                                                                         |
-| ------------------ | ------ | ------------------------------------------------------------------------------------------------------------------- |
-| `--build-deps, -b` | `bool` | Install build dependencies for the requested packages                                                               |
-| `--make-deps, -m`  | `bool` | Install make dependencies for the requested packages                                                                |
-| `--no-deps, -d`    | `bool` | Pass the ALPM nodeps transaction flag when installing repository packages                                           |
-| `--upgrade, -u`    | `bool` | After confirmation, synchronize and upgrade the standard system before installing the requested repository packages |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--build-deps, -b` | `bool` | Install build dependencies for the requested packages |
+| `--make-deps, -m` | `bool` | Install make dependencies for the requested packages |
+| `--no-deps, -d` | `bool` | Pass the ALPM nodeps transaction flag when installing repository packages |
+| `--upgrade, -u` | `bool` | After confirmation, synchronize and upgrade the standard system before installing the requested repository packages |
 
 #### `shelly install appimage`
 
@@ -250,14 +253,14 @@ shelly install appimage <location> [options]
 
 Arguments:
 
-| Argument     | Arity | Description                                           |
-| ------------ | ----- | ----------------------------------------------------- |
-| `<location>` | 1..1  | Path to an existing file whose extension is .AppImage |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<location>` | 1..1 | Path to an existing file whose extension is .AppImage |
 
 Options:
 
-| Option                          | Type     | Description                                                                          |
-| ------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--install-path <install-path>` | `string` | Directory to install the AppImage into; overrides the configured AppImageInstallPath |
 
 #### `shelly install aur`
@@ -273,19 +276,22 @@ shelly install aur [<packages>...] [options]
 
 Arguments:
 
-| Argument     | Arity | Description                                                                                                                          |
-| ------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `<packages>` | 0..\* | AUR package names; dependency-only mode accepts one package, while --version requires exactly one package followed by its Git commit |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | AUR package names; dependency-only mode accepts one package, while --version requires exactly one package followed by its Git commit |
 
 Options:
 
-| Option             | Type   | Description                                                           |
-| ------------------ | ------ | --------------------------------------------------------------------- |
-| `--build-deps, -b` | `bool` | Install build dependencies for the requested packages                 |
-| `--make-deps, -m`  | `bool` | Install make dependencies for the requested packages                  |
-| `--chroot, -c`     | `bool` | Build packages in a clean chroot with makechrootpkg                   |
-| `--check`          | `bool` | Enable the PKGBUILD check() function during package builds            |
-| `--version, -v`    | `bool` | Install exactly one AUR package from the following Git commit operand |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--build-deps, -b` | `bool` | Install build dependencies for the requested packages |
+| `--make-deps, -m` | `bool` | Install make dependencies for the requested packages |
+| `--chroot, -c` | `bool` | Build packages in a clean chroot with makechrootpkg |
+| `--check` | `bool` | Enable the PKGBUILD check() function during package builds |
+| `--no-check` | `bool` | Disable the PKGBUILD check() function during package builds |
+| `--sign` | `bool` | Sign built packages with GPG |
+| `--nosign` | `bool` | Skip signing built packages |
+| `--version, -v` | `bool` | Install exactly one AUR package from the following Git commit operand |
 
 #### `shelly install flatpak`
 
@@ -300,21 +306,21 @@ shelly install flatpak <package> [options]
 
 Arguments:
 
-| Argument    | Arity | Description                                                                                                                                     |
-| ----------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<package>` | 1..1  | Application/runtime ID, friendly AppStream name, installed target with --repair, .flatpakref path with --ref-file, or bundle path with --bundle |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 1..1 | Application/runtime ID, friendly AppStream name, installed target with --repair, .flatpakref path with --ref-file, or bundle path with --bundle |
 
 Options:
 
-| Option                  | Type     | Description                                                                                     |
-| ----------------------- | -------- | ----------------------------------------------------------------------------------------------- |
-| `--user`                | `bool`   | Install into the invoking user's Flatpak installation instead of the system installation        |
-| `--remote, -r <remote>` | `string` | Install from this remote instead of resolving a remote from cached AppStream metadata           |
-| `--branch, -b <branch>` | `string` | Install this branch; defaults to stable                                                         |
-| `--runtime`             | `bool`   | Build a runtime ref instead of an application ref                                               |
-| `--ref-file, -e`        | `bool`   | Treat the package operand as a local .flatpakref file                                           |
-| `--bundle, -u`          | `bool`   | Treat the package operand as a local Flatpak bundle                                             |
-| `--repair, -f`          | `bool`   | Reinstall the installed Flatpak and its dependencies while preserving application configuration |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--user` | `bool` | Install into the invoking user's Flatpak installation instead of the system installation |
+| `--remote, -r <remote>` | `string` | Install from this remote instead of resolving a remote from cached AppStream metadata |
+| `--branch, -b <branch>` | `string` | Install this branch; defaults to the branch the remote publishes for the package |
+| `--runtime` | `bool` | Build a runtime ref instead of an application ref |
+| `--ref-file, -e` | `bool` | Treat the package operand as a local .flatpakref file |
+| `--bundle, -u` | `bool` | Treat the package operand as a local Flatpak bundle |
+| `--repair, -f` | `bool` | Reinstall the installed Flatpak and its dependencies while preserving application configuration |
 
 ### `shelly upgrade`
 
@@ -322,13 +328,13 @@ Upgrade standard, AUR, AppImage, or Flatpak packages, including all supported ba
 
 Subcommands:
 
-| Command                   | Description                                                                                                                                                                                                                 |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shelly upgrade standard` | Synchronize ALPM repositories, show the available repository package upgrades, perform a full system upgrade, and report required restarts.                                                                                 |
-| `shelly upgrade all`      | Build and confirm an invoking-user upgrade plan, then upgrade every enabled package backend in one coordinated action, continuing through independent backend failures and returning failure if any selected backend fails. |
-| `shelly upgrade appimage` | Check every configured AppImage update source and replace each AppImage for which a newer version is available.                                                                                                             |
-| `shelly upgrade aur`      | Find installed foreign packages with newer AUR or VCS revisions, then build and install all available upgrades.                                                                                                             |
-| `shelly upgrade flatpak`  | Upgrade every application and runtime with an available update in the system and user Flatpak installations.                                                                                                                |
+| Command | Description |
+| --- | --- |
+| `shelly upgrade standard` | Synchronize ALPM repositories, show the available repository package upgrades, perform a full system upgrade, and report required restarts. |
+| `shelly upgrade all` | Build and confirm an invoking-user upgrade plan, then upgrade every enabled package backend in one coordinated action, continuing through independent backend failures and returning failure if any selected backend fails. |
+| `shelly upgrade appimage` | Check every configured AppImage update source and replace each AppImage for which a newer version is available. |
+| `shelly upgrade aur` | Find installed foreign packages with newer AUR or VCS revisions, then build and install all available upgrades. |
+| `shelly upgrade flatpak` | Upgrade every application and runtime with an available update in the system and user Flatpak installations. |
 
 #### `shelly upgrade standard`
 
@@ -343,8 +349,8 @@ shelly upgrade standard [options]
 
 Options:
 
-| Option      | Type   | Description                                           |
-| ----------- | ------ | ----------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--all, -a` | `bool` | Upgrade standard, AUR, Flatpak, and AppImage backends |
 
 #### `shelly upgrade all`
@@ -360,13 +366,13 @@ shelly upgrade all [options]
 
 Options:
 
-| Option          | Type   | Description                    |
-| --------------- | ------ | ------------------------------ |
-| `--no-repo`     | `bool` | Skip the standard ALPM backend |
-| `--no-aur`      | `bool` | Skip the AUR backend           |
-| `--no-flatpak`  | `bool` | Skip the Flatpak backend       |
-| `--no-appimage` | `bool` | Skip the AppImage backend      |
-| `--no-devel`    | `bool` | Skip -git aur                  |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--no-repo` | `bool` | Skip the standard ALPM backend |
+| `--no-aur` | `bool` | Skip the AUR backend |
+| `--no-flatpak` | `bool` | Skip the Flatpak backend |
+| `--no-appimage` | `bool` | Skip the AppImage backend |
+| `--no-devel` | `bool` | Skip -git aur |
 
 #### `shelly upgrade appimage`
 
@@ -390,11 +396,14 @@ shelly upgrade aur [options]
 
 Options:
 
-| Option         | Type   | Description                                                                           |
-| -------------- | ------ | ------------------------------------------------------------------------------------- |
-| `--check`      | `bool` | Run each PKGBUILD check() function during AUR upgrade builds                          |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--check` | `bool` | Run each PKGBUILD check() function during AUR upgrade builds |
+| `--no-check` | `bool` | Skip each PKGBUILD check() function during AUR upgrade builds |
+| `--sign` | `bool` | Sign upgraded AUR packages with GPG |
+| `--nosign` | `bool` | Skip signing upgraded AUR packages |
 | `--singlepane` | `bool` | Use the shared pacman-style linear output (already the native Zig non-UI output mode) |
-| `--no-devel`   | `bool` | Skip checking -git packages                                                           |
+| `--no-devel` | `bool` | Skip checking -git packages |
 
 #### `shelly upgrade flatpak`
 
@@ -418,18 +427,18 @@ shelly downgrade [<package>] [options]
 
 Arguments:
 
-| Argument    | Arity | Description                         |
-| ----------- | ----- | ----------------------------------- |
-| `<package>` | 0..1  | Installed ALPM package to downgrade |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 0..1 | Installed ALPM package to downgrade |
 
 Options:
 
-| Option                  | Type     | Description                                                                              |
-| ----------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `--oldest, -o`          | `bool`   | Select the oldest available version instead of prompting or selecting the newest version |
-| `--ignore, -i`          | `bool`   | Add the package to IgnorePkg after a successful downgrade                                |
-| `--list-options, -l`    | `bool`   | List cached and archived versions without installing one                                 |
-| `--target, -t <target>` | `string` | Install an exact version-release or package filename                                     |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--oldest, -o` | `bool` | Select the oldest available version instead of prompting or selecting the newest version |
+| `--ignore, -i` | `bool` | Add the package to IgnorePkg after a successful downgrade |
+| `--list-options, -l` | `bool` | List cached and archived versions without installing one |
+| `--target, -t <target>` | `string` | Install an exact version-release or package filename |
 
 ### `shelly mark`
 
@@ -437,12 +446,12 @@ Manage IgnorePkg and HoldPkg package marks, or change an installed package's exp
 
 Subcommands:
 
-| Command                  | Description                                                            |
-| ------------------------ | ---------------------------------------------------------------------- |
-| `shelly mark ignore`     | List or modify packages excluded from ALPM upgrades through IgnorePkg. |
-| `shelly mark hold`       | List or modify packages protected from removal through HoldPkg.        |
-| `shelly mark explicit`   | Mark an installed ALPM package as explicitly installed.                |
-| `shelly mark dependency` | Mark an installed ALPM package as installed as a dependency.           |
+| Command | Description |
+| --- | --- |
+| `shelly mark ignore` | List or modify packages excluded from ALPM upgrades through IgnorePkg. |
+| `shelly mark hold` | List or modify packages protected from removal through HoldPkg. |
+| `shelly mark explicit` | Mark an installed ALPM package as explicitly installed. |
+| `shelly mark dependency` | Mark an installed ALPM package as installed as a dependency. |
 
 #### `shelly mark ignore`
 
@@ -456,18 +465,18 @@ shelly mark ignore [<packages>...] [options]
 
 Arguments:
 
-| Argument     | Arity | Description                                      |
-| ------------ | ----- | ------------------------------------------------ |
-| `<packages>` | 0..\* | Package names to add to or remove from IgnorePkg |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | Package names to add to or remove from IgnorePkg |
 
 Options:
 
-| Option         | Type   | Description                    |
-| -------------- | ------ | ------------------------------ |
-| `--list, -l`   | `bool` | List packages in IgnorePkg     |
-| `--add, -a`    | `bool` | Add packages to IgnorePkg      |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--list, -l` | `bool` | List packages in IgnorePkg |
+| `--add, -a` | `bool` | Add packages to IgnorePkg |
 | `--remove, -r` | `bool` | Remove packages from IgnorePkg |
-| `--clear, -c`  | `bool` | Clear IgnorePkg                |
+| `--clear, -c` | `bool` | Clear IgnorePkg |
 
 #### `shelly mark hold`
 
@@ -481,18 +490,18 @@ shelly mark hold [<packages>...] [options]
 
 Arguments:
 
-| Argument     | Arity | Description                                    |
-| ------------ | ----- | ---------------------------------------------- |
-| `<packages>` | 0..\* | Package names to add to or remove from HoldPkg |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | Package names to add to or remove from HoldPkg |
 
 Options:
 
-| Option         | Type   | Description                                       |
-| -------------- | ------ | ------------------------------------------------- |
-| `--list, -l`   | `bool` | List packages in HoldPkg                          |
-| `--add, -a`    | `bool` | Add packages to HoldPkg                           |
-| `--remove, -r` | `bool` | Remove packages from HoldPkg                      |
-| `--clear, -c`  | `bool` | Clear HoldPkg except for Shelly's protected entry |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--list, -l` | `bool` | List packages in HoldPkg |
+| `--add, -a` | `bool` | Add packages to HoldPkg |
+| `--remove, -r` | `bool` | Remove packages from HoldPkg |
+| `--clear, -c` | `bool` | Clear HoldPkg except for Shelly's protected entry |
 
 #### `shelly mark explicit`
 
@@ -506,9 +515,9 @@ shelly mark explicit <package>
 
 Arguments:
 
-| Argument    | Arity | Description                                      |
-| ----------- | ----- | ------------------------------------------------ |
-| `<package>` | 1..1  | Installed package whose reason should be changed |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 1..1 | Installed package whose reason should be changed |
 
 #### `shelly mark dependency`
 
@@ -522,9 +531,9 @@ shelly mark dependency <package>
 
 Arguments:
 
-| Argument    | Arity | Description                                      |
-| ----------- | ----- | ------------------------------------------------ |
-| `<package>` | 1..1  | Installed package whose reason should be changed |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 1..1 | Installed package whose reason should be changed |
 
 ### `shelly news`
 
@@ -538,8 +547,8 @@ shelly news [options]
 
 Options:
 
-| Option      | Type   | Description                                           |
-| ----------- | ------ | ----------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--all, -a` | `bool` | Show previously viewed news as well as unread entries |
 
 ### `shelly list-updates`
@@ -548,13 +557,13 @@ List available updates for standard, AUR, AppImage, or Flatpak packages.
 
 Subcommands:
 
-| Command                        | Description                                                                                                    |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `shelly list-updates all`      | Query available updates from every supported package backend, continuing through independent backend failures. |
-| `shelly list-updates standard` | List available standard repository package updates.                                                            |
-| `shelly list-updates appimage` | List installed AppImages with available updates.                                                               |
-| `shelly list-updates aur`      | List installed AUR packages with available updates.                                                            |
-| `shelly list-updates flatpak`  | List Flatpak applications and runtimes with available updates.                                                 |
+| Command | Description |
+| --- | --- |
+| `shelly list-updates all` | Query available updates from every supported package backend, continuing through independent backend failures. |
+| `shelly list-updates standard` | List available standard repository package updates. |
+| `shelly list-updates appimage` | List installed AppImages with available updates. |
+| `shelly list-updates aur` | List installed AUR packages with available updates. |
+| `shelly list-updates flatpak` | List Flatpak applications and runtimes with available updates. |
 
 #### `shelly list-updates all`
 
@@ -568,10 +577,10 @@ shelly list-updates all [options]
 
 Options:
 
-| Option          | Type   | Description                    |
-| --------------- | ------ | ------------------------------ |
-| `--show-hidden` | `bool` | Include hidden packages        |
-| `--no-devel`    | `bool` | Does not check for -git builds |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--show-hidden` | `bool` | Include hidden packages |
+| `--no-devel` | `bool` | Does not check for -git builds |
 
 #### `shelly list-updates standard`
 
@@ -605,10 +614,10 @@ shelly list-updates aur [options]
 
 Options:
 
-| Option          | Type   | Description                    |
-| --------------- | ------ | ------------------------------ |
-| `--show-hidden` | `bool` | Include hidden packages        |
-| `--no-devel`    | `bool` | Does not check for -git builds |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--show-hidden` | `bool` | Include hidden packages |
+| `--no-devel` | `bool` | Does not check for -git builds |
 
 #### `shelly list-updates flatpak`
 
@@ -626,12 +635,12 @@ List installed standard packages, AppImages, AUR packages, or Flatpak applicatio
 
 Subcommands:
 
-| Command                | Description                                                                                                    |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `shelly list standard` | List packages installed in the local ALPM database, with optional IgnorePkg and install-reason filters.        |
-| `shelly list appimage` | List installed AppImages.                                                                                      |
-| `shelly list aur`      | List installed foreign packages tracked as AUR packages.                                                       |
-| `shelly list flatpak`  | List installed Flatpaks, configured system and user remotes, or cached AppStream JSON for one or every remote. |
+| Command | Description |
+| --- | --- |
+| `shelly list standard` | List packages installed in the local ALPM database, with optional IgnorePkg and install-reason filters. |
+| `shelly list appimage` | List installed AppImages. |
+| `shelly list aur` | List installed foreign packages tracked as AUR packages. |
+| `shelly list flatpak` | List installed Flatpaks, configured system and user remotes, or cached AppStream JSON for one or every remote. |
 
 #### `shelly list standard`
 
@@ -645,13 +654,13 @@ shelly list standard [options]
 
 Options:
 
-| Option                 | Type   | Description                                                       |
-| ---------------------- | ------ | ----------------------------------------------------------------- |
-| `--show-hidden, -w`    | `bool` | Include hidden packages                                           |
-| `--explicitOnly, -e`   | `bool` | List explicitly installed packages only                           |
-| `--dependencyOnly, -d` | `bool` | List dependency-installed packages only                           |
-| `--required-by`        | `bool` | Include packages that directly require each listed package        |
-| `--optional-for`       | `bool` | Include packages that directly use each listed package optionally |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--show-hidden, -w` | `bool` | Include hidden packages |
+| `--explicitOnly, -e` | `bool` | List explicitly installed packages only |
+| `--dependencyOnly, -d` | `bool` | List dependency-installed packages only |
+| `--required-by` | `bool` | Include packages that directly require each listed package |
+| `--optional-for` | `bool` | Include packages that directly use each listed package optionally |
 
 #### `shelly list appimage`
 
@@ -675,13 +684,13 @@ shelly list aur [options]
 
 Options:
 
-| Option                 | Type   | Description                                                       |
-| ---------------------- | ------ | ----------------------------------------------------------------- |
-| `--show-hidden`        | `bool` | Include hidden packages                                           |
-| `--explicitOnly, -e`   | `bool` | List explicitly installed packages only                           |
-| `--dependencyOnly, -d` | `bool` | List dependency-installed packages only                           |
-| `--required-by`        | `bool` | Include packages that directly require each listed package        |
-| `--optional-for`       | `bool` | Include packages that directly use each listed package optionally |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--show-hidden` | `bool` | Include hidden packages |
+| `--explicitOnly, -e` | `bool` | List explicitly installed packages only |
+| `--dependencyOnly, -d` | `bool` | List dependency-installed packages only |
+| `--required-by` | `bool` | Include packages that directly require each listed package |
+| `--optional-for` | `bool` | Include packages that directly use each listed package optionally |
 
 #### `shelly list flatpak`
 
@@ -695,10 +704,10 @@ shelly list flatpak [<source>] [<query>]
 
 Arguments:
 
-| Argument   | Arity | Description                                                                             |
-| ---------- | ----- | --------------------------------------------------------------------------------------- |
-| `<source>` | 0..1  | Use remote to return cached remote AppStream applications instead of installed Flatpaks |
-| `<query>`  | 0..1  | Remote name, or all; omit it to list the configured system and user remotes             |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<source>` | 0..1 | Use remote to return cached remote AppStream applications instead of installed Flatpaks |
+| `<query>` | 0..1 | Remote name, or all; omit it to list the configured system and user remotes |
 
 ### `shelly backup`
 
@@ -712,12 +721,12 @@ shelly backup [options]
 
 Options:
 
-| Option                        | Type     | Description                                                                                                  |
-| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `--export, -e`                | `bool`   | Exports a declaritive list of explicitly installed standard packages, AUR packages, and Flatpak applications |
-| `--import, -i`                | `bool`   | Imports a previously exported backup and installs the latest versions of all items listed                    |
-| `--name, -a <name>`           | `string` | File name without the .toml extension                                                                        |
-| `--directory, -d <directory>` | `string` | Directory in which to write/read the backup                                                                  |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--export, -e` | `bool` | Exports a declaritive list of explicitly installed standard packages, AUR packages, and Flatpak applications |
+| `--import, -i` | `bool` | Imports a previously exported backup and installs the latest versions of all items listed |
+| `--name, -a <name>` | `string` | File name without the .toml extension |
+| `--directory, -d <directory>` | `string` | Directory in which to write/read the backup |
 
 ### `shelly utility`
 
@@ -725,8 +734,8 @@ Repair Shelly directory ownership, manage pacfiles, or generate CLI documentatio
 
 Subcommands:
 
-| Command                     | Description                                                                                              |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Command | Description |
+| --- | --- |
 | `shelly utility repository` | Add, remove, or list pacman.conf ALPM repositories; optionally locally sign a key and refresh databases. |
 
 Usage:
@@ -737,25 +746,25 @@ shelly utility [options]
 
 Options:
 
-| Option                            | Type     | Description                                                                                     |
-| --------------------------------- | -------- | ----------------------------------------------------------------------------------------------- |
-| `--fix-permissions, -f`           | `bool`   | Restore the invoking user's ownership of Shelly's configuration, cache, and data directories    |
-| `--repair-db, -r`                 | `bool`   | Remove a stale database lock                                                                    |
-| `--docs, -d`                      | `bool`   | Write Markdown CLI reference documentation to standard output                                   |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--fix-permissions, -f` | `bool` | Restore the invoking user's ownership of Shelly's configuration, cache, and data directories |
+| `--repair-db, -r` | `bool` | Remove a stale database lock |
+| `--docs, -d` | `bool` | Write Markdown CLI reference documentation to standard output |
 | `--completions, -c <completions>` | `string` | Write a Bash, Fish, or Zsh completion script to standard output Choices: `bash`, `fish`, `zsh`. |
-| `--pacfiles, -p`                  | `bool`   | Run the pacdiff-compatible pacnew, pacorig, and pacsave maintenance workflow                    |
-| `--find, -F`                      | `bool`   | Recursively find pacfiles instead of reading the pacman database                                |
-| `--locate, -l`                    | `bool`   | Find pacfiles with locate instead of reading the pacman database                                |
-| `--pacmandb, -P`                  | `bool`   | Search backup paths from the local pacman database (default)                                    |
-| `--backup, -b`                    | `bool`   | Save the old original as .bak before overwriting                                                |
-| `--cachedir, -C <cachedir>`       | `string` | Package cache directory for three-way base archives; repeat to add directories                  |
-| `--output, -o`                    | `bool`   | Print discovered pacfile paths without modifying them                                           |
-| `--sudo, -s`                      | `bool`   | Explicitly request elevation; interactive pacfile maintenance elevates automatically            |
-| `--threeway, -3`                  | `bool`   | Use a cached older package as the third input when viewing differences                          |
-| `--nocolor`                       | `bool`   | Disable colored pacfile status output                                                           |
-| `--search-path <search-path>`     | `string` | Path to scan with --find; repeat to add paths                                                   |
-| `--diff-program <diff-program>`   | `string` | Diff command, overriding DIFFPROG                                                               |
-| `--merge-program <merge-program>` | `string` | Merge command, overriding MERGEPROG                                                             |
+| `--pacfiles, -p` | `bool` | Run the pacdiff-compatible pacnew, pacorig, and pacsave maintenance workflow |
+| `--find, -F` | `bool` | Recursively find pacfiles instead of reading the pacman database |
+| `--locate, -l` | `bool` | Find pacfiles with locate instead of reading the pacman database |
+| `--pacmandb, -P` | `bool` | Search backup paths from the local pacman database (default) |
+| `--backup, -b` | `bool` | Save the old original as .bak before overwriting |
+| `--cachedir, -C <cachedir>` | `string` | Package cache directory for three-way base archives; repeat to add directories |
+| `--output, -o` | `bool` | Print discovered pacfile paths without modifying them |
+| `--sudo, -s` | `bool` | Explicitly request elevation; interactive pacfile maintenance elevates automatically |
+| `--threeway, -3` | `bool` | Use a cached older package as the third input when viewing differences |
+| `--nocolor` | `bool` | Disable colored pacfile status output |
+| `--search-path <search-path>` | `string` | Path to scan with --find; repeat to add paths |
+| `--diff-program <diff-program>` | `string` | Diff command, overriding DIFFPROG |
+| `--merge-program <merge-program>` | `string` | Merge command, overriding MERGEPROG |
 
 #### `shelly utility repository`
 
@@ -769,19 +778,19 @@ shelly utility repository [<name>] [<url>] [options]
 
 Arguments:
 
-| Argument | Arity | Description                                                                                        |
-| -------- | ----- | -------------------------------------------------------------------------------------------------- |
-| `<name>` | 0..1  | Repository (database) name, e.g. my-repo                                                           |
-| `<url>`  | 0..1  | Server URL; required for --add, e.g. `https://my-repo.ee/$arch/$repo`, ignored for --remove/--list |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<name>` | 0..1 | Repository (database) name, e.g. my-repo |
+| `<url>` | 0..1 | Server URL; required for --add, e.g. '<https://my-repo.ee/$arch/$repo>', ignored for --remove/--list |
 
 Options:
 
-| Option                        | Type     | Description                                       |
-| ----------------------------- | -------- | ------------------------------------------------- |
-| `--add, -a`                   | `bool`   | Add the named repository (requires name and url)  |
-| `--remove, -x`                | `bool`   | Remove the named repository                       |
-| `--list, -l`                  | `bool`   | List configured repositories                      |
-| `--no-sync, -n`               | `bool`   | Skip the final database refresh                   |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--add, -a` | `bool` | Add the named repository (requires name and url) |
+| `--remove, -x` | `bool` | Remove the named repository |
+| `--list, -l` | `bool` | List configured repositories |
+| `--no-sync, -n` | `bool` | Skip the final database refresh |
 | `--lsign-key, -s <lsign-key>` | `string` | Key to locally sign with pacman-key before adding |
 
 ### `shelly purify`
@@ -790,10 +799,10 @@ Remove corrupted or orphaned ALPM packages, optionally clean the package cache, 
 
 Subcommands:
 
-| Command                  | Description                                                                                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Command | Description |
+| --- | --- |
 | `shelly purify standard` | Plan corrupted archives, optional orphan cleanup, and optional cache retention cleanup; show the targets, then confirm before changing ALPM or cache state. |
-| `shelly purify flatpak`  | Plan unused dependency cleanup across system and user Flatpak installations, then show and confirm the targets.                                             |
+| `shelly purify flatpak` | Plan unused dependency cleanup across system and user Flatpak installations, then show and confirm the targets. |
 
 #### `shelly purify standard`
 
@@ -808,10 +817,10 @@ shelly purify standard [options]
 
 Options:
 
-| Option                | Type   | Description                                                             |
-| --------------------- | ------ | ----------------------------------------------------------------------- |
-| `--dry-run, -d`       | `bool` | Show the cleanup plan without changing packages                         |
-| `--orphans, -o`       | `bool` | Include orphaned packages                                               |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--dry-run, -d` | `bool` | Show the cleanup plan without changing packages |
+| `--orphans, -o` | `bool` | Include orphaned packages |
 | `--cache, -c <cache>` | `uint` | Remove older cached package versions while retaining this many versions |
 
 #### `shelly purify flatpak`
@@ -830,12 +839,12 @@ Remove standard or local packages, AUR packages, AppImages, or Flatpak applicati
 
 Subcommands:
 
-| Command                  | Description                                                                                                          |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Command | Description |
+| --- | --- |
 | `shelly remove standard` | Remove installed ALPM packages or Shelly-managed local binaries, with optional dependency and configuration cleanup. |
-| `shelly remove appimage` | Remove an installed AppImage and optionally delete its associated configuration.                                     |
-| `shelly remove aur`      | Remove installed AUR packages and optionally remove dependent or optional packages through ALPM.                     |
-| `shelly remove flatpak`  | Remove an installed Flatpak application or runtime, with optional unused dependency and configuration cleanup.       |
+| `shelly remove appimage` | Remove an installed AppImage and optionally delete its associated configuration. |
+| `shelly remove aur` | Remove installed AUR packages and optionally remove dependent or optional packages through ALPM. |
+| `shelly remove flatpak` | Remove an installed Flatpak application or runtime, with optional unused dependency and configuration cleanup. |
 
 #### `shelly remove standard`
 
@@ -849,21 +858,21 @@ shelly remove standard [<packages>...] [options]
 
 Arguments:
 
-| Argument     | Arity | Description        |
-| ------------ | ----- | ------------------ |
-| `<packages>` | 0..\* | Packages to remove |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | Packages to remove |
 
 Options:
 
-| Option            | Type   | Description                                                     |
-| ----------------- | ------ | --------------------------------------------------------------- |
-| `--cascade, -c`   | `bool` | Remove dependencies that are no longer needed                   |
-| `--no-cascade`    | `bool` | Keep dependencies that become unneeded after removal            |
-| `--opt-deps, -o`  | `bool` | Remove unused optional dependencies installed with the packages |
-| `--ripple, -i`    | `bool` | Remove packages that depend on the removed packages             |
-| `--remove-config` | `bool` | Remove configuration associated with the removed package        |
-| `--local, -l`     | `bool` | Remove Shelly-managed local binaries                            |
-| `--force, -f`     | `bool` | Force local binary removal                                      |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--cascade, -c` | `bool` | Remove dependencies that are no longer needed |
+| `--no-cascade` | `bool` | Keep dependencies that become unneeded after removal |
+| `--opt-deps, -o` | `bool` | Remove unused optional dependencies installed with the packages |
+| `--ripple, -i` | `bool` | Remove packages that depend on the removed packages |
+| `--remove-config` | `bool` | Remove configuration associated with the removed package |
+| `--local, -l` | `bool` | Remove Shelly-managed local binaries |
+| `--force, -f` | `bool` | Force local binary removal |
 
 #### `shelly remove appimage`
 
@@ -877,14 +886,14 @@ shelly remove appimage <appimage> [options]
 
 Arguments:
 
-| Argument     | Arity | Description                  |
-| ------------ | ----- | ---------------------------- |
-| `<appimage>` | 1..1  | Installed AppImage to remove |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<appimage>` | 1..1 | Installed AppImage to remove |
 
 Options:
 
-| Option            | Type   | Description                                              |
-| ----------------- | ------ | -------------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--remove-config` | `bool` | Remove configuration associated with the removed package |
 
 #### `shelly remove aur`
@@ -899,17 +908,17 @@ shelly remove aur [<packages>...] [options]
 
 Arguments:
 
-| Argument     | Arity | Description        |
-| ------------ | ----- | ------------------ |
-| `<packages>` | 0..\* | Packages to remove |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | Packages to remove |
 
 Options:
 
-| Option           | Type   | Description                                                     |
-| ---------------- | ------ | --------------------------------------------------------------- |
-| `--cascade, -c`  | `bool` | Remove dependencies that are no longer needed                   |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--cascade, -c` | `bool` | Remove dependencies that are no longer needed |
 | `--opt-deps, -o` | `bool` | Remove unused optional dependencies installed with the packages |
-| `--ripple, -i`   | `bool` | Remove packages that depend on the removed packages             |
+| `--ripple, -i` | `bool` | Remove packages that depend on the removed packages |
 
 #### `shelly remove flatpak`
 
@@ -923,16 +932,16 @@ shelly remove flatpak <package> [options]
 
 Arguments:
 
-| Argument    | Arity | Description                                 |
-| ----------- | ----- | ------------------------------------------- |
-| `<package>` | 1..1  | Installed Flatpak application or runtime ID |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 1..1 | Installed Flatpak application or runtime ID |
 
 Options:
 
-| Option                | Type   | Description                                              |
-| --------------------- | ------ | -------------------------------------------------------- |
-| `--remove-unused, -r` | `bool` | Remove newly unused Flatpak dependencies                 |
-| `--remove-config`     | `bool` | Remove configuration associated with the removed package |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--remove-unused, -r` | `bool` | Remove newly unused Flatpak dependencies |
+| `--remove-config` | `bool` | Remove configuration associated with the removed package |
 
 ### `shelly sync`
 
@@ -940,10 +949,10 @@ Synchronize ALPM package databases, AppImage metadata, or cached Flatpak AppStre
 
 Subcommands:
 
-| Command                | Description                                                                                                                      |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Command | Description |
+| --- | --- |
 | `shelly sync appimage` | Synchronize extracted AppImage metadata, or configure an installed AppImage's update source with the appimage/url/type overload. |
-| `shelly sync flatpak`  | Update cached AppStream metadata, or add and remove configured system or user Flatpak remotes.                                   |
+| `shelly sync flatpak` | Update cached AppStream metadata, or add and remove configured system or user Flatpak remotes. |
 
 Usage:
 
@@ -953,8 +962,8 @@ shelly sync [options]
 
 Options:
 
-| Option        | Type   | Description                                             |
-| ------------- | ------ | ------------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--force, -f` | `bool` | Force every configured ALPM package database to refresh |
 
 #### `shelly sync appimage`
@@ -970,16 +979,16 @@ shelly sync appimage [<appimage>] [<url>] [<type>] [options]
 
 Arguments:
 
-| Argument     | Arity | Description                                                   |
-| ------------ | ----- | ------------------------------------------------------------- |
-| `<appimage>` | 0..1  | Optional case-insensitive AppImage name query                 |
-| `<url>`      | 0..1  | Update URL or owner/repository value when configuring updates |
-| `<type>`     | 0..1  | Update source type when configuring updates                   |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<appimage>` | 0..1 | Optional case-insensitive AppImage name query |
+| `<url>` | 0..1 | Update URL or owner/repository value when configuring updates |
+| `<type>` | 0..1 | Update source type when configuring updates |
 
 Options:
 
-| Option             | Type   | Description                                                |
-| ------------------ | ------ | ---------------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--prerelease, -p` | `bool` | Allow prerelease versions for the configured update source |
 
 #### `shelly sync flatpak`
@@ -994,19 +1003,19 @@ shelly sync flatpak [<mode>] [<operation>] [<name>] [options]
 
 Arguments:
 
-| Argument      | Arity | Description                                                                |
-| ------------- | ----- | -------------------------------------------------------------------------- |
-| `<mode>`      | 0..1  | Use remote to configure Flatpak remotes; omit to update AppStream metadata |
-| `<operation>` | 0..1  | Add or remove a configured remote                                          |
-| `<name>`      | 0..1  | Flatpak remote name, such as flathub                                       |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<mode>` | 0..1 | Use remote to configure Flatpak remotes; omit to update AppStream metadata |
+| `<operation>` | 0..1 | Add or remove a configured remote |
+| `<name>` | 0..1 | Flatpak remote name, such as flathub |
 
 Options:
 
-| Option                          | Type     | Description                                             |
-| ------------------------------- | -------- | ------------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--remote-url, -u <remote-url>` | `string` | Remote URL or .flatpakrepo URL; required for remote add |
-| `--system, -s`                  | `bool`   | Use system scope; defaults to true                      |
-| `--gpg-verify, -g`              | `bool`   | Enable GPG verification when adding; defaults to true   |
+| `--system, -s` | `bool` | Use system scope; defaults to true |
+| `--gpg-verify, -g` | `bool` | Enable GPG verification when adding; defaults to true |
 
 ### `shelly update`
 
@@ -1014,11 +1023,11 @@ Update selected standard, AUR, or Flatpak packages.
 
 Subcommands:
 
-| Command                  | Description                                                                                               |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Command | Description |
+| --- | --- |
 | `shelly update standard` | Update only the named installed ALPM packages after an explicit partial-upgrade warning and confirmation. |
-| `shelly update aur`      | Fetch, review, rebuild, and reinstall only the named AUR packages.                                        |
-| `shelly update flatpak`  | Update one installed Flatpak application or runtime in its existing user or system installation.          |
+| `shelly update aur` | Fetch, review, rebuild, and reinstall only the named AUR packages. |
+| `shelly update flatpak` | Update one installed Flatpak application or runtime in its existing user or system installation. |
 
 #### `shelly update standard`
 
@@ -1032,9 +1041,9 @@ shelly update standard [<packages>...]
 
 Arguments:
 
-| Argument     | Arity | Description                                                                                                                       |
-| ------------ | ----- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `<packages>` | 0..\* | One or more installed repository package names to update; partial upgrades are unsupported by Arch Linux and require confirmation |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | One or more installed repository package names to update; partial upgrades are unsupported by Arch Linux and require confirmation |
 
 #### `shelly update aur`
 
@@ -1048,15 +1057,18 @@ shelly update aur [<packages>...] [options]
 
 Arguments:
 
-| Argument     | Arity | Description                                            |
-| ------------ | ----- | ------------------------------------------------------ |
-| `<packages>` | 0..\* | One or more AUR package names to rebuild and reinstall |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<packages>` | 0..* | One or more AUR package names to rebuild and reinstall |
 
 Options:
 
-| Option    | Type   | Description                                           |
-| --------- | ------ | ----------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--check` | `bool` | Run each PKGBUILD check() function during the rebuild |
+| `--no-check` | `bool` | Skip each PKGBUILD check() function during the rebuild |
+| `--sign` | `bool` | Sign rebuilt packages with GPG |
+| `--nosign` | `bool` | Skip signing rebuilt packages |
 
 #### `shelly update flatpak`
 
@@ -1070,9 +1082,9 @@ shelly update flatpak <package>
 
 Arguments:
 
-| Argument    | Arity | Description                                                           |
-| ----------- | ----- | --------------------------------------------------------------------- |
-| `<package>` | 1..1  | Installed Flatpak application/runtime ID or unambiguous friendly name |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 1..1 | Installed Flatpak application/runtime ID or unambiguous friendly name |
 
 ### `shelly config`
 
@@ -1080,12 +1092,12 @@ Read and modify Shelly configuration.
 
 Subcommands:
 
-| Command                  | Description                                    |
-| ------------------------ | ---------------------------------------------- |
-| `shelly config get`      | Read a Shelly configuration value.             |
-| `shelly config set`      | Set a Shelly configuration value.              |
-| `shelly config reset`    | Reset Shelly configuration to native defaults. |
-| `shelly config parallel` | Set Shelly's parallel download count.          |
+| Command | Description |
+| --- | --- |
+| `shelly config get` | Read a Shelly configuration value. |
+| `shelly config set` | Set a Shelly configuration value. |
+| `shelly config reset` | Reset Shelly configuration to native defaults. |
+| `shelly config parallel` | Set Shelly's parallel download count. |
 
 Usage:
 
@@ -1105,9 +1117,9 @@ shelly config get <key>
 
 Arguments:
 
-| Argument | Arity | Description                 |
-| -------- | ----- | --------------------------- |
-| `<key>`  | 1..1  | Configuration property name |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<key>` | 1..1 | Configuration property name |
 
 #### `shelly config set`
 
@@ -1121,10 +1133,10 @@ shelly config set <key> <value>
 
 Arguments:
 
-| Argument  | Arity | Description                 |
-| --------- | ----- | --------------------------- |
-| `<key>`   | 1..1  | Configuration property name |
-| `<value>` | 1..1  | New configuration value     |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<key>` | 1..1 | Configuration property name |
+| `<value>` | 1..1 | New configuration value |
 
 #### `shelly config reset`
 
@@ -1148,24 +1160,24 @@ shelly config parallel <downloadCount>
 
 Arguments:
 
-| Argument          | Arity | Description                          |
-| ----------------- | ----- | ------------------------------------ |
-| `<downloadCount>` | 1..1  | Maximum number of parallel downloads |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<downloadCount>` | 1..1 | Maximum number of parallel downloads |
 
 ### `shelly keyring`
 
-Initialize, inspect, refresh, populate, receive, or locally sign keys in the pacman keyring.
+Manage pacman package-signing keys and user PKGBUILD source-signing keys.
 
 Subcommands:
 
-| Command                   | Description                                                          |
-| ------------------------- | -------------------------------------------------------------------- |
-| `shelly keyring init`     | Initialize the pacman keyring.                                       |
-| `shelly keyring list`     | List keys in the pacman keyring.                                     |
-| `shelly keyring refresh`  | Refresh pacman keyring keys from the configured keyserver.           |
-| `shelly keyring lsign`    | Locally sign one or more keys in the pacman keyring.                 |
+| Command | Description |
+| --- | --- |
+| `shelly keyring init` | Initialize the pacman keyring. |
+| `shelly keyring list` | List keys in the pacman keyring. |
+| `shelly keyring refresh` | Refresh pacman keyring keys from the configured keyserver. |
+| `shelly keyring lsign` | Locally sign one or more keys in the pacman keyring. |
 | `shelly keyring populate` | Populate the pacman keyring with default or named distribution keys. |
-| `shelly keyring recv`     | Receive one or more keys from the configured or requested keyserver. |
+| `shelly keyring recv` | Receive keys into the pacman keyring or the current user's source-signing keyring. |
 
 #### `shelly keyring init`
 
@@ -1209,9 +1221,9 @@ shelly keyring lsign <keys>...
 
 Arguments:
 
-| Argument | Arity | Description                 |
-| -------- | ----- | --------------------------- |
-| `<keys>` | 1..\* | One or more key identifiers |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<keys>` | 1..* | One or more key identifiers |
 
 #### `shelly keyring populate`
 
@@ -1225,13 +1237,13 @@ shelly keyring populate [<keys>...]
 
 Arguments:
 
-| Argument | Arity | Description                                               |
-| -------- | ----- | --------------------------------------------------------- |
-| `<keys>` | 0..\* | Distribution keyring names; omit to populate the defaults |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<keys>` | 0..* | Distribution keyring names; omit to populate the defaults |
 
 #### `shelly keyring recv`
 
-Receive one or more keys from the configured or requested keyserver.
+Receive keys into the pacman keyring or the current user's source-signing keyring.
 
 Usage:
 
@@ -1241,15 +1253,16 @@ shelly keyring recv <keys>... [options]
 
 Arguments:
 
-| Argument | Arity | Description                 |
-| -------- | ----- | --------------------------- |
-| `<keys>` | 1..\* | One or more key identifiers |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<keys>` | 1..* | One or more key identifiers |
 
 Options:
 
-| Option                    | Type     | Description                          |
-| ------------------------- | -------- | ------------------------------------ |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--keyserver <keyserver>` | `string` | Keyserver from which to receive keys |
+| `--user` | `void` | Import into the current user's GnuPG keyring for PKGBUILD source verification |
 
 ### `shelly run`
 
@@ -1257,10 +1270,10 @@ Launch or stop a Flatpak or AppImage application.
 
 Subcommands:
 
-| Command               | Description                                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `shelly run flatpak`  | Launch an installed Flatpak application, stop it with --kill, or list running instances with `run flatpak list`. |
-| `shelly run appimage` | Launch an installed AppImage, or stop it with --kill.                                                            |
+| Command | Description |
+| --- | --- |
+| `shelly run flatpak` | Launch an installed Flatpak application, stop it with --kill, or list running instances with `run flatpak list`. |
+| `shelly run appimage` | Launch an installed AppImage, or stop it with --kill. |
 
 #### `shelly run flatpak`
 
@@ -1274,15 +1287,15 @@ shelly run flatpak [<package>] [options]
 
 Arguments:
 
-| Argument    | Arity | Description                                                                      |
-| ----------- | ----- | -------------------------------------------------------------------------------- |
-| `<package>` | 0..1  | Flatpak application ID or friendly name; use `list` to show running applications |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 0..1 | Flatpak application ID or friendly name; use `list` to show running applications |
 
 Options:
 
-| Option       | Type   | Description                                               |
-| ------------ | ------ | --------------------------------------------------------- |
-| `--kill, -k` | `bool` | Stop the selected application instead of launching it     |
+| Option | Type | Description |
+| --- | --- | --- |
+| `--kill, -k` | `bool` | Stop the selected application instead of launching it |
 | `--list, -l` | `bool` | List running Flatpak applications and process identifiers |
 
 #### `shelly run appimage`
@@ -1297,12 +1310,43 @@ shelly run appimage <package> [options]
 
 Arguments:
 
-| Argument    | Arity | Description                     |
-| ----------- | ----- | ------------------------------- |
-| `<package>` | 1..1  | Installed AppImage name or path |
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<package>` | 1..1 | Installed AppImage name or path |
 
 Options:
 
-| Option       | Type   | Description                                           |
-| ------------ | ------ | ----------------------------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `--kill, -k` | `bool` | Stop the selected application instead of launching it |
+
+### `shelly build`
+
+Builds a PKGBUILD into an installable package
+
+Usage:
+
+```text
+shelly build [<pkgbuild>] [options]
+```
+
+Arguments:
+
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<pkgbuild>` | 0..1 | File path of PKGBUILD. If left empty will look in executed directory for file named PKGBUILD. |
+
+Options:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `--reviewed, -r` | `bool` | Marks the package as reviewed |
+| `--makesrcinfo` | `bool` | Generates SRCINFO on standard output and exits |
+| `--sync-deps, -s` | `bool` | Installs missing dependencies |
+| `--check, -c` | `bool` | Performs check on PKGBUILD and installs check depends |
+| `--no-check` | `bool` | Skips the PKGBUILD check() function |
+| `--sign` | `bool` | Signs the resulting packages with GPG |
+| `--nosign` | `bool` | Skips signing the resulting packages |
+| `--key <key>` | `string` | Specifies the GPG key used for package signing |
+| `--noverify` | `bool` | Skips the PKGBUILD verify() function |
+| `--isolated, -i` | `bool` | Builds as an unprivileged user in a fresh systemd-nspawn root |
