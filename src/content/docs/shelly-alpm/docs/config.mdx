@@ -27,7 +27,9 @@ Below is the authoritative default configuration for the Shelly CLI (`~/.config/
   "ProgressBarStyle": "Blocks",
   "ProgressBarWidth": 24,
   "OutputMode": "singlepane",
-  "AppImageInstallPath": null
+  "AppImageInstallPath": null,
+  "AutoConfirmCacheClean": false,
+  "AurUrl": "https://aur.archlinux.org"
 }
 ```
 
@@ -64,6 +66,14 @@ The following fields configure the CLI (`shelly`). Modifying these options affec
    - Custom filesystem path where AppImage binaries are downloaded and integrated into the desktop environment. When set
      to `null` or omitted, defaults to `~/.local/bin` (`$XDG_BIN_HOME`).
    - **Type:** string or `null` (default: `null`).
+8. `AutoConfirmCacheClean`
+   - Automatically answers yes to removing extra cache entries during aggregate upgrades (`shelly upgrade all`),
+     without prompting for confirmation.
+   - **Type:** boolean (default: `false`).
+9. `AurUrl`
+   - Base URL of the Arch User Repository (AUR) service used for Git clones and RPC requests. Can be overridden per
+     command using the `--aur-url` option.
+   - **Type:** string (default: `"https://aur.archlinux.org"`).
 
 ## GUI Configuration (`settings.json`)
 
@@ -275,4 +285,4 @@ these values does not alter CLI defaults.
 
 If you set the environment variable `SHELLY_ELEVATOR`, Shelly will use the designated privilege elevator in the CLI
 rather than detecting one in `$PATH`. Shelly falls back to `sudo` if nothing is detected. The natively detected
-elevators are currently `doas` and `sudo`.
+elevators are currently `doas`, `sudo`, and `run0` (evaluated in that order).
