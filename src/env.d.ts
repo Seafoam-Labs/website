@@ -1,8 +1,12 @@
-/* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference types="astro/client" />
 /// <reference types="@astrojs/starlight" />
-/// <reference path="../node_modules/@astrojs/starlight/global.d.ts" />
-/// <reference path="../node_modules/@astrojs/starlight/locals.d.ts" />
-/// <reference path="../node_modules/@astrojs/starlight/virtual-internal.d.ts" />
-/// <reference path="../node_modules/@astrojs/starlight/virtual.d.ts" />
-/* eslint-enable @typescript-eslint/triple-slash-reference */
+
+declare module "virtual:starlight/user-config" {
+  const Config: import("@astrojs/starlight/types").StarlightConfig;
+  export default Config;
+}
+
+declare module "virtual:starlight/components/*" {
+  const Component: (props: Record<string, unknown>) => unknown;
+  export default Component;
+}
