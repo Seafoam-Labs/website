@@ -3,13 +3,10 @@ name: autofix.ci
 permissions: {}
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
-  workflow_call:
+  workflow_call: {}
 
 concurrency:
   cancel-in-progress: true
