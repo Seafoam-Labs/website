@@ -40,23 +40,27 @@ complete identifier.
 [[window]]
 app_id = "org.example.Editor"
 title = "Preferences*"
-layout = "stacking"
 floating = true
 width = 900
 height = 640
 
 [[window]]
 app_id = "org.example.Editor"
-layout = "tile"
 workspace = 2
 ```
 
-Put narrow rules before broad rules.
+Put narrow rules before broad rules. These examples change floating placement
+and workspace assignment while preserving the workspace layout.
 
-<Aside type="caution" title="Set layout on identity rules">
-  The current rule snapshot defaults an omitted layout to Game Mode. Give
-  app-ID/class/title rules an explicit layout, even when their main purpose is
-  opacity or placement. Content-type-only rules are visual-only and are exempt.
+Omitting `layout` leaves the workspace layout unchanged. To select Game Mode
+with a rule, set `layout = "game-mode"` (or its alias `"game_mode"`) explicitly.
+Visual-only, placement-only, and scrolling-width rules can all omit `layout`.
+An unset layout in the first matching rule does not inherit a later rule's layout.
+
+<Aside type="note" title="Migrating existing game rules">
+  Older versions implicitly selected Game Mode for most rules with no layout.
+  Add <code>layout = "game-mode"</code> to game rules that relied on that
+  default.
 </Aside>
 
 ## Complete field reference
@@ -77,22 +81,22 @@ it must not move or rearrange an established window.
 
 ### Layout, placement, and state
 
-| Field              | Values and behavior                                                                                                                    |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `layout`           | Any top-level layout ID; `float`, `floating`, and `stack` alias `stacking`. Selecting a stacking alias also marks the window floating. |
-| `output`           | Exact enabled connector name. Without workspace, use that output's active workspace.                                                   |
-| `workspace`        | 1-based workspace. Without output, retain normal admission output.                                                                     |
-| `floating`         | Force or clear persistent floating presentation.                                                                                       |
-| `fullscreen`       | Request true fullscreen. It is not treated as a Game Mode anchor.                                                                      |
-| `ignore_struts`    | Use the full output instead of its usable area.                                                                                        |
-| `stack_layer`      | `below`, `normal`, or `above`.                                                                                                         |
-| `focus`            | `false` excludes the window from compositor focus actions.                                                                             |
-| `fixed_position`   | Reject compositor pointer and keyboard geometry changes.                                                                               |
-| `skip_switcher`    | Exclude from MRU cycling and overview.                                                                                                 |
-| `skip_taskbar`     | Export taskbar suppression through window-info state.                                                                                  |
-| `placement_policy` | `cascade`, `center`, `under-pointer`, or `minimal-overlap`.                                                                            |
-| `width`, `height`  | Positive floating dimensions.                                                                                                          |
-| `x`, `y`           | Offsets from the usable-area origin; zero centers that axis.                                                                           |
+| Field              | Values and behavior                                                                                                                                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `layout`           | Any top-level layout ID; omitted preserves the workspace layout. Game Mode requires explicit `game-mode` or `game_mode`. `float`, `floating`, and `stack` alias `stacking`; selecting a stacking alias also marks the window floating. |
+| `output`           | Exact enabled connector name. Without workspace, use that output's active workspace.                                                                                                                                                   |
+| `workspace`        | 1-based workspace. Without output, retain normal admission output.                                                                                                                                                                     |
+| `floating`         | Force or clear persistent floating presentation.                                                                                                                                                                                       |
+| `fullscreen`       | Request true fullscreen. It is not treated as a Game Mode anchor.                                                                                                                                                                      |
+| `ignore_struts`    | Use the full output instead of its usable area.                                                                                                                                                                                        |
+| `stack_layer`      | `below`, `normal`, or `above`.                                                                                                                                                                                                         |
+| `focus`            | `false` excludes the window from compositor focus actions.                                                                                                                                                                             |
+| `fixed_position`   | Reject compositor pointer and keyboard geometry changes.                                                                                                                                                                               |
+| `skip_switcher`    | Exclude from MRU cycling and overview.                                                                                                                                                                                                 |
+| `skip_taskbar`     | Export taskbar suppression through window-info state.                                                                                                                                                                                  |
+| `placement_policy` | `cascade`, `center`, `under-pointer`, or `minimal-overlap`.                                                                                                                                                                            |
+| `width`, `height`  | Positive floating dimensions.                                                                                                                                                                                                          |
+| `x`, `y`           | Offsets from the usable-area origin; zero centers that axis.                                                                                                                                                                           |
 
 Output and workspace form one initial-placement target. Rules do not activate
 an inactive workspace. A missing/disabled output falls back to normal admission
@@ -116,6 +120,9 @@ different matcher becomes active. As with other placement fields, it is ignored
 by rules containing `content_type`.
 
 ### Game Mode geometry
+
+Set `layout = "game-mode"` on the matching rule to establish an anchor. Geometry
+fields such as `anchor`, `size`, and `scale` do not select Game Mode on their own.
 
 | Field    | Values and behavior                                                           |
 | -------- | ----------------------------------------------------------------------------- |
@@ -181,6 +188,11 @@ lifecycle ownership. When a rule first becomes active, Aqueous remembers the
 previous value and applies the request. A manual move or state toggle marks
 that property overridden, so later manage cycles do not fight the user. A
 different matching rule starts a fresh ownership lifecycle.
+
+Game Mode has a workspace-level claim: after an explicit game rule establishes
+an anchor, closing the anchor or removing its `layout` on reload leaves the
+workspace in Game Mode using `fallback_layout`. Select another layout manually
+to release that claim. Rules with no `layout` do not create a new Game Mode claim.
 
 Blur, opacity, HDR expansion, scaling, and overlay preference are visual or
 client-presentation properties and are recalculated from the active rule.

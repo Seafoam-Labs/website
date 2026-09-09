@@ -299,6 +299,10 @@ and right columns to independent companion-layout instances. An edge anchor
 collapses that side; top/bottom strips around a shorter centered anchor remain
 unused.
 
+To select Game Mode and establish an anchor with a window rule, set
+`layout = "game-mode"` (or `"game_mode"`) explicitly. Rules with no `layout`
+preserve the workspace layout, even when they include `anchor`, `size`, or `scale`.
+
 ```toml
 # rules.toml
 [game_mode]
@@ -318,7 +322,9 @@ scale = 1.0
 The remainder and fallback accept every leaf layout. Game Mode delegates
 rearrangement and scrolling actions to an active remainder while keeping the
 anchor fixed. If no matching anchor is present, the fallback fills the usable
-area.
+area. After a rule claims the workspace for Game Mode, closing its anchor or
+removing the rule's `layout` on reload keeps that workspace in Game Mode using
+the fallback. Select a layout manually to release the existing claim.
 
 ## Per-output and workspace selection
 

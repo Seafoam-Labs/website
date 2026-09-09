@@ -157,6 +157,10 @@ floating/state policy, stack layer, focus/task-list hints, placement and size,
 opacity/blur, client-buffer scaling, HDR expansion, and overlay preference.
 The scrolling full-width preset is also available.
 
+Choose **Unset** for a rule's layout to remove the `layout` field and preserve
+the workspace layout. Select **game-mode** explicitly when the rule should
+establish a Game Mode anchor. This applies to both settings editors.
+
 When content type is the only matcher, the editor disables placement fields to
 make the compositor's safety rule obvious. Aqueous treats every rule containing
 `content_type` as visual-only, so placement values combined with it are ignored.
