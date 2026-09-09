@@ -1,6 +1,6 @@
 ---
 title: Outputs and HDR
-description: Configure monitors, profiles, hotplug, adaptive sync, HDR, and the embedded output service.
+description: Configure monitors, profiles, mirroring, hotplug, adaptive sync, HDR, and the embedded output service.
 sidebar:
   label: Outputs and HDR
   order: 7
@@ -62,6 +62,9 @@ possible to define a broad dock policy followed by one specific monitor.
   rotated flipped variants.
 - `primary` is a deterministic action/focus fallback. It does not steal focus
   from an explicitly selected output.
+- `mirror_of` names a source connector; `""` clears an inherited mirror.
+  Mirroring currently requires one SDR pair on the same backend/device with
+  normal transforms. See [Screen mirroring](/aqueous/screen-mirroring/).
 
 When `position` is absent, Aqueous arranges otherwise unconfigured outputs in a
 non-overlapping horizontal row. A first output-management transaction that
@@ -155,6 +158,10 @@ logical rectangle transfers the window to that output's active workspace. If
 the source disappears, Aqueous recovers the window to the nearest enabled
 output and keeps a reachable portion visible.
 
+Transient output commit failures schedule retries with a capped backoff delay
+so presentation can recover. This does not guarantee recovery from
+every GPU or driver failure.
+
 ## Embedded output service
 
 Aqueous hosts a same-user Unix socket at:
@@ -167,11 +174,15 @@ It preserves the display-panel JSON contract without a separate
 `aqueous-outputd` process. Operations include `list`, `set`, `reload`,
 `apply_profile`, and `save_profile`. The `set` and profile operations support
 mode, position, transform, scale, adaptive sync, primary selection, HDR level,
-SDR white, and Auto HDR fields. Listed outputs also report HDR capability,
+SDR white, Auto HDR, and `mirror_of` fields. Listed outputs also report HDR capability,
 active state, render format, EDID luminance, supported primaries and transfer
 functions, and Auto HDR capability.
 
-The Noctalia [settings application](/aqueous/settings/) consumes this service
+When this service is available, `aqueousctl outputs --json` also includes
+`mirror_of`, `mirror_status`, and `mirror_error`. Standard output-management
+discovery remains available without the service.
+
+The [settings application](/aqueous/settings/) consumes this service
 for its connected-output canvas while writing persistent overrides to
 `outputs.toml` only when you select **Apply**.
 

@@ -37,6 +37,8 @@ Aqueous-owned and integrated directly into the compositor.
 - Configure modes, scale, transforms, logical positions, adaptive sync, HDR,
   Auto HDR, primary-output fallback, hotplug behavior, and named output
   profiles through atomic compositor transactions.
+- Mirror an SDR display to a projector or capture card on the same device,
+  with independent refresh rates and aspect-ratio-preserving letterboxing.
 - Configure XKB, repeat, focus policy, mice, touchpads, pointer constraints,
   gestures, tablets, and input-method/text-input clients.
 - Use compositor-side rounded corners, damage-aware backdrop blur,
@@ -44,6 +46,12 @@ Aqueous-owned and integrated directly into the compositor.
   transitions, and a workspace-local window overview.
 - Run native Wayland and optional embedded XWayland applications without an
   external XWayland bridge or policy client.
+- Integrate shells through typed window, workspace, keyboard, overview, and
+  session commands, with persistent socket IPC for state subscriptions.
+
+These guides track the source tree as of **September 8, 2026**. Distribution
+packages may lag behind; use `aqueous -version` and
+`aqueousctl shell capabilities --json` to check your installed build.
 
 ## Layouts and interaction
 
@@ -95,18 +103,21 @@ failures retain the last valid rule snapshot.
 The packaged desktop also includes:
 
 - `aqueousctl`, for inspecting windows, outputs, scene nodes, overlay-plane
-  decisions, and live workspace layouts.
-- A Noctalia settings plugin with typed controls, a draggable monitor canvas,
+  decisions, cursor settings, and live shell state, and controlling windows,
+  workspaces, keyboard layouts, and overview.
+- A Dank Material Shell settings plugin with typed controls, a draggable monitor canvas,
   complete stacking and rule editors, named snap-layout and binding controls,
   raw advanced file editing, validation, stale-write protection, backups, and
   toolkit typography synchronization.
-- A first-run welcome application that discovers installed software and can
-  install selected repository, AUR, and Flatpak applications through Shelly.
+- A shell-native screen-sharing chooser backed by Aqueous's private desktop
+  portal backend.
 
 <Aside type="note">
-  Noctalia is the packaged shell, not a compositor dependency. Aqueous supports
-  standard layer-shell clients and can run with another compatible desktop
-  shell.
+  Source Arch packages use Seafoam Labs' Dank Material Shell fork
+  (`dms-aqueous`). The binary package, Noctalia Git variant, NixOS module, and
+  Gentoo installer retain Noctalia integration. The Noctalia Git variant also
+  includes the welcome application. Aqueous supports other compatible
+  layer-shell clients; see [Installation](/aqueous/installation/).
 </Aside>
 
 <CardGrid>
@@ -116,6 +127,11 @@ The packaged desktop also includes:
   <LinkCard title="Outputs and HDR" href="/aqueous/outputs/" />
   <LinkCard title="Settings application" href="/aqueous/settings/" />
   <LinkCard title="Command-line tools" href="/aqueous/command-line/" />
+  <LinkCard title="Screen mirroring" href="/aqueous/screen-mirroring/" />
+  <LinkCard
+    title="Shell integration and IPC"
+    href="/aqueous/shell-integration/"
+  />
 </CardGrid>
 
 ## Project source

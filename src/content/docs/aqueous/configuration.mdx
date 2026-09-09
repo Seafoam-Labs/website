@@ -24,7 +24,7 @@ files are sidecars for keeping each policy area understandable.
   - layout.toml layouts, options, slots, named stacking snap layouts, and mappings
   - input.toml keyboard, focus, gestures, mouse, and touchpad policy
   - rules.toml ordered window/layer rules and Game Mode policy
-  - appearance.toml settings-plugin typography source of truth, not read by the compositor
+  - appearance.toml settings-plugin font and cursor preferences, not read by the compositor
 
 </FileTree>
 
@@ -101,10 +101,9 @@ left = 0
 right = 0
 
 [actions]
-toggle_start_menu = "noctalia msg panel-toggle launcher"
+toggle_start_menu = "dms ipc call spotlight toggle"
 spawn_terminal = "ghostty"
-screenshot = "grim -g \"$(slurp)\" - | wl-copy"
-lock_screen = "noctalia msg lock"
+screenshot = "dms screenshot region"
 
 [layout]
 path = "~/.config/aqueous/layout.toml"
@@ -166,7 +165,7 @@ env = { XDG_CURRENT_DESKTOP = "Aqueous" }
 - `once` avoids duplicate children with the same name.
 - `restart` retries a child after a nonzero exit until it succeeds.
 
-The packaged Noctalia shell is already managed as a graphical-session service
+The package's desktop shell is already managed as a graphical-session service
 and does not need a duplicate `[[exec]]` entry.
 
 ## Application launch profiles
@@ -215,8 +214,9 @@ when testing this higher-cost compatibility mode.
 
 ## Edit with the settings application
 
-The Noctalia plugin provides typed controls for common settings and complete
-raw editors for all five files. Draft changes can be validated before Apply;
+The DMS and Noctalia plugins provide typed controls for common settings and
+complete raw editors for all five compositor files plus `appearance.toml`.
+Draft changes can be validated before Apply;
 the helper preserves comments and unknown keys, detects external edits, creates
 backups for multi-file writes, and never restarts the compositor. See
 [Settings application](/aqueous/settings/).

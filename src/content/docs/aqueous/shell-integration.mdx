@@ -1,0 +1,152 @@
+---
+title: Shell Integration and IPC
+description: Integrate desktop shells with Aqueous state, runtime commands, persistent IPC, and screen-sharing portals.
+sidebar:
+  label: Shell Integration and IPC
+  order: 13
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Aqueous owns window and workspace policy in the compositor. Desktop shells can
+use standard layer-shell, workspace, and foreign-toplevel protocols, plus the
+versioned Aqueous shell interface for richer state and typed runtime actions.
+Source Arch packages start Seafoam Labs' `dms-aqueous`; other package variants
+retain Noctalia. See [Installation](/aqueous/installation/#shell-and-package-variants).
+
+## Discover live capabilities
+
+```sh
+aqueousctl shell capabilities --json
+aqueousctl shell snapshot --json
+aqueousctl shell watch --json
+```
+
+Capabilities describe what the installed compositor supports. Snapshots and
+deltas expose outputs, workspaces, windows, seats, keyboard groups/devices, and
+session state. IDs belong to a compositor session; workspace IDs are distinct
+from the numbered workspace shortcuts in `wm.toml`.
+
+The CLI uses `aqueous_shell_manager_v1` on Wayland. Its typed commands can
+activate or close windows, set window states, move windows, activate or rename
+workspaces, switch keyboard layouts, control overview, and request session exit.
+See [Command-line tools](/aqueous/command-line/#shell-state-and-runtime-actions).
+
+## Persistent socket IPC
+
+Aqueous exports an absolute `AQUEOUS_SOCKET` path to session children and
+services before startup. It points to a private per-instance endpoint:
+
+```text
+$XDG_RUNTIME_DIR/aqueous/<instance>/ipc.sock
+```
+
+This socket serves capability discovery, snapshots, acknowledged state deltas,
+and typed commands without launching a process for each action. It shares the
+compositor's state and command backend with the Wayland shell protocol.
+
+<Aside type="note" title="Compositor support and shell adoption">
+  The compositor socket is implemented. DMS's migration to a persistent socket
+  consumer is separate work; the existing DMS process adapter and `aqueousctl`
+  remain supported. Settings and keybinding configuration still use the
+  `aqueous-config` helper rather than this runtime socket.
+</Aside>
+
+### Connect and negotiate
+
+Use an AF_UNIX stream connection to the inherited path. Each frame is one
+UTF-8 JSON object followed by LF; reads can split or combine frames. Every
+connection begins with:
+
+```json
+{ "ipc": 1, "id": "1", "op": "hello", "params": {} }
+```
+
+The response includes the session token, schema, capabilities, and resource
+limits. Every subsequent request includes that returned token as a top-level
+`session` field. Request IDs are increasing decimal strings, at most 20 digits;
+entity IDs and sequence/delivery values also remain strings.
+
+Use one persistent connection for queries and commands and another for
+subscriptions and acknowledgements. Allow only one outstanding request per
+connection. The runtime operations are:
+
+| Operation   | Purpose                                                     |
+| ----------- | ----------------------------------------------------------- |
+| `hello`     | Negotiate capabilities and session identity.                |
+| `snapshot`  | Read a complete current state batch.                        |
+| `subscribe` | Receive an initial snapshot followed by state deltas.       |
+| `ack`       | Acknowledge the exact delivery ID after installing a batch. |
+| `command`   | Run a typed action with validated fields.                   |
+
+### State, completion, and recovery
+
+Install each batch atomically. A snapshot has `base_sequence: null`; a delta's
+`base_sequence` must match the last installed sequence. Delta upserts replace
+complete entities. Only one batch is unacknowledged at a time, and subscribed
+connections accept only acknowledgements after subscribing.
+
+Command status `applied` means the operation committed. `accepted` is reserved
+for close and exit requests; it does not prove a client has terminated.
+Commands fail explicitly for stale sessions, invalid targets, lock state,
+unsupported actions, and resource limits. The socket exposes typed runtime
+actions, not arbitrary command execution or configuration writes.
+
+After disconnect, discard old state and queued mutations, reconnect with
+bounded backoff, and install a fresh subscription snapshot. Never automatically
+replay a command sent without a reply: its outcome is unknown. Both connections
+must agree on session identity before the shell uses their state.
+
+The socket is a same-user desktop interface, with a private directory and peer
+UID checks. Session tokens detect stale identity; they are not authentication
+secrets. Use the inherited endpoint and do not expose it to untrusted
+application sandboxes or discover endpoints by scanning other sessions.
+
+For exact fields, limits, schemas, and recovery rules, use the source
+[IPC v1 contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/compositor/protocol/aqueous-ipc-v1.md)
+and [Wayland shell contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/compositor/protocol/aqueous-shell-v1.md).
+
+## Screen sharing and portals
+
+Packages include a private namespaced build of `xdg-desktop-portal-wlr` as
+`xdg-desktop-portal-aqueous`. It handles ScreenCast and Screenshot, while GTK
+handles the remaining portal interfaces. The package variant selects a DMS or
+Noctalia source chooser; installing another shell alone does not change it.
+
+DMS sharing uses the independent **Aqueous Screen Sharing** (`aqueousPortal`)
+daemon plugin. It works without Aqueous Settings or a DankBar widget. The
+bridge waits for discovery and enables this portal plugin on the first request
+unless it has been explicitly disabled. Re-enable it through DMS Settings →
+Plugins or:
+
+```sh
+dms ipc call plugins enable aqueousPortal
+```
+
+Escape, Cancel, or closing the picker produces no selection. A second picker
+request is rejected while one is active. The chooser does not start another
+shell or silently select a screen.
+
+### Troubleshooting the picker
+
+```sh
+journalctl --user -u xdg-desktop-portal-aqueous.service -b
+```
+
+| Error                   | Meaning                                        |
+| ----------------------- | ---------------------------------------------- |
+| `PluginDisabled`        | The portal plugin was explicitly disabled.     |
+| `PluginNotReady`        | DMS or the portal plugin did not become ready. |
+| `PluginSettingsInvalid` | DMS plugin settings are malformed.             |
+| `ChooserBusy`           | Another picker is active.                      |
+
+Backend configuration uses the first readable file, without merging:
+
+1. `$XDG_CONFIG_HOME/xdg-desktop-portal-aqueous/Aqueous`
+2. `$XDG_CONFIG_HOME/xdg-desktop-portal-aqueous/config`
+3. `/etc/xdg/xdg-desktop-portal-aqueous/Aqueous`
+4. `/etc/xdg/xdg-desktop-portal-aqueous/config`
+
+`XDG_CONFIG_HOME` defaults to `~/.config`. An existing override can mask the
+new package's chooser settings. Review it and any `.pacnew` file when changing
+shell variants, then log out and back in to load the backend configuration.

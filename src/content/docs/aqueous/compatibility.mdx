@@ -10,7 +10,7 @@ import { Aside } from "@astrojs/starlight/components";
 
 Aqueous is a wlroots 0.20 compositor with native Wayland clients and optional
 embedded XWayland. Its shell and tooling interfaces are protocols rather than
-hard-coded dependencies on Noctalia.
+hard-coded dependencies on a particular desktop shell.
 
 ## Application and rendering protocols
 
@@ -22,7 +22,9 @@ seat, output, and data-device interfaces together with:
   explicit content type.
 - Linux DMA-BUF and explicit DRM synchronization where the renderer/backend
   support them.
-- Presentation timing and tearing control.
+- Presentation timing, tearing control, and FIFO v1 commit pacing. FIFO is
+  available in both Vulkan and diagnostic builds; physical DRM/VRR and
+  FIFO plane-promotion qualification remain outstanding.
 - Color representation and color-management-v1, including parametric image
   descriptions and the supported Windows HDR descriptions in the Vulkan
   effects build.
@@ -43,6 +45,10 @@ Standard shell and desktop components can use:
 - wlr output management, output power, gamma control, and XDG output.
 - ext idle notification, idle inhibit, and ext session lock.
 - XDG desktop portals through the packaged wlr/GTK portal configuration.
+- `ext-background-effect-v1` for exact client-requested blur regions in Vulkan
+  effects builds, including compatible DMS/Quickshell clients.
+- The versioned Aqueous shell protocol and persistent `AQUEOUS_SOCKET` IPC for
+  state and typed runtime actions. See [Shell integration](/aqueous/shell-integration/).
 
 Layer-shell exclusive zones feed directly into each output's usable area.
 Session-lock surfaces are handled outside ordinary window policy and Auto HDR.
@@ -54,6 +60,9 @@ Aqueous implements `xdg-decoration` mode negotiation. With
 configured for server-side decoration even when it requests client-side mode.
 Repeated client requests receive a configure response even when policy keeps
 the same effective mode.
+
+The legacy `org_kde_kwin_server_decoration_manager` is also available for GTK
+and older Qt clients. Its display-wide default follows `force_ssd`.
 
 Applications that do not create the protocol object—or that paint a custom
 toolbar/title bar into their normal content—are not removable by compositor
@@ -72,6 +81,10 @@ both ext and wlr data-control managers.
 Overlay-plane candidates fall back to normal composition while capture or a
 software cursor requires it, ensuring capture tools see the expected content.
 
+The packaged `xdg-desktop-portal-aqueous` backend handles ScreenCast and
+Screenshot with a shell-native source chooser; GTK handles remaining portal
+interfaces. See [portal setup and troubleshooting](/aqueous/shell-integration/#screen-sharing-and-portals).
+
 ## Input protocols
 
 Aqueous supports relative pointer, pointer constraints, pointer gestures,
@@ -79,6 +92,9 @@ tablet v2, text input v3, input method v2 and its popup surfaces, virtual
 pointer, virtual keyboard, XWayland keyboard grabs, and compositor-side idle
 notification. Holding the configured `untrap_pointer` binding temporarily
 releases a client pointer constraint and restores it when the key is released.
+
+`keyboard-shortcuts-inhibit-v1` lets eligible focused clients inhibit normal
+compositor bindings. Built-in virtual-terminal switching remains reserved.
 
 ## XWayland
 
@@ -103,13 +119,11 @@ to expose the required integration.
 
 ## Known protocol gaps
 
-The current compositor does not expose DRM lease v1, keyboard-shortcuts
-inhibit v1, or the legacy wlr input-inhibitor protocol. The practical effects
+The current compositor does not expose DRM lease v1 or the legacy wlr
+input-inhibitor protocol. The practical effects
 are:
 
 - VR headsets that require DRM leasing are not yet supported.
-- Fullscreen clients cannot request temporary ownership of compositor-reserved
-  shortcuts.
 - Old lock tools that only understand wlr input inhibition should be replaced
   with an ext-session-lock client.
 
@@ -118,8 +132,9 @@ of xdg-foreign, tablet, input-method, and text-input are also not exposed.
 Modern versions of those capabilities are supported where listed above.
 
 <Aside type="note">
-  Plasma- and GNOME-private shell APIs are not implemented. This does not
-  prevent standard Wayland applications from running, but desktop components
-  that require compositor-specific private APIs need a protocol-compatible
+  General Plasma- and GNOME-private shell APIs are not implemented beyond the
+  legacy decoration compatibility described above. This does not prevent
+  standard Wayland applications from running, but desktop components that
+  require compositor-specific private APIs need a protocol-compatible
   alternative.
 </Aside>

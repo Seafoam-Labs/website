@@ -17,6 +17,7 @@ devices added later.
 ```toml
 [input]
 focus_follows_mouse = false
+mouse_follows_focus = false
 focus_new_windows = false
 raise_on_focus = true
 raise_on_focus_delay_ms = 0
@@ -31,12 +32,19 @@ repeat_delay = 400
 
 - `focus_follows_mouse` focuses the pointer target immediately, except where a
   scrolling layout configures its own dwell delay.
+- `mouse_follows_focus` moves the pointer into a newly focused window after
+  keyboard navigation, activation, or automatic focus changes. It defaults to
+  false. Pointer-originated focus, grabs, and drags leave the pointer in place;
+  a pointer already over the target's visible content also stays put. Output
+  navigation still moves the pointer when this setting is disabled.
 - `focus_new_windows` focuses a newly admitted focusable window after its
   output/workspace rule is resolved. Inactive-workspace and non-focusable X11
   arrivals do not steal focus.
 - `raise_on_focus` persistently raises a stacking/freeform window after the
   optional delay.
-- `num_lock_state` sets the initial XKB Num Lock state.
+- `num_lock_state` sets Num Lock on physical keyboards (default false). An
+  explicit value overrides `wm.toml` and changes apply to connected keyboards
+  on reload. Reloading an unchanged value preserves manual Num Lock toggles.
 - `repeat_rate` is characters per second; zero disables repeat.
 - `repeat_delay` is milliseconds before repeat begins.
 
@@ -115,7 +123,9 @@ permanently disabling pointer locking.
 
 Scrolling-layout wheel navigation uses the primary modifier to move by column
 and the primary modifier plus Alt to move within a column. Natural-scroll
-settings reverse those directions consistently.
+settings reverse those directions consistently. Configure or disable these
+actions with `wheel_scroll_left/right/up/down`; see
+[wheel bindings](/aqueous/keybindings/#scrolling-actions).
 
 ## Tablets and input methods
 

@@ -1,6 +1,6 @@
 ---
 title: Settings Application
-description: Configure Aqueous safely through its Noctalia v5 settings plugin.
+description: Configure Aqueous through its Dank Material Shell or Noctalia settings plugin.
 sidebar:
   label: Settings Application
   order: 4
@@ -8,14 +8,41 @@ sidebar:
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-Aqueous Settings is a native Noctalia v5 plugin. Add its **Aqueous** widget to
-a bar, then click the widget to open a theme-native flyout. The plugin edits the
-same TOML files as the compositor; it is not a second configuration system.
+Aqueous Settings is available for Dank Material Shell and Noctalia v5. Both
+frontends use the shared `aqueous-config` helper and edit the same TOML files
+as the compositor. Source Arch packages install the DMS frontend.
 
 ## Install or enable the plugin
 
-The normal Aqueous package installs the plugin and its `aqueous-config` Zig
-helper. Fresh Noctalia profiles are seeded with the source, enabled plugin, and
+### Dank Material Shell
+
+Enable **Aqueous Settings** in **DMS Settings → Plugins**, then add its widget
+to DankBar. Left-click opens the attached popout; right-click opens a separate
+settings window. Both share one draft model across all bar instances.
+
+The enabled plugin can also open without a bar widget:
+
+```sh
+dms ipc call aqueousSettings open
+dms ipc call aqueousSettings toggle
+dms ipc call aqueousSettings close
+```
+
+The plugin targets DMS 1.7 or newer and requires `aqueous-config` 0.7.0 or
+newer, plus `aqueousctl`. Helper 0.7.1 adds capability discovery. Its executable
+path can be configured in the plugin settings.
+
+For a development checkout, run `./dms-plugin/packaging/dev-install.sh` from the
+Aqueous repository. Reload changed plugin code through DMS's plugin UI or
+`dms ipc call plugin-scan reload aqueousSettings`.
+
+Drafts survive closing the window or popout. Apply or discard them before
+disabling or reloading the plugin or restarting DMS, which clears in-memory drafts.
+
+### Noctalia
+
+Noctalia package variants install the v5 plugin and the same helper. Fresh
+Noctalia profiles are seeded with the source, enabled plugin, and
 bar widget. Existing profiles receive a one-time registration attempt without
 overwriting their bars or re-enabling a plugin the user later disables.
 
@@ -50,12 +77,21 @@ Typed controls cover:
 - Stable or focus-sensitive opacity.
 - Workspace transition enablement and rate.
 - Static struts and maximize/fullscreen compatibility behavior.
-- Desktop font family and point size.
+- Installed font families and faces, point size, and adapter status/retry.
+- Opt-in cursor theme and size management, including live application.
 
 Typography is stored in `~/.config/aqueous/appearance.toml` and synchronized
-to Noctalia, GSettings, GTK 3, GTK 4, and qt5ct/qt6ct when those adapters are
-installed or configured. Each target reports available, active, and synced
-state. KDE/Plasma-specific configuration is intentionally not changed.
+to the selected shell, GSettings, GTK 3, GTK 4, and qt5ct/qt6ct when those
+adapters are installed or configured. Each target reports available, active,
+and synced state. DMS applies family, weight, and scale, with partial coverage
+for exact face, slant, width, and separately scaled bars. Noctalia applies the
+family and reports partial coverage for an exact face.
+
+Cursor management applies theme and size through `aqueousctl`, updates GTK and
+the systemd/D-Bus activation environment, and writes
+`~/.config/uwsm/env-aqueous.d/90-aqueous-cursor` for future sessions. Existing
+applications may keep their own cursor surfaces until restarted. DMS-mode
+helper operations do not write or reload Noctalia settings.
 
 ### Layouts
 
@@ -86,14 +122,14 @@ Ordinary typed edits continue to update the effective existing alias in place.
 
 ### Input
 
-Typed controls cover focus-follows-pointer, focus-new-windows, freeform raising
-and delay, XKB layout/variant/options, keyboard repeat, legacy global pointer
-speed, and mouse/touchpad libinput settings.
+Typed controls cover focus-follows-pointer, mouse-follows-focus,
+focus-new-windows, freeform raising and delay, XKB layout/variant/options,
+keyboard repeat, legacy global pointer speed, and mouse/touchpad libinput settings.
 
 ### Displays
 
-The display canvas combines configured `[[output]]` entries with Noctalia's
-connected outputs. Monitor cards use a common scale, reflect their relative
+The display canvas combines configured `[[output]]` entries with connected
+outputs. Monitor cards use a common scale, reflect their relative
 logical resolution, and remain visible when configured but offline. Drag a
 card before, after, above, or below another display; select normal or flipped
 rotation; or enter exact logical X/Y coordinates.
@@ -103,12 +139,23 @@ the matching `outputs.toml` entry. Other display settings continue to inherit
 from `wm.toml` until explicitly changed. General display-policy fields include
 startup/reload application and fallback profile.
 
+Resolution and refresh selectors use advertised modes, including fractional
+refresh rates. Automatic refresh writes `WIDTHxHEIGHT`; an explicit rate writes
+`WIDTHxHEIGHT@Hz`. Offline outputs accept custom modes, and mode drafts survive
+movement and rotation. The canvas reflects resolution at the effective scale.
+
+Choose **Extended desktop** or **Mirror of …** for a destination display.
+Mirrors remain selectable but are omitted from the arrangement canvas. Select
+compatible SDR, orientation, and refresh settings before applying mirroring;
+see [Screen mirroring](/aqueous/screen-mirroring/).
+
 ### Rules
 
 The ordered window-rule editor can add, duplicate, move, update, and delete
 rules. It covers identity and content-type matchers, layout/output/workspace,
 floating/state policy, stack layer, focus/task-list hints, placement and size,
 opacity/blur, client-buffer scaling, HDR expansion, and overlay preference.
+The scrolling full-width preset is also available.
 
 When content type is the only matcher, the editor disables placement fields to
 make the compositor's safety rule obvious. Aqueous treats every rule containing
@@ -135,6 +182,11 @@ Use this page for composable regions, output profiles, gestures, managed
 commands, workspace mappings, layer rules, or any newer option not yet given a
 typed control.
 
+Search filters schema-backed settings on the selected page in DMS. Reset
+arrows stage defaults, and numeric controls report input errors. Resolve raw
+and typed drafts affecting the same file before Validate or Apply. Apply or
+discard a rule reorder before making other rule edits.
+
 ## Safe editing model
 
 <Steps>
@@ -158,6 +210,11 @@ typed control.
    the result; the plugin never restarts the compositor.
 
 </Steps>
+
+DMS backups live under
+`${XDG_STATE_HOME:-$HOME/.local/state}/aqueous/dms-plugin/backups`.
+If Apply times out or returns an invalid response, reload and inspect the saved
+state before retrying; the write may already have completed.
 
 <Aside type="note">
   Toolkit synchronization is observable per target rather than presented as a

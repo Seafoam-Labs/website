@@ -28,13 +28,15 @@ compiled defaults.
 Join case-insensitive tokens with `+`.
 
 - Primary modifier: `Super`, `Mod4`, `Logo`, or `Win`.
+- Physical Super modifier: `Meta`, even when `AQUEOUS_MOD=Alt`.
 - Other modifiers: `Ctrl`/`Control`, `Alt`/`Mod1`, and `Shift`.
 - Keys: printable ASCII, `F1`–`F24`, navigation/editing names, punctuation
-  names, `Print`, `CapsLock`, `wheel`, and common `XF86` media/display/brightness keys.
+  names, `Print`, `CapsLock`, and common `XF86` media/display/brightness keys.
+- Scroll directions: `WheelUp`, `WheelDown`, `WheelLeft`, and `WheelRight`,
+  including accumulated touchpad scroll steps.
 
 `AQUEOUS_MOD=Alt` makes Alt the primary modifier; in that mode literal Alt is
-still resolved consistently and Super remains available as an additional
-modifier.
+still resolved consistently. Use `Meta` to address the physical Super key.
 
 ## Session, focus, and overview
 
@@ -59,11 +61,14 @@ Four command actions run values from `[actions]`:
 
 ```toml
 [actions]
-toggle_start_menu = "noctalia msg panel-toggle launcher"
+toggle_start_menu = "dms ipc call spotlight toggle"
 spawn_terminal = "ghostty"
-screenshot = "grim -g \"$(slurp)\" - | wl-copy"
-lock_screen = "noctalia msg lock"
+screenshot = "dms screenshot region"
 ```
+
+These examples use the DMS source-package commands. Set `lock_screen` to your
+chosen session locker's command; binding the action alone does not configure a
+locker. Noctalia users can keep their existing shell commands.
 
 ## Layout-aware movement
 
@@ -91,9 +96,9 @@ Movement follows the active engine:
 | ---------------------------------------- | ----------------------------------- |
 | `scroll_viewport_left/right`             | `Super+Comma/Period` (legacy names) |
 | `scroll_viewport_left_arrow/right_arrow` | `Super+Left/Right`                  |
-| `scroll_viewport_left/right`             | `Super+wheel`                       |
+| `wheel_scroll_left/right`                | `Super+WheelUp/Down`                |
 | `scroll_viewport_up/down`                | `Super+Up/Down`                     |
-| `scroll_viewport_up/down`                | `Super+Alt+wheel`                   |
+| `wheel_scroll_up/down`                   | `Alt+Meta+WheelUp/Down`             |
 | `consume_window_into_column`             | `Super+Ctrl+J`                      |
 | `expel_window_from_column`               | `Super+Ctrl+K`                      |
 | `toggle_scrolling_full_width`            | `Super+Shift+Z`                     |
@@ -102,6 +107,29 @@ Movement follows the active engine:
 The primary-modifier wheel chord pans columns; primary+Alt moves within a
 vertical column. See [Layouts](/aqueous/layouts/#scrolling-columns) for pointer
 insertion and resize behavior.
+
+Wheel actions accept the same string, array, or empty-array syntax as keyboard
+actions. Rebinding one removes its previous default without changing the arrow
+shortcuts:
+
+```toml
+[keybinds]
+wheel_scroll_left = ["Ctrl+WheelUp", "Ctrl+WheelLeft"]
+wheel_scroll_right = ["Ctrl+WheelDown", "Ctrl+WheelRight"]
+wheel_scroll_up = []
+wheel_scroll_down = []
+
+[keybinds.custom]
+"Super+WheelUp" = "builtin:focus_workspace_up"
+"Super+WheelDown" = "builtin:focus_workspace_down"
+```
+
+Custom wheel chords can run any supported action or command outside scrolling
+layouts, too. An explicit custom chord replaces the default on that chord.
+Matched steps are consumed even when the action has no effect; unmatched
+directions reach the application. Wheel input cannot hold `untrap_pointer`.
+Locks, shortcut inhibition, overview, interactive drags, and XWayland keyboard
+grabs prevent wheel bindings from running.
 
 ## Layout selection and composable regions
 
@@ -143,6 +171,11 @@ rotate_output_clockwise = "Super+Ctrl+R"
 Output navigation uses physical rectangles rather than connector iteration
 order. Rotation targets only the enabled output beneath the pointer and is not
 persisted to TOML.
+
+An explicitly selected output remains the target for subsequent workspace and
+window actions even when it is empty. Output navigation moves the pointer to
+the destination; [mouse-follows-focus](/aqueous/input/#keyboard-and-focus)
+can additionally place it inside the newly focused window.
 
 ## Window states
 

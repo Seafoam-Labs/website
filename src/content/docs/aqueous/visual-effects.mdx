@@ -49,6 +49,19 @@ The renderer caches and damages blur regions around scene changes rather than
 blindly redrawing the entire desktop. Set `enabled = false` to remove global
 blur work.
 
+### Native client blur regions
+
+Vulkan effects builds support `ext-background-effect-v1`. Compatible DMS and
+Quickshell clients can request blur directly, including regions with holes or
+rounded masks, without namespace rules. Global `[blur].enabled` must be true.
+An explicit `blur = false` rule vetoes a request, and a committed client mask
+takes precedence over rectangular rule fallback. See
+[Layer-shell rules](/aqueous/window-rules/#layer-shell-rules) for popup behavior.
+
+`dms blur check` reports protocol discovery. It can report `supported` even
+when runtime blur is disabled; a build without Vulkan effects reports
+`unsupported`.
+
 ## Window opacity
 
 ```toml
@@ -86,6 +99,12 @@ slide more quickly. Workspace transitions retain the outgoing workspace until
 the slide completes and use inert surface clones, so clients are not repeatedly
 configured during motion.
 
+Fullscreen windows participate in workspace slides with an opaque backing
+behind transparent content. Transitions stay clipped to their owning output,
+including mixed-scale and rotated setups, while client dimensions and focus
+remain governed by normal workspace policy. Aqueous still permits only one
+fullscreen owner per output.
+
 Window placement animation is also compositor-side. Damage-driven frames
 advance only visual state that is changing. Build with `-Danimations=false` to
 remove placement and workspace motion completely.
@@ -101,6 +120,10 @@ window creates an `xdg-decoration` object. Aqueous responds to every mode
 request, including repeated requests that do not change the effective mode,
 and recalculates the result when configuration reloads or the decoration
 object is recreated or destroyed.
+
+The legacy `org_kde_kwin_server_decoration_manager` is also advertised for
+GTK and older Qt clients. Its display-wide default follows `force_ssd` and
+updates on configuration reload.
 
 ```toml
 [layout]

@@ -1,0 +1,120 @@
+---
+title: Screen Mirroring
+description: Mirror an SDR display to a projector or capture card with independent refresh rates.
+sidebar:
+  label: Screen Mirroring
+  order: 9
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Aqueous can mirror one output to another on the same backend/device. The
+source keeps its resolution, scale, workspace, and refresh rate. The destination
+fits the complete source image into its own resolution with black bars where
+needed, including windows, panels, popups, effects, and the cursor.
+
+## Configure a mirror
+
+Find connector names and advertised modes with `aqueousctl outputs --json`.
+Add the relationship to `~/.config/aqueous/outputs.toml`:
+
+```toml
+[[output]]
+name = "DP-1"
+enabled = true
+mode = "2560x1440@240"
+transform = "normal"
+hdr = false
+mirror_of = ""
+
+[[output]]
+name = "HDMI-A-1"
+enabled = true
+mode = "1920x1080@60"
+mirror_of = "DP-1"
+adaptive_sync = false
+hdr = false
+transform = "normal"
+```
+
+Both displays must use SDR and normal orientation. The source can keep adaptive
+sync; the destination uses fixed refresh and disallows tearing. Refresh rates
+do not need to be integer multiples. Aqueous copies frames at destination
+demand, skips intermediate source updates, and retains the latest complete
+image when the source is idle.
+
+The [settings plugin](/aqueous/settings/#displays) also offers **Extended
+desktop** and **Mirror of …** choices. Select compatible modes, SDR, and normal
+orientation before applying the relationship. Mirrors remain in the display
+selector but are omitted from the arrangement canvas. Position and scale are
+retained for a later return to extended mode.
+
+## Return to an extended desktop
+
+Explicitly clear the relationship in the file that sets it:
+
+```toml
+[[output]]
+name = "HDMI-A-1"
+mirror_of = ""
+position = [2560, 0]
+```
+
+Adjust the position for your source's logical size after scaling. An omitted
+`mirror_of` inherits policy; an empty string clears it. A value in
+`outputs.toml` takes precedence over `wm.toml`. Named output profiles accept
+the same field.
+
+## Status and runtime changes
+
+```sh
+aqueousctl outputs --json
+```
+
+With the embedded output service available, each output can report
+`mirror_of`, `mirror_status`, and `mirror_error`. Status is `starting`,
+`active`, `waiting_for_source`, `suspended`, `error`, or `extended`.
+
+The existing [output service](/aqueous/outputs/#embedded-output-service) accepts
+`mirror_of` in a `set` request to `$XDG_RUNTIME_DIR/aqueous/outputd.sock`:
+
+```json
+{
+  "op": "set",
+  "changes": [
+    { "name": "HDMI-A-1", "mirror_of": "DP-1", "adaptive_sync": false }
+  ]
+}
+```
+
+Use compatible SDR and orientation settings first. Apply responses describe
+staged changes; the compositor's output transaction performs the backend
+commit. Inspect the resulting status to confirm the mirror is active.
+
+## Workspace and lock behavior
+
+A mirror has no independent workspace or pointer area. Existing windows migrate
+using output-removal policy. Returning to extended mode recreates its workspace
+space without automatically moving those windows back. Mirrors cannot be
+layer-shell or input-device mapping targets.
+
+A disconnected or powered-off source leaves the mirror black until a usable
+source returns. The mirror is also black during session locking and while
+locked. Cached desktop images are discarded on locking, source changes, and
+resizing; unlocking waits for fresh source content.
+
+## Supported configurations
+
+The first version supports one pair, SDR, normal transforms, and a shared
+backend/device. Self references, chains, extra pairs, and incompatible settings
+are rejected. Vulkan requires timeline synchronization support; the diagnostic
+Pixman build is also supported. HDR mirroring, rotation, cross-device transfer,
+delay, audio, and wireless transport are outside this version.
+
+<Aside type="note" title="Performance and capture hardware">
+  Mirroring forces source composition and software cursor rendering, disables
+  source direct scanout and overlay promotion, and adds GPU copy/scaling work.
+  Independent refresh scheduling does not guarantee unchanged game performance.
+  Validate capture-card cadence, tearing, VRR, and performance on your hardware
+  before relying on the setup for production capture.
+</Aside>

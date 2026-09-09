@@ -1,6 +1,6 @@
 ---
 title: Command-line Tools
-description: Inspect Aqueous state and control live layouts with aqueousctl.
+description: Inspect Aqueous and control windows, workspaces, keyboard layouts, overview, and cursors with aqueousctl.
 sidebar:
   label: Command-line Tools
   order: 10
@@ -85,6 +85,9 @@ physical size, enabled state, modes, current/preferred mode, position,
 transform, scale, adaptive sync, and `edid_sha256` where available. Use it
 before writing an output block or output-targeted rule.
 
+When the embedded output service is available, it also includes `mirror_of`,
+`mirror_status`, and `mirror_error`. See [Screen mirroring](/aqueous/screen-mirroring/).
+
 ## Live workspace layout
 
 ```sh
@@ -109,6 +112,76 @@ capability, current decision phase, candidate window and geometry, buffer
 format/modifier, rejection reason, backoff, attempts, accepts/rejections,
 promotions, demotions, and fallback retries. This is the first place to check
 when an `overlay_plane = "prefer"` rule remains composed.
+
+## Cursor theme and size
+
+```sh
+aqueousctl cursor --json
+aqueousctl cursor set --theme Adwaita --size 24 --json
+```
+
+The query reports the effective compositor cursor theme and base size. `set`
+applies an installed Xcursor theme and a size from 1 through 512 to every seat
+and the XWayland default cursor without restarting. Applications subsequently
+launched by Aqueous inherit matching `XCURSOR_THEME` and `XCURSOR_SIZE` values.
+Native clients may draw their own cursor surfaces.
+
+This is a live change. Use [Settings](/aqueous/settings/#appearance) to persist
+cursor preferences and update toolkit and service activation environments.
+
+## Shell state and runtime actions
+
+```sh
+aqueousctl shell capabilities --json
+aqueousctl shell snapshot --json
+aqueousctl shell watch --json
+```
+
+The snapshot contains windows, workspaces, outputs, seats, keyboard
+groups/devices, and session state. `watch` streams a snapshot followed by
+newline-delimited JSON deltas. IDs are scoped to the reported compositor
+session; use the current snapshot to resolve them. Workspace runtime IDs are
+not the 1–9 workspace numbers used by configuration bindings.
+
+The following forms use `ID`, `WORKSPACE_ID`, and `NAME` as placeholders:
+
+```sh
+aqueousctl window activate --id ID --json
+aqueousctl window close --id ID --json
+aqueousctl window state --id ID --fullscreen true --json
+aqueousctl window move --id ID --workspace-id WORKSPACE_ID --json
+aqueousctl window move --id ID --output DP-1 --json
+aqueousctl workspace activate --id WORKSPACE_ID --json
+aqueousctl workspace rename --id WORKSPACE_ID --name "Code" --json
+aqueousctl keyboard query --json
+aqueousctl keyboard set --index 0 --json
+aqueousctl keyboard next --json
+aqueousctl overview show --output DP-1 --json
+aqueousctl overview toggle --output DP-1 --json
+aqueousctl overview hide --json
+```
+
+Activation reveals the workspace and restores a minimized window. Moving a
+window does not request focus-following or workspace activation. Window state
+also accepts `--minimized` or `--maximized`, exactly one state at a time, with
+eligibility following the compositor's floating-window policy.
+
+Keyboard indices are zero-based. `set` and `next` accept optional `--seat`
+and `--group` selectors and change live XKB state without rewriting TOML.
+Window/workspace activation accepts `--seat`; commands requiring a seat may
+omit it only when exactly one seat exists. `aqueousctl session exit --json`
+requests orderly session termination.
+
+Commands fail while locked or under external/comparison policy. JSON replies
+include `ok`, `status`, and `sequence`. Close and exit report acceptance, not
+proof of client termination. Initial state and commands have a five-second
+deadline; a running watch has no idle timeout. Do not automatically retry a
+timed-out mutation, which may already have executed. Exit codes are 0 for
+success, 2 for malformed arguments, and 1 for operation/transport failure.
+
+These commands use the versioned Wayland shell protocol. For persistent socket
+clients, state sequencing, and capability negotiation, see
+[Shell integration and IPC](/aqueous/shell-integration/).
 
 ## Compatibility clients
 

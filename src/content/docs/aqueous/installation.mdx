@@ -16,9 +16,9 @@ import {
 } from "@astrojs/starlight/components";
 
 Aqueous packages include the compositor, `aqueousctl`, session integration,
-default configuration, the Noctalia settings plugin and helper, protocol
-metadata, and Aqueous's pinned wlroots library. Arch packages also include the
-first-run welcome application.
+default configuration, a shell settings plugin and helper, protocol metadata,
+and Aqueous's pinned wlroots library. Shell integration depends on the package
+variant.
 
 ## Arch Linux
 
@@ -54,6 +54,46 @@ git clone https://github.com/Seafoam-Labs/Aqueous.git
 cd Aqueous
 makepkg -si
 ```
+
+### Shell and package variants
+
+| Source or package variant                                                          | Shell integration                                                                  |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `PKGBUILD`, `PKGBUILD-git`, `GitPKGBUILD/PKGBUILD`, Intel variants, `PKGBUILD-DMS` | Seafoam Labs' `dms-aqueous`, Aqueous Settings, and the DMS screen-sharing chooser. |
+| `PKGBUILD-bin`                                                                     | Noctalia and its settings plugin; no welcome application.                          |
+| `gitNoctalia/PKGBUILD`                                                             | Alternative `aqueous-git` build preserving Noctalia and Welcome.                   |
+| NixOS module and Gentoo installer                                                  | Noctalia integration.                                                              |
+
+The DMS integration targets DMS 1.7 or newer and uses the
+[Seafoam Labs fork](https://github.com/Seafoam-Labs/DankMaterialShell).
+The release `PKGBUILD` builds its version tag; Git variants track repository
+development. Features documented from the current source may arrive in release
+packages later.
+
+### Switching an existing profile to DMS
+
+Existing user configuration is preserved. Copy the launcher and screenshot
+commands from `/usr/share/aqueous/wm.toml` into your own `wm.toml`:
+
+```toml
+[actions]
+toggle_start_menu = "dms ipc call spotlight toggle"
+screenshot = "dms screenshot region"
+
+[keybinds.custom]
+"Super+Shift+S" = "spawn:dms screenshot region"
+```
+
+Disable manually enabled shell services or shell startup commands before using
+packaged startup. `GitPKGBUILD/PKGBUILD` starts `dms.service` through
+`graphical-session.target`; the other DMS source variants use
+`aqueous-dms.service`. When moving to the former, remove manual enablement of
+the old `aqueous-dms.service` to avoid starting DMS twice.
+
+DMS packages omit the Noctalia Welcome app. Enable Aqueous Settings in
+**DMS Settings → Plugins** and use it for compositor configuration. Review any
+portal `.pacnew` files or user overrides after changing shell variants, then
+log out and back in. See [screen sharing](/aqueous/shell-integration/#screen-sharing-and-portals).
 
 ## Gentoo
 
@@ -119,13 +159,13 @@ zig build -Doptimize=ReleaseSafe -Dxwayland -Dllvm
 
 Useful build switches are:
 
-| Option                   | Purpose                                                                      |
-| ------------------------ | ---------------------------------------------------------------------------- |
-| `-Dxwayland=true`        | Build embedded XWayland support.                                             |
-| `-Dvulkan-effects=false` | Diagnostic stock-wlroots build without Aqueous blur or rounded corners.      |
-| `-Danimations=false`     | Compile out compositor-side placement and workspace motion.                  |
-| `-Dman-pages=true`       | Build and install manual pages when `scdoc` is available.                    |
-| `-Dexternal-policy=true` | Build the retired River external-policy path for compatibility testing only. |
+| Option                   | Purpose                                                                                              |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `-Dxwayland=true`        | Build embedded XWayland support.                                                                     |
+| `-Dvulkan-effects=false` | Diagnostic build without Aqueous blur or rounded corners; still requires the pinned patched wlroots. |
+| `-Danimations=false`     | Compile out compositor-side placement and workspace motion.                                          |
+| `-Dman-pages=true`       | Build and install manual pages when `scdoc` is available.                                            |
+| `-Dexternal-policy=true` | Build the retired River external-policy path for compatibility testing only.                         |
 
 <Aside type="caution">
   The normal effects build requires Aqueous's pinned wlroots render hook and
@@ -143,25 +183,26 @@ Useful build switches are:
    `WAYLAND_DISPLAY` and optional XWayland environment, and starts the
    graphical-session services and portals.
 
-3. On a fresh packaged profile, the session seeds `wm.toml`, registers the
-   Aqueous settings plugin, starts Noctalia, and offers the welcome application.
-   Existing configuration and bar layouts are not overwritten.
+3. On a fresh packaged profile, the session seeds `wm.toml` and starts the
+   package's shell integration. The Noctalia Git variant also offers the welcome
+   application. Existing configuration and bar layouts are not overwritten.
 
 </Steps>
 
-Noctalia is optional. The compositor continues to work with another shell that
-uses standard layer-shell interfaces.
+The compositor works with compatible shells using standard layer-shell
+interfaces. Source Arch packages depend on `dms-aqueous`; choose the package
+variant appropriate to your shell.
 
 To run a nested development session inside another Wayland compositor:
 
 ```sh
-./launch_river.sh
+./launch_aqueous.sh
 ```
 
-<Aside type="note" title="The launcher name is historical">
-  `launch_river.sh` launches Aqueous and Noctalia in a nested display. Aqueous
-  does not start River or an external window-manager client.
-</Aside>
+The launcher starts Aqueous and DMS (`dms run`) in the nested display. Set
+`AQUEOUS_COMPOSITOR_BIN=/path/to/aqueous` to select a build and
+`AQUEOUS_DMS_CMD` to override the shell command and arguments. Default logs are
+`/tmp/aqueous.log` and `/tmp/dms.log`.
 
 ## Runtime switches
 
