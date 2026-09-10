@@ -28,6 +28,10 @@ seat, output, and data-device interfaces together with:
 - Color representation and color-management-v1, including parametric image
   descriptions and the supported Windows HDR descriptions in the Vulkan
   effects build.
+- `xdg-system-bell-v1` version 1 for configurable visual feedback and custom
+  sound effects. It is available in Vulkan and Pixman builds, including
+  security-context clients and external-policy mode. See
+  [System bell](/aqueous/system-bell/) for configuration and request handling.
 
 The default client-buffer policy advertises exact fractional output scale.
 `integer-ceil` is an opt-in global or per-window compatibility path for

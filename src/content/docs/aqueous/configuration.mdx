@@ -19,7 +19,7 @@ files are sidecars for keeping each policy area understandable.
 <FileTree>
 
 - ~/.config/aqueous/
-  - wm.toml keybindings, commands, struts, global effects, and state policy
+  - wm.toml keybindings, commands, struts, global effects, system bell, and state policy
   - outputs.toml physical outputs, HDR, positions, and profiles
   - layout.toml layouts, options, slots, named stacking snap layouts, and mappings
   - input.toml keyboard, focus, gestures, mouse, touchpad, and tablet policy
@@ -67,6 +67,9 @@ from `wm.toml` or compiled defaults in place.
 
 `~` is expanded in explicit paths. A relative layout path is resolved beside
 `wm.toml`; use an absolute or `~`-prefixed input or rules path.
+The system bell's `sound_file` is an exception: it accepts an absolute path or
+one relative to the loaded `wm.toml`, with no `~` or variable expansion. See
+[System bell](/aqueous/system-bell/#custom-sound-effects).
 
 <Aside type="caution" title="layout.toml keeps compatibility-first discovery">
   An existing `~/.config/aqueous/layout.toml` wins before `$AQUEOUS_LAYOUT` and
@@ -221,6 +224,22 @@ buffer_policy = "native" # native | integer-ceil
 buffer while retaining fractional logical geometry. Prefer a per-window rule
 when testing this higher-cost compatibility mode.
 
+## System bell
+
+The `[bell]` section in `wm.toml` controls visual feedback, custom sounds, and
+bell volume. Visual feedback is the default; choose `"both"` to add a sound:
+
+```toml
+[bell]
+mode = "both" # visual | sound | both | off
+sound_file = "sounds/bell.wav"
+volume = 0.5
+```
+
+Bell settings reload with the rest of the configuration. Changing them cancels
+active feedback. See [System bell](/aqueous/system-bell/) for defaults, sound
+requirements, path handling, and feedback behavior.
+
 ## Edit with the settings application
 
 The DMS and Noctalia plugins provide typed controls for common settings and
@@ -236,6 +255,7 @@ backups for multi-file writes, and never restarts the compositor. See
   <LinkCard title="layout.toml reference" href="/aqueous/docs/toml/layout/" />
   <LinkCard title="input.toml reference" href="/aqueous/docs/toml/input/" />
   <LinkCard title="Tablet setup" href="/aqueous/tablets/" />
+  <LinkCard title="System bell" href="/aqueous/system-bell/" />
   <LinkCard title="rules.toml reference" href="/aqueous/docs/toml/rules/" />
   <LinkCard title="Command-line tools" href="/aqueous/command-line/" />
 </CardGrid>

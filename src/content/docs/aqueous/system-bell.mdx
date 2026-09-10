@@ -1,0 +1,125 @@
+---
+title: System Bell
+description: Configure visual bell feedback, custom sound effects, and volume in Aqueous.
+sidebar:
+  label: System Bell
+  order: 12.5
+---
+
+Aqueous can briefly highlight an output edge, play a custom sound, or do both
+when a Wayland application rings the system bell. Visual feedback is enabled
+by default. Sound playback is optional.
+
+## Configure the bell
+
+Open **Appearance → System bell** in the standalone `aqueous-settings`
+application, or add a `[bell]` section to your `wm.toml`:
+
+```toml
+[bell]
+mode = "both"
+sound_file = "sounds/bell.wav"
+volume = 0.5
+```
+
+With the usual configuration location, this example plays
+`~/.config/aqueous/sounds/bell.wav` and highlights the application's output.
+
+| Setting      | Default    | Values and behavior                                                                                                            |
+| ------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `mode`       | `"visual"` | `"visual"` highlights the output edge; `"sound"` plays the configured sound; `"both"` enables both; `"off"` disables feedback. |
+| `sound_file` | `""`       | An absolute file path or a path relative to the loaded `wm.toml`. An empty path disables audio.                                |
+| `volume`     | `0.5`      | A finite number from `0.0` to `1.0`. Zero disables audio; other values control only the bell stream's volume.                  |
+
+Changes take effect through the normal
+[configuration reload](/aqueous/configuration/#parsing-and-reloads). To apply a
+saved change immediately:
+
+```sh
+aqueousctl session reload --json
+```
+
+Changing any bell setting cancels active feedback. Setting `mode = "off"`
+disables both components, while leaving protocol support available to clients.
+
+## Custom sound effects
+
+Sound playback requires the PipeWire tools providing `pw-play` and a running
+PipeWire session. The Nix package supplies the player's runtime path. Audio
+uses the default sink and respects the session's routing and mute settings;
+the bell's volume setting does not change system volume.
+
+Use a short PCM WAV file. Ogg Vorbis and other formats depend on the installed
+player's libsndfile support. Each playback attempt is limited to two seconds
+from launch, followed by up to 100 ms of termination grace. There is no bundled
+default sound: select a file before using `"sound"` or `"both"`.
+
+Paths are relative to the actual `wm.toml` being loaded, including one selected
+with `AQUEOUS_CONFIG`. Aqueous does not expand `~`, environment variables, or
+shell expressions in `sound_file`. Use an absolute path to reference another
+directory:
+
+```toml
+[bell]
+mode = "sound"
+sound_file = "/home/alex/Sounds/soft bell.wav"
+volume = 0.25
+```
+
+Spaces are supported. TOML basic strings decode escaped quotes and backslashes;
+single-quoted TOML strings preserve them literally. The setting selects a local
+file, not a command or a URL.
+
+## When feedback appears
+
+The visual bell is a three-logical-pixel output-edge highlight lasting 150 ms.
+It works in Vulkan and Pixman builds, including when animations are disabled,
+and does not intercept pointer input.
+
+Feedback requires a mapped, visible application window on an enabled, awake
+output. Requests associated with hidden or unmapped windows, popups, or
+subsurfaces are ignored. If an application sends a request without a surface,
+Aqueous uses a keyboard-focused window belonging to that application. With
+multiple eligible seats, it selects the first in seat creation order. If no
+window qualifies, there is no feedback.
+
+All applications share a 500 ms cooldown. Requests during that interval are
+dropped without extending the current indication. Only one sound plays at a
+time; subsequent sounds are neither queued nor used to restart it. In `"both"`
+mode, an eligible visual indication can still appear while a sound is playing.
+
+Locking the session cancels both components and suppresses new requests until
+unlock. Changes to the target output's power or geometry, output removal, and
+compositor shutdown also cancel affected feedback. Canceled sounds may leave a
+short audio-buffer tail; requests are never replayed later.
+
+Bells do not move focus, switch workspaces, set urgency, reset idle state, or
+wake sleeping outputs.
+
+## Troubleshooting
+
+If a sound does not play:
+
+1. Check that `mode` is `"sound"` or `"both"`, `sound_file` is nonempty, and
+   `volume` is greater than zero.
+2. Check the path relative to the loaded `wm.toml`, or try an absolute path to
+   a readable PCM WAV file. Directories, pipes, and device files are unsupported.
+3. Check that `pw-play` is available in the compositor's environment and that
+   the PipeWire session has an available, unmuted output.
+4. Check that the requesting application has an eligible visible window and
+   that the request is outside the cooldown.
+
+Missing files, unsupported or corrupt audio, an unavailable player, or audio
+service failures leave visual feedback working in `"both"` mode. Sound-only
+mode stays silent when playback fails. The compositor logs a bounded failure
+warning rather than disconnecting the application.
+
+## Protocol support
+
+Aqueous exposes `xdg_system_bell_v1` version 1 in both renderer builds,
+including security-context clients and external-policy mode. Applications must
+use `xdg-system-bell-v1` to request this feedback. X11 bell forwarding and sound
+theme lookup are not part of this feature.
+
+See [Wayland compatibility](/aqueous/compatibility/) for the other supported
+interfaces.

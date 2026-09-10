@@ -80,6 +80,11 @@ Typed controls cover:
 - Installed font families and faces, point size, and adapter status/retry.
 - Opt-in cursor theme and size management, including live application.
 
+The standalone `aqueous-settings` application also provides **Appearance →
+System bell** controls for visual feedback, a custom sound-file path, and bell
+volume. Changes are saved in `[bell]` in `wm.toml` and take effect on reload.
+See [System bell](/aqueous/system-bell/) for the four modes and sound setup.
+
 Typography is stored in `~/.config/aqueous/appearance.toml` and synchronized
 to the selected shell, GSettings, GTK 3, GTK 4, and qt5ct/qt6ct when those
 adapters are installed or configured. Each target reports available, active,
