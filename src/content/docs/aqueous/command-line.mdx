@@ -1,6 +1,6 @@
 ---
 title: Command-line Tools
-description: Inspect Aqueous and control windows, workspaces, keyboard layouts, overview, and cursors with aqueousctl.
+description: Inspect Aqueous and control windows, workspaces, keyboard layouts, overview, cursors, and tablet configuration with aqueousctl.
 sidebar:
   label: Command-line Tools
   order: 10
@@ -87,6 +87,46 @@ before writing an output block or output-targeted rule.
 
 When the embedded output service is available, it also includes `mirror_of`,
 `mirror_status`, and `mirror_error`. See [Screen mirroring](/aqueous/screen-mirroring/).
+
+## Tablet discovery and configuration
+
+Run these commands inside the Aqueous session:
+
+```sh
+aqueousctl input devices --json
+aqueousctl input generate-config --device DEVICE_ID --id drawing-pen --output OUTPUT
+aqueousctl input generate-config --device DEVICE_ID --id drawing-pen --output OUTPUT --write ~/.config/aqueous/input.toml
+```
+
+Discovery reports input devices and their session IDs, persistent identity
+fields, outputs, the selected `input_file`, and each tablet's mapping `status`
+and `pending` flag. Select an entry with `type: "tablet"`. Replace `DEVICE_ID`
+with its `id` and `OUTPUT` with the intended display's `name` in that response.
+Session IDs select connected devices; generated rules contain persistent
+matchers instead of those IDs.
+
+Generation requires `--device`, `--id`, and exactly one mapping choice:
+
+| Option              | Result                                                      |
+| ------------------- | ----------------------------------------------------------- |
+| `--output OUTPUT`   | Map the pen to the selected available, non-mirrored output. |
+| `--mapping desktop` | Map the pen to the full output layout.                      |
+| `--disabled`        | Disable matching tablet-tool delivery.                      |
+
+Without `--write`, generation prints one TOML rule to stdout. `--write PATH`
+atomically updates the rule with that `id`, preserving unrelated settings,
+comments, file permissions, and existing symlinks. The parent directory must
+exist. Ambiguous identities, unavailable outputs, malformed or unsupported
+existing TOML, and detected concurrent file edits cause an error.
+
+The command reports whether the destination is the selected input sidecar.
+The normal watcher applies active-sidecar writes; generation does not send a
+full reload. Check discovery again to confirm application. `pending: true`
+means a tool must leave proximity before the remap takes effect. Native
+generation requires internal-policy mode.
+
+See [Tablets](/aqueous/tablets/) for HUION/Wacom examples, matching rules,
+output reconnect behavior, and status explanations.
 
 ## Live workspace layout
 

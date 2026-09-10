@@ -1,6 +1,6 @@
 ---
 title: Input
-description: Configure XKB, focus, gestures, keyboard repeat, and libinput devices.
+description: Configure XKB, focus, gestures, keyboard repeat, tablets, and libinput devices.
 sidebar:
   label: Input
   order: 6
@@ -127,7 +127,28 @@ settings reverse those directions consistently. Configure or disable these
 actions with `wheel_scroll_left/right/up/down`; see
 [wheel bindings](/aqueous/keybindings/#scrolling-actions).
 
-## Tablets and input methods
+## Tablets
+
+Map a tablet's absolute pen input to one output with repeated `[[input.tablet]]`
+rules in `input.toml`. Each tablet can use a different output while the mouse
+cursor remains independent. Pen pressure, tilt, proximity, tip and buttons
+continue through tablet-v2.
+
+```sh
+aqueousctl input devices --json
+aqueousctl input generate-config --device DEVICE_ID --id drawing-pen --output OUTPUT
+```
+
+Replace `DEVICE_ID` and `OUTPUT` with values from discovery. Generation prints
+TOML by default; add `--write ~/.config/aqueous/input.toml` to update the file.
+See [Tablets](/aqueous/tablets/) for Kamvas/Intuos setup, persistent matching,
+full-desktop or disabled modes, and troubleshooting.
+
+Mouse/touchpad acceleration settings apply to pointer devices, not pens.
+Unconfigured tablets retain the existing desktop mapping behavior. Configured
+tablets wait for their assigned output when it is unavailable.
+
+## Input methods and virtual devices
 
 At the protocol layer Aqueous supports tablet v2, text-input v3, input-method
 v2 and input popups, relative pointers, pointer gestures, virtual keyboards,

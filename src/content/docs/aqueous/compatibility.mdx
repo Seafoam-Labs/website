@@ -93,6 +93,12 @@ pointer, virtual keyboard, XWayland keyboard grabs, and compositor-side idle
 notification. Holding the configured `untrap_pointer` binding temporarily
 releases a client pointer constraint and restores it when the key is released.
 
+Physical tablets support per-output absolute pen mapping through
+[`input.toml` tablet rules](/aqueous/tablets/), with independent mouse input.
+Drawing clients need tablet-v2 support; this does not add mouse emulation for
+applications without native tablet support. Physical HUION/Wacom calibration
+and XWayland drawing-application compatibility still require device testing.
+
 `keyboard-shortcuts-inhibit-v1` lets eligible focused clients inhibit normal
 compositor bindings. Built-in virtual-terminal switching remains reserved.
 
