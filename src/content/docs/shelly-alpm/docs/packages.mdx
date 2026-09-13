@@ -2,133 +2,106 @@
 title: Shelly Package Management
 sidebar:
   label: Package Management
-description: This section covers how to access and use the Package section including installing, updating, and managing current packages.
+description: Browse, install, update, and remove ALPM repository packages in Shelly's GTK interface.
 tableOfContents:
   minHeadingLevel: 2
   maxHeadingLevel: 4
 ---
 
-:::tip
-The screenshots use the Adwaita theme. Your theme and version of Shelly may look different, since Shelly is under active
-development. However, the functionality remains the same.
+The **Package** page is Shelly's home for ALPM (repository) packages: search your configured
+repositories, install what you need, and remove what you no longer want, all from one view.
+System-wide upgrades have their own [Update](#updating-packages) page, and AUR, Flatpak, and
+AppImage software are managed on their own pages.
+
+## Browsing packages
+
+The Package page lists every package available from your configured repositories, with installed
+packages marked. The toolbar along the top controls what you see:
+
+- **Search** filters the list by package name and description; `Ctrl+F` jumps to the search field.
+- The **group filter** (defaults to `Any`) narrows the list to a single package group.
+- **Installed Only** hides packages that are not installed and adds an _Install Date_ column to the
+  list view.
+- The **grid/list toggle** switches between card and table layouts; the table shows Name, Version,
+  Size, and Repository.
+- The **cart button** (`N Selected`) lists every package you have checked. Click an entry there to
+  uncheck it.
+
+Selecting a package opens a detail pane beside the list with its description, version, size,
+dependencies, and related metadata. The pane can be hidden with **Hide Detail Pane** in the options
+(`⋮`) menu.
+
+### Options menu
+
+- **Perform Upgrade** - synchronize and upgrade the whole system as part of the next install.
+- **Show Hidden** - include packages listed in `IgnorePkg` in `pacman.conf`.
+- **Show Explicit Only** / **Show Dependency Only** - filter by install reason: packages you chose
+  to install versus packages pulled in as dependencies.
+
+## Installing packages
+
+1. Check one or more available packages. Each checked package appears in the cart button.
+2. Select **Install Selected**.
+3. Shelly runs the transaction in a progress view and refreshes the list when it finishes.
+
+Installing, removing, and upgrading touch the system package database, so Shelly authorizes these
+operations through polkit and your desktop's usual authentication prompt appears. If polkit is not
+available, Shelly warns you and blocks privileged actions; see
+[Polkit Setup](/shelly-alpm/docs/polkit/).
+
+:::note[One action per selection]
+
+The primary button follows your selection: available packages turn it into **Install Selected**,
+installed packages turn it into **Remove Selected**, and a mix of both disables it until the
+selection contains only one kind.
+
 :::
 
-## Packages
+## Removing packages
 
-![Package_Listing](../../../../assets/screenshots/Package_Listing.png)
+1. Check the installed packages you want to remove - **Installed Only** makes them easy to find.
+2. Select **Remove Selected** and confirm in the **Remove Packages** dialog.
 
-On the left side of the screen there is the word packages, underneath are the three options for Packages.
+By default the removal also cascates dependencies that are no longer needed and removes unused
+optional dependencies. Turning on **Remove Cache on Uninstall** in Settings additionally deletes the
+packages' configuration files.
 
-- Install - Search and install packages, select which packages to install by selecting the checkbox on the right side
-  and select install selected in top left to install.
-  - Next to install selected there are several unique options to packages
-    - Any - Listing all groups created in the repository you are using, you can select these groups to get more targeted
-      packages
-    - Install Local - Select a file on your computer and install it, will create sim links/opt allowing you to access
-      the files via your terminal while not putting them in the bin.
+## Package actions
 
-![Package_Install](../../../../assets/screenshots/Packages_Install.png)
+The detail pane's actions menu operates on the selected package:
 
-- Update Packages - List of all packages with updates available, screen starts with all selected, you can uncheck
-  packages to not include in update, when satisfied select update selected in top left to update all selected packages.
-- Manage Packages - List of all current installed packages, their size and version. Any packages you select the check
-  box on can be uninstalled by clicking the Remove Selected in the top left.
+- **Reinstall** - reinstall the package.
+- **Add Ignore** - add it to `IgnorePkg` so upgrades skip it.
+- **Add Hold** - add it to `HoldPkg` so it is protected from removal.
+- **Make Explicit** / **Mark Dependency** - change its install reason.
 
-## Step By Step Guides
+## Updating packages
 
-### Installation
+Updates live on their own **Update** page, which checks the System (ALPM), AUR, and Flatpak sources
+and lists everything with a newer version.
 
-We will walkthrough installing firefox as an example of doing an installation
+- The **System**, **AUR**, and **Flatpak** toggles choose which sources are included. Everything is
+  included by default, and the summary line shows how many of the found updates are included.
+- **Check Again** re-runs the check.
+- **Upgrade** updates everything included in one transaction. System packages are always upgraded as
+  a full-system upgrade - there are no per-package checkboxes for them, matching Arch Linux's advice
+  against partial upgrades. AUR and Flatpak entries have an individual update button on their row.
 
-- Click Install on the left side to open the list of packages for install
-- Now you can either scroll down to find the package or use the search in the top right to find firefox
-  ![Install_FireFox](../../../../assets/screenshots/Install_FireFox.png)
-- Once you find what you want to install select the box on the right (in the picture above you will see firefox
-  selected)
-- Once you have one package selected the install selected at the top left with light up blue and you can click to
-  install.
-  - you can also at this point select any other packages you want to install them as well.
-- Once you click the button an Install Packages Prompt will pop up
-  ![Install_Packages](../../../../assets/screenshots/Install_Packages.png)
-- Once you click yes you will prompted to enter your password and Shelly will execute the installation.
+## Local package archives
 
-#### Local Packages
+The GTK interface does not handle local package archives; use the `shelly` CLI for those:
 
-Shelly supports installing package archives from your local filesystem through the **Install Local** action.
+```sh
+# Install a local Arch package archive (or an HTTP(S) URL)
+shelly install ./example-1.0-1-x86_64.pkg.tar.zst
 
-##### Supported package types
+# List Shelly binary packages installed under /opt/shelly
+shelly search --local <term>
 
-There are **two kinds of local packages** you can install:
+# Remove an installed Shelly binary package
+shelly remove --local <name>
+```
 
-**1. ALPM packages**
-
-These are standard Arch-style package archives that contain `PKGINFO`.
-
-- Shelly recognizes them as normal packages
-- They are installed and managed by **ALPM** _(Arch Linux Package Management)_
-- They behave like regular system packages, including package tracking and removal through the package manager
-
-**2. Universal binary packages**
-
-These are archive-based packages intended for standalone applications.
-
-- Shelly extracts them into `/opt/shelly/`
-- Executable files are linked into `/usr/bin/` using symlinks
-- Icons are installed into the system icon theme directories
-- A desktop entry is created so the app appears in application menus
-- These packages are **not managed by ALPM**
-
-##### How to install a local package
-
-1. Open the **Package** screen in Shelly.
-2. Click **Install Local**.
-3. Choose a supported package archive from the file picker.
-4. Shelly will detect the package type automatically and start installation.
-
-![Package_Install](../../../../assets/screenshots/Packages_Install.png)
-
-##### Notes
-
-- Supported archive formats include `*.gz` and `*.zst`
-- If the archive is an ALPM package, it will be installed like a standard package
-- If the archive is a universal binary package, Shelly will unpack it into `/opt/shelly/` and create the necessary
-  desktop integration automatically
-- A **logout** might be needed for the new icon to start showing up correctly in the system
-
-### Update
-
-- Click Update underneath install in packages
-- All packages will start selected, you can unclick any you want to remove them from your update.
-  ![Update_Packages](../../../../assets/screenshots/Update_Packages.png) (in the above example I removed selection of
-  one package to do partial update, I would not recommend this but you can do partial updates)
-- Then click the above update selected button this will trigger a prompt to update
-  ![Update_Packages2](../../../../assets/screenshots/Update_Packages2.png)
-- Click yes and it will prompt a password entry and launch.
-- At the end of the update shelly may prompt you to restart your computer
-
-### Manage
-
-#### Local Packages
-
-Shelly lets you list and remove locally installed packages from your system with the **Remove Local Packages** action.
-These are the packages that are not managed by ALPM and were installed as standalone application directory in
-`/opt/shelly/`.
-
-##### How to remove a local binary package
-
-1. Open the **Packages** **Manage** screen in Shelly.
-2. Click **Remove Local Packages**.
-   ![Remove Local Packages button](../../../../assets/screenshots/remove_local_button.png)
-3. A table appears showing all package directories currently present in `/opt/shelly/`.
-4. Select one or more packages from the list.
-5. Click **Remove Selected** to uninstall them.
-   ![Remove Local Packages dialog](../../../../assets/screenshots/remove_local_dialog.png)
-
-##### Notes
-
-Shelly takes care to remove local binary packages safely:
-
-- only package directories under `/opt/shelly/` are shown
-- package deletion is handled in a controlled way
-- linked binaries, desktop files, and icons are cleaned up when appropriate
-- standard ALPM packages are left to the normal package manager removal flow
+Shelly binary packages are archive-based standalone applications: they unpack into `/opt/shelly`,
+their executables are symlinked into `/usr/bin`, and icons and desktop entries are installed
+system-wide. They are not tracked by ALPM.
