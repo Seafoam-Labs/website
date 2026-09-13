@@ -1,0 +1,461 @@
+---
+title: Building Packages
+sidebar:
+  label: Building Packages
+description: Build PKGBUILD recipes into installable Arch Linux packages with shelly build, featuring static parsing, Landlock sandboxing, and no makepkg dependency.
+---
+
+import { Steps, Tabs, TabItem, Aside, Card, CardGrid } from "@astrojs/starlight/components";
+
+`shelly build` compiles a `PKGBUILD` recipe into an installable Arch Linux package archive (`.pkg.tar.zst`). It is
+Shelly's native, standalone package build engine, the same `shelly install aur` uses, made entirely in
+Zig without relying on `makepkg` or `fakeroot`.
+
+Shelly resolves recipe metadata with a **static parser** that never executes arbitrary shell
+code during analysis. Recipe lifecycle functions run strictly as ordinary Bash child processes of an unprivileged,
+non-root user, protected by interactive security reviews, cryptographic digest locks, and optional Linux kernel Landlock
+sandboxing.
+
+---
+
+## When to Use `shelly build`
+
+Shelly offers two distinct workflows for building packages:
+
+<CardGrid>
+  <Card title="shelly build" icon="seti:config">
+    **Compiles local recipes without installing.**
+
+    Use this when you are writing a `PKGBUILD`, testing a modified recipe, or building a standalone package archive (`.pkg.tar.zst`) for distribution or later installation.
+  </Card>
+  <Card title="shelly install aur" icon="download">
+    **Fetches, reviews, builds, and installs in one command.**
+
+    Use this when you want to discover, download, and install a package directly from the Arch User Repository (AUR) onto your current system.
+  </Card>
+</CardGrid>
+
+### Differences from `makepkg`
+
+| Feature | `shelly build` | `makepkg` |
+| :--- | :--- | :--- |
+| **Metadata Parsing** | **Static analysis** (safe, bash-aware parser; no arbitrary code execution) | Sourced directly in host Bash |
+| **Privilege Model** | Strict non-root builder execution | Requires `fakeroot` / LD_PRELOAD |
+| **File Ownership** | **Virtual ownership journal** (mapped by inode into `.PKGINFO` & `.MTREE`) | Relies on `fakeroot` host translation |
+| **Integrity Checks** | **SHA-256 review digest lock** (prevents TOCTOU modifications) | Manual recipe inspection |
+| **Sandboxing** | **Kernel Landlock LSM** (restricts filesystem access to `$HOME`) | Unrestricted host access by default |
+| **Configuration** | Structured TOML (`shellybuild.conf`) | Shell script (`makepkg.conf`) |
+
+---
+
+## Quick Start: Building a Package
+
+<Steps>
+
+1. ### Navigate to your package directory
+
+   Ensure your directory contains a valid `PKGBUILD` and any local source or install files:
+
+   ```sh
+   cd ~/src/my-package
+   ```
+
+2. ### Run `shelly build`
+
+   To automatically fetch and install missing build dependencies before compiling, pass `-s` (or `--sync-deps`):
+
+   ```sh
+   shelly build -s
+   ```
+
+   :::tip[Building from any directory]
+   You can also specify a path to a recipe located anywhere on disk:
+   ```sh
+   shelly build ~/src/my-package/PKGBUILD
+   ```
+   :::
+
+3. ### Review the recipe and security findings
+
+   Before executing any shell commands, Shelly presents the full `PKGBUILD`, local source files, `.install` scriptlets, and results from its automated security scans (e.g. homograph detection, malicious scriptlets, or privilege elevation).
+
+   Confirm to proceed with the build, or decline to cancel safely.
+
+4. ### Install the generated package
+
+   Upon completion, the compressed package archive (e.g. `my-package-1.0.0-1-x86_64.pkg.tar.zst`) is placed in the packages destination configured in `shellybuild.conf` (falling back to the current directory).
+
+   Install it onto your system using Shelly's standard installer:
+
+   ```sh
+   shelly install standard ./my-package-1.0.0-1-x86_64.pkg.tar.zst
+   ```
+
+</Steps>
+
+:::note[Build Logs]
+Every build attempt—including cancelled or failed runs—creates a structured log file under the configured log
+destination (default: `/var/log/shelly/build/` or user cache). Output streams real-time stdout and stderr separately, so
+you can always inspect failed builds.
+:::
+
+---
+
+## Pre-Build Review and Integrity Model
+
+Security is at the core of Shelly's build architecture. Before any code is executed:
+
+1. **Static Analysis & Automated Scanning**: Shelly inspects the recipe and flags high-risk patterns, including
+   obfuscated commands, privilege escalations (`sudo`, `su`, `run0`), network calls in build functions (`curl`, `wget`),
+   and Unicode homograph spoofing.
+2. **Interactive Confirmation**: The complete recipe and any accompanying files (such as `.install` scripts or local
+   patches) are displayed for your review.
+3. **Cryptographic Review Digest**: Everything reviewed is hashed into a 64-character SHA-256 digest. Shelly re-verifies
+   this digest immediately before executing build steps. If any file is modified, replaced, or tampered with after
+   approval (a Time-of-Check to Time-of-Use race), the build aborts immediately.
+4. **Supplemental Review**: If evaluation of dynamic metadata discovers additional local files, Shelly halts and
+   requests a supplemental review pass before proceeding to source acquisition.
+
+:::note[Learn More]
+For guidance on reading recipes safely and understanding automated scanner alerts, see the
+[AUR Safety Guide](/shelly-alpm/docs/aur-safety/) and [Shelly Security Checks](/shelly-alpm/docs/security/).
+:::
+
+---
+
+## Command-Line Reference
+
+```text
+shelly build [<pkgbuild>] [options]
+```
+
+### Common Options
+
+| Option | Short | Description |
+| :--- | :--- | :--- |
+| `--sync-deps` | `-s` | Automatically install missing build and runtime dependencies with `pacman`/ALPM before building. |
+| `--check` | `-c` | Execute the `check()` test suite in the `PKGBUILD` and install check dependencies. |
+| `--no-check` | | Skip the `check()` test function, overriding `shellybuild.conf`. |
+| `--isolated` | `-i` | Build in a fresh, unprivileged `systemd-nspawn` container environment. |
+| `--sign` | | Generate a detached OpenPGP signature (`.sig`) next to each built package archive. |
+| `--nosign` | | Skip package signing, overriding `shellybuild.conf`. |
+| `--key <key>` | | Specify the GPG key ID or 40-character fingerprint to use for package signing. |
+| `--package-destination <dir>` | | Save package archives to a specified absolute directory instead of the default location. |
+| `--reviewed` | `-r` | Mark the recipe as reviewed and bypass the interactive prompt (use only for automated workflows or trusted recipes). |
+| `--makesrcinfo` | | Statically parse the recipe, generate `.SRCINFO` to standard output, and exit without building. |
+| `--noverify` | | Skip the `PKGBUILD`'s `verify()` function (not recommended). |
+
+### Shortcodes
+
+Shelly provides concise shortcodes where `-A` represents `shelly build`. Options attach directly to the shortcode flag:
+
+<Tabs>
+  <TabItem label="Common Workflows">
+    ```sh
+    shelly -A                         # Build PKGBUILD in current directory
+    shelly -As                        # Build and install missing dependencies
+    shelly -Ac                        # Build and run test suites (check)
+    shelly -Asc                       # Build, install dependencies, and run check()
+    shelly -Ai                        # Build in an isolated systemd-nspawn container
+    ```
+  </TabItem>
+  <TabItem label="Automation & Maintenance">
+    ```sh
+    shelly -Ar                        # Build and mark recipe as reviewed
+    shelly -Ars                       # Non-interactive build with dependency sync
+    shelly -A ~/pkg/PKGBUILD          # Build recipe at specific path
+    shelly -Ah                        # Show build command help
+    ```
+  </TabItem>
+</Tabs>
+
+For the complete options list, see the [CLI Reference](/shelly-alpm/docs/cli-reference/#shelly-build).
+
+---
+
+## How the Build Engine Works
+
+For power users, package maintainers, and curious developers, Shelly's build engine operates across several dedicated
+stages:
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ 1. Static Parsing & Security Scans                          │
+│    • Word expansion, variable map, dependency resolution    │
+│    • Security checks (privilege, obfuscation, homographs)   │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 2. Review & Digest Lock                                     │
+│    • Interactive confirmation of PKGBUILD + local files     │
+│    • Compute SHA-256 review digest snapshot                 │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 3. Source Pipeline                                          │
+│    • Download HTTP(S) sources to cache & clone Git mirrors  │
+│    • Verify checksums (sha256, b2, etc.) & PGP signatures   │
+│    • Safe extraction (guards against path traversal & bombs)│
+│    • Execute verify() step                                  │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 4. Lifecycle Execution (Sandboxed Non-Root Bash)            │
+│    • prepare() ➔ pkgver() ➔ build() ➔ check()               │
+│    • Landlock LSM restricts access to $HOME                 │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 5. Package Assembly & Virtual Ownership                     │
+│    • package() execution per split-package member           │
+│    • Tidy/strip binaries & apply purge cleanups             │
+│    • Generate .PKGINFO, .BUILDINFO, .MTREE metadata         │
+│    • Assemble .pkg.tar.zst archive & optional GPG signing   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 1. Safe Static Parsing
+
+Traditional build tools source the `PKGBUILD` directly in Bash just to read package metadata, which allows untrusted
+recipes to run arbitrary commands before you ever see a prompt.
+
+Shelly uses a purpose-built static parser that extracts variables, arrays, dependencies, and execution plans without
+shell execution. It features a Bash-aware expansion engine supporting parameter expansions (`${var#prefix}`,
+`${var/search/replace}`, substring slicing), arithmetic expressions (`$((...))`), and brace expansions (`pkg-{a,b}`).
+Any dynamic constructs that require runtime evaluation (such as command substitutions in integrity arrays) are isolated
+and evaluated only after user approval in a controlled sandbox.
+
+### 2. Source Pipeline & Extraction Guards
+
+Shelly handles remote and local sources with strict security controls:
+
+- **Caching**: HTTP/HTTPS archives and Git mirrors are downloaded into the shared source cache
+  (`/var/cache/shelly/sources`), avoiding duplicate downloads across rebuilds.
+- **Verification**: Automatically verifies all seven Arch checksum algorithms (`sha512sums`, `sha256sums`, `b2sums`,
+  etc.) and validates detached OpenPGP signatures. Pinned Git commits and tags are verified against deterministic
+  archive generation.
+- **Safe Extraction**: Archive extraction enforces path-traversal protection, symlink-destination checks, and
+  decompression size caps to protect against malicious archives.
+
+### 3. Fakeroot-Free Virtual Ownership
+
+`makepkg` relies on `fakeroot` (an `LD_PRELOAD` library) to intercept filesystem calls and pretend files are owned by
+`root:root` inside `$pkgdir`.
+
+Shelly replaces `fakeroot` with a **virtual ownership engine**:
+
+- It runs a virtual-metadata prelude that records ownership and permission change requests during `package()` execution
+  into an in-memory journal.
+- It tracks ownership across file renames and hard links by inode without modifying actual host file permissions.
+- The archive writer translates this journal directly into the `.PKGINFO`, `.MTREE`, and `.pkg.tar.zst` archive
+  metadata.
+
+### 4. Split Packages
+
+Shelly natively supports split `PKGBUILD` recipes containing multiple `package_<pkgname>()` functions:
+
+- Each package member's function body and scoped variable overrides (`pkgdesc`, `depends`, `backup`, `options`) are
+  evaluated independently.
+- One discrete `.pkg.tar.zst` archive is assembled per package member.
+- Maintainers can build a single split member using the power-user flag `--package <member_name>`.
+
+---
+
+## Sandboxing and Isolation
+
+Shelly provides two levels of isolation for building untrusted recipes:
+
+### Landlock LSM Step Confinement
+
+On modern Linux kernels (5.13+), Shelly can enforce filesystem isolation on build steps using the kernel's
+**Landlock Linux Security Module (LSM)**.
+
+When enabled in `shellybuild.conf`:
+
+- Untrusted lifecycle steps (`prepare`, `pkgver`, `build`, `check`, `package`) execute with restricted privileges via
+  `prctl(NO_NEW_PRIVS)`.
+- Filesystem access outside an allow-list is blocked at the kernel level. Build scripts are strictly forbidden from
+  reading or writing to your `$HOME` directory (including `~/.ssh`, `~/.gnupg`, and browser data).
+- Standard system toolchain paths (`/usr`, `/etc`, `/opt`, `/tmp`, `/proc`) and the build directory remain accessible.
+- If a build legitimately requires access to external cache directories (such as Cargo, ccache, or npm), you can grant
+  specific paths using `extra_read` or `extra_write`.
+
+### Isolated Container Builds (`-i, --isolated`)
+
+For complete clean-room isolation, pass `-i` or `--isolated`:
+
+```sh
+shelly build -i
+```
+
+This builds the package as an unprivileged user inside a fresh `systemd-nspawn` container root. It ensures no host files
+or undeclared dependencies influence the compilation, mirroring official Arch package build environments.
+
+---
+
+## Configuration Reference (`shellybuild.conf`)
+
+`shellybuild.conf` is Shelly's data-only TOML configuration file for the package builder. It replaces `makepkg.conf` for
+Shelly's native build engine.
+
+### Configuration Precedence
+
+Shelly merges configuration layers in the following order (later layers override earlier ones field-by-field):
+
+1. **Compiled Safe Defaults**
+2. **System-wide configuration**: `/etc/shellybuild.conf`
+3. **User configuration**: `$XDG_CONFIG_HOME/shelly/shellybuild.conf` (or `~/.config/shelly/shellybuild.conf`)
+4. **CLI Flags**: Command-line arguments (e.g. `--check`, `--sign`, `--package-destination`) take final precedence.
+
+### Full TOML Schema
+
+Below is the complete reference schema for `shellybuild.conf` with default values:
+
+```toml
+[build]
+# Target architecture and host triplet
+carch = "x86_64"
+chost = "x86_64-pc-linux-gnu"
+
+# Compiler and linker flags (arrays are joined with spaces during step execution)
+cppflags = []
+cflags = ["-O2", "-pipe"]
+cxxflags = ["-O2", "-pipe"]
+ldflags = ["-Wl,-z,relro", "-Wl,-z,now"]
+ltoflags = ["-flto=auto"]
+makeflags = ["-j2"]
+
+# Default execution of check() test suites
+check = true
+
+# Compiler cache and distributed compilation integrations
+ccache = false
+distcc = false
+distcc_hosts = []
+
+[package]
+# Package metadata and compression format
+packager = "Unknown Packager"
+extension = ".pkg.tar.zst"
+
+# Build options and tidy behavior
+options = ["strip", "docs", "emptydirs", "zipman", "purge", "lto"]
+strip_binaries = ["--strip-all"]
+strip_shared = ["--strip-debug"]
+strip_static = ["--strip-unneeded"]
+
+# OpenPGP package signing defaults
+sign = false
+sign_key = "0000000000000000000000000000000000000000"
+
+[destinations]
+# Workspace and artifact storage locations
+build = "/var/tmp/shellybuild"
+packages = "/var/cache/shelly/packages"
+sources = "/var/cache/shelly/sources"
+logs = "/var/log/shelly/build"
+
+[sandbox]
+# Kernel Landlock LSM step confinement
+enabled = false
+extra_read = []
+extra_write = []
+```
+
+### Section Breakdown
+
+#### `[build]`
+
+- `makeflags`: Concurrency and build options passed to `make` (e.g. `["-j$(nproc)"]`).
+- `cflags` / `cxxflags` / `ldflags` / `ltoflags`: Optimization and hardening flags exported to build child processes.
+- `ccache`: When `true`, prepends `/usr/lib/ccache/bin` to `PATH`.
+- `distcc`: When `true`, prepends `/usr/lib/distcc/bin` to `PATH` and exports `DISTCC_HOSTS`.
+
+#### `[package]`
+
+- `packager`: Identifies the builder in `.PKGINFO` (e.g. `"Jane Doe <jane@example.com>"`).
+- `options`: Controls package tidy operations. Supported options include `strip`, `docs`, `emptydirs`, `zipman`,
+  `purge`, `lto`, `debug`, `libtool`, and `staticlibs`. Recipes can override them using `options=('!strip' '!purge')`.
+- `purge`: Automatically removes `usr/share/info/dir`, `.packlist` files, and `*.pod` files from `$pkgdir` before
+  packing.
+- `sign` / `sign_key`: Controls detached OpenPGP package signature generation.
+
+#### `[destinations]`
+
+- `build`: Root directory for temporary extraction and compilation workspaces (`$srcdir` and `$pkgdir`).
+- `packages`: Destination directory where finished `.pkg.tar.zst` archives are committed.
+- `sources`: Cache directory for downloaded source tarballs and Git mirrors.
+- `logs`: Directory where mandatory build logs are stored.
+
+#### `[sandbox]`
+
+- `enabled`: Enables Landlock filesystem isolation for all build lifecycle steps.
+- `extra_read`: List of absolute directory paths outside the standard system hierarchy granted read access (e.g.
+  `["/home/user/.cargo/registry"]`).
+- `extra_write`: List of absolute directory paths granted read-write access (e.g. `["/home/user/.cache/ccache"]`).
+
+---
+
+## Power User & CI/CD Workflows
+
+### Pre-Flight Recipe Validation (`--review-only`)
+
+For CI/CD pipelines or static linting, evaluate a `PKGBUILD` and emit structured JSON metadata without downloading
+sources or compiling:
+
+```sh
+shelly build --review-only ~/src/my-package/PKGBUILD
+```
+
+### Reproducible Builds with Digest Locks (`--review-digest`)
+
+Guarantee that automated builds compile the exact recipe reviewed by your team, preventing upstream tampering or race
+conditions:
+
+```sh
+# Specify the accepted 64-character SHA-256 review digest
+shelly build --review-digest "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" -r
+```
+
+### Generate `.SRCINFO` Statically (`--makesrcinfo`)
+
+Generate a valid `.SRCINFO` file using Shelly's fast static parser:
+
+```sh
+shelly build --makesrcinfo > .SRCINFO
+```
+
+### Non-Interactive Automated Builds
+
+For scripts, combine `-n` (`--no-confirm`) and `-r` (`--reviewed`):
+
+```sh
+shelly build -n -r -s
+```
+
+:::caution[Safety Warning]
+`-n` automatically answers prompts with safe defaults, and `-r` assumes you have already reviewed the recipe. Only use
+`-r` on trusted recipes or in controlled build pipelines.
+:::
+
+### Debugging Failed Builds (`--keep-workdirs`)
+
+If a build fails and you need to inspect the `$srcdir` or `$pkgdir` staging trees, use the internal flag
+`--keep-workdirs`:
+
+```sh
+shelly build --keep-workdirs
+```
+
+Work directories are preserved in the configured `build` destination (`/var/tmp/shellybuild/` by default) instead of
+being cleaned up on exit.
+
+---
+
+## Further Reading
+
+- [AUR Safety Practices](/shelly-alpm/docs/aur-safety/) — Best practices for reviewing recipes and avoiding security
+  risks.
+- [Shelly Security Checks](/shelly-alpm/docs/security/) — In-depth guide to Shelly's automated scanner detections.
+- [Shelly Configuration Guide](/shelly-alpm/docs/config/) — CLI and GUI configuration details.
+- [CLI Reference](/shelly-alpm/docs/cli-reference/) — Complete command-line syntax for all Shelly commands.
