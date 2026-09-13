@@ -5,7 +5,7 @@ sidebar:
 description: Build PKGBUILD recipes into installable Arch Linux packages with shelly build, featuring static parsing, Landlock sandboxing, and no makepkg dependency.
 ---
 
-import { Steps, Tabs, TabItem, Aside, Card, CardGrid } from "@astrojs/starlight/components";
+import { Steps, Tabs, TabItem, Card, CardGrid, Code } from "@astrojs/starlight/components";
 
 `shelly build` compiles a `PKGBUILD` recipe into an installable Arch Linux package archive (`.pkg.tar.zst`). It is
 Shelly's native, standalone package build engine, the same `shelly install aur` uses, made entirely in
@@ -94,7 +94,7 @@ Shelly offers two distinct workflows for building packages:
 </Steps>
 
 :::note[Build Logs]
-Every build attempt—including cancelled or failed runs—creates a structured log file under the configured log
+Every build attempt-including cancelled or failed runs-creates a structured log file under the configured log
 destination (default: `/var/log/shelly/build/` or user cache). Output streams real-time stdout and stderr separately, so
 you can always inspect failed builds.
 :::
@@ -133,7 +133,7 @@ shelly build [<pkgbuild>] [options]
 
 | Option | Short | Description |
 | :--- | :--- | :--- |
-| `--sync-deps` | `-s` | Automatically install missing build and runtime dependencies with `pacman`/ALPM before building. |
+| `--sync-deps` | `-s` | Automatically install missing build and runtime dependencies with before building. |
 | `--check` | `-c` | Execute the `check()` test suite in the `PKGBUILD` and install check dependencies. |
 | `--no-check` | | Skip the `check()` test function, overriding `shellybuild.conf`. |
 | `--isolated` | `-i` | Build in a fresh, unprivileged `systemd-nspawn` container environment. |
@@ -151,21 +151,16 @@ Shelly provides concise shortcodes where `-A` represents `shelly build`. Options
 
 <Tabs>
   <TabItem label="Common Workflows">
-    ```sh
-    shelly -A                         # Build PKGBUILD in current directory
-    shelly -As                        # Build and install missing dependencies
-    shelly -Ac                        # Build and run test suites (check)
-    shelly -Asc                       # Build, install dependencies, and run check()
-    shelly -Ai                        # Build in an isolated systemd-nspawn container
-    ```
+    <Code
+      code={"shelly -A                         # Build PKGBUILD in current directory\nshelly -As                        # Build and install missing dependencies\nshelly -Ac                        # Build and run test suites (check)\nshelly -Asc                       # Build, install dependencies, and run check()\nshelly -Ai                        # Build in an isolated systemd-nspawn container"}
+      lang="sh"
+    />
   </TabItem>
   <TabItem label="Automation & Maintenance">
-    ```sh
-    shelly -Ar                        # Build and mark recipe as reviewed
-    shelly -Ars                       # Non-interactive build with dependency sync
-    shelly -A ~/pkg/PKGBUILD          # Build recipe at specific path
-    shelly -Ah                        # Show build command help
-    ```
+    <Code
+      code={"shelly -Ar                        # Build and mark recipe as reviewed\nshelly -Ars                       # Non-interactive build with dependency sync\nshelly -A ~/pkg/PKGBUILD          # Build recipe at specific path\nshelly -Ah                        # Show build command help"}
+      lang="sh"
+    />
   </TabItem>
 </Tabs>
 
@@ -454,8 +449,8 @@ being cleaned up on exit.
 
 ## Further Reading
 
-- [AUR Safety Practices](/shelly-alpm/docs/aur-safety/) — Best practices for reviewing recipes and avoiding security
+- [AUR Safety Practices](/shelly-alpm/docs/aur-safety/) - Best practices for reviewing recipes and avoiding security
   risks.
-- [Shelly Security Checks](/shelly-alpm/docs/security/) — In-depth guide to Shelly's automated scanner detections.
-- [Shelly Configuration Guide](/shelly-alpm/docs/config/) — CLI and GUI configuration details.
-- [CLI Reference](/shelly-alpm/docs/cli-reference/) — Complete command-line syntax for all Shelly commands.
+- [Shelly Security Checks](/shelly-alpm/docs/security/) - In-depth guide to Shelly's automated scanner detections.
+- [Shelly Configuration Guide](/shelly-alpm/docs/config/) - CLI and GUI configuration details.
+- [CLI Reference](/shelly-alpm/docs/cli-reference/) - Complete command-line syntax for all Shelly commands.

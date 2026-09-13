@@ -9,7 +9,8 @@ tableOfContents:
 ---
 
 :::tip
-The screenshots use the Adwaita theme. Your theme and version of Shelly may look different, since Shelly is under active development. However, the functionality remains the same.
+The screenshots use the Adwaita theme. Your theme and version of Shelly may look different, since Shelly is under active
+development. However, the functionality remains the same.
 :::
 
 ## Packages
@@ -18,16 +19,20 @@ The screenshots use the Adwaita theme. Your theme and version of Shelly may look
 
 On the left side of the screen there is the word packages, underneath are the three options for Packages.
 
-- Install - Search and install packages, select which packages to install by selecting the checkbox on the right side and select install selected in top left to install.
+- Install - Search and install packages, select which packages to install by selecting the checkbox on the right side
+  and select install selected in top left to install.
   - Next to install selected there are several unique options to packages
-    - Any - Listing all groups created in the repository you are using, you can select these groups to get more targeted packages
-    - Install Local - Select a file on your computer and install it, will create sim links/opt allowing you to access the files via your terminal while not putting them in the bin.
+    - Any - Listing all groups created in the repository you are using, you can select these groups to get more targeted
+      packages
+    - Install Local - Select a file on your computer and install it, will create sim links/opt allowing you to access
+      the files via your terminal while not putting them in the bin.
 
 ![Package_Install](../../../../assets/screenshots/Packages_Install.png)
 
-- Update Packages - List of all packages with updates available, screen starts with all selected, you can
-  uncheck packages to not include in update, when satisfied select update selected in top left to update all selected packages.
-- Manage Packages - List of all current installed packages, their size and version. Any packages you select the check box on can be uninstalled by clicking the Remove Selected in the top left.
+- Update Packages - List of all packages with updates available, screen starts with all selected, you can uncheck
+  packages to not include in update, when satisfied select update selected in top left to update all selected packages.
+- Manage Packages - List of all current installed packages, their size and version. Any packages you select the check
+  box on can be uninstalled by clicking the Remove Selected in the top left.
 
 ## Step By Step Guides
 
@@ -38,8 +43,10 @@ We will walkthrough installing firefox as an example of doing an installation
 - Click Install on the left side to open the list of packages for install
 - Now you can either scroll down to find the package or use the search in the top right to find firefox
   ![Install_FireFox](../../../../assets/screenshots/Install_FireFox.png)
-- Once you find what you want to install select the box on the right (in the picture above you will see firefox selected)
-- Once you have one package selected the install selected at the top left with light up blue and you can click to install.
+- Once you find what you want to install select the box on the right (in the picture above you will see firefox
+  selected)
+- Once you have one package selected the install selected at the top left with light up blue and you can click to
+  install.
   - you can also at this point select any other packages you want to install them as well.
 - Once you click the button an Install Packages Prompt will pop up
   ![Install_Packages](../../../../assets/screenshots/Install_Packages.png)
@@ -84,15 +91,16 @@ These are archive-based packages intended for standalone applications.
 
 - Supported archive formats include `*.gz` and `*.zst`
 - If the archive is an ALPM package, it will be installed like a standard package
-- If the archive is a universal binary package, Shelly will unpack it into `/opt/shelly/` and create the necessary desktop integration automatically
+- If the archive is a universal binary package, Shelly will unpack it into `/opt/shelly/` and create the necessary
+  desktop integration automatically
 - A **logout** might be needed for the new icon to start showing up correctly in the system
 
 ### Update
 
 - Click Update underneath install in packages
 - All packages will start selected, you can unclick any you want to remove them from your update.
-  ![Update_Packages](../../../../assets/screenshots/Update_Packages.png)
-  (in the above example I removed selection of one package to do partial update, I would not recommend this but you can do partial updates)
+  ![Update_Packages](../../../../assets/screenshots/Update_Packages.png) (in the above example I removed selection of
+  one package to do partial update, I would not recommend this but you can do partial updates)
 - Then click the above update selected button this will trigger a prompt to update
   ![Update_Packages2](../../../../assets/screenshots/Update_Packages2.png)
 - Click yes and it will prompt a password entry and launch.
@@ -102,7 +110,9 @@ These are archive-based packages intended for standalone applications.
 
 #### Local Packages
 
-Shelly lets you list and remove locally installed packages from your system with the **Remove Local Packages** action. These are the packages that are not managed by ALPM and were installed as standalone application directory in `/opt/shelly/`.
+Shelly lets you list and remove locally installed packages from your system with the **Remove Local Packages** action.
+These are the packages that are not managed by ALPM and were installed as standalone application directory in
+`/opt/shelly/`.
 
 ##### How to remove a local binary package
 

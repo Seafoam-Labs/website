@@ -1,0 +1,176 @@
+---
+title: Flatpak Applications
+sidebar:
+  label: Flatpak
+description: Search, install, run, and manage Flatpak sandboxed applications alongside native Arch Linux packages with Shelly.
+---
+
+import { Steps, Tabs, TabItem, Code } from "@astrojs/starlight/components";
+
+Shelly natively integrates Flatpak application management alongside official ALPM repositories and the Arch User
+Repository (AUR). With Shelly, you can discover applications across configured remotes, inspect sandbox permissions and
+download sizes, manage system- and user-level installations, and control running application processes:
+
+- **`shelly search flatpak`** - Query cached AppStream metadata with permissions, download sizes, and remote sources.
+- **`shelly install flatpak`** - Install applications from remotes, local `.flatpakref` files, or standalone `.flatpak`
+  bundles.
+- **`shelly run flatpak`** - Launch applications, inspect running Flatpak instances, or terminate processes with
+  `--kill`.
+- **`shelly purify flatpak`** - Prune unreferenced runtimes and extension dependencies to reclaim storage space.
+
+---
+
+## Searching for Flatpaks (`shelly search flatpak`)
+
+Shelly searches cached local AppStream catalogs across all configured system and user Flatpak remotes (such as Flathub):
+
+```sh
+shelly search flatpak spotify
+```
+
+You can paginate large result sets using `--page` and `--limit`:
+
+```sh
+shelly search flatpak editor --limit 5 --page 1
+```
+
+---
+
+## Installing Flatpaks (`shelly install flatpak`)
+
+Shelly supports installing applications by **Application ID** (e.g. `com.spotify.Client`) or friendly AppStream name:
+
+```sh
+# Install system-wide (default)
+shelly install flatpak com.spotify.Client
+
+# Or install for the current user only
+shelly install flatpak com.spotify.Client --user
+```
+
+### Installation Sources & Modifiers
+
+<Tabs>
+  <TabItem label="From a Specific Remote">
+    If multiple remotes provide the same application (e.g. `flathub` vs
+    `flathub-beta`), specify the remote explicitly:
+
+    <Code code="shelly install flatpak org.blender.Blender --remote flathub-beta" lang="sh" />
+  </TabItem>
+  <TabItem label="From a .flatpakref File">
+    Install directly from a downloaded `.flatpakref` file:
+
+    <Code code="shelly install flatpak ~/Downloads/app.flatpakref --ref-file" lang="sh" />
+  </TabItem>
+  <TabItem label="From a Flatpak Bundle">
+    Install an offline `.flatpak` single-file bundle:
+
+    <Code code="shelly install flatpak ~/Downloads/application.flatpak --bundle" lang="sh" />
+  </TabItem>
+  <TabItem label="Repairing an Installation">
+    Reinstall a corrupted Flatpak application and its runtime dependencies while
+    preserving all user configuration and application data:
+
+    <Code code="shelly install flatpak com.spotify.Client --repair" lang="sh" />
+  </TabItem>
+</Tabs>
+
+---
+
+## Running & Managing Processes (`shelly run flatpak`)
+
+Shelly provides process management and inspection for installed Flatpaks.
+
+### Launching an Application
+
+Launch any installed Flatpak application by its ID or friendly name:
+
+```sh
+shelly run flatpak com.spotify.Client
+# Or with shortcode:
+shelly -Xf com.spotify.Client
+```
+
+### Tracking Running Instances
+
+To view active Flatpak processes and their process identifiers (PIDs):
+
+```sh
+shelly run flatpak --list
+```
+
+```text
+┌───────────────────────┬───────────┬────────┬───────────┬────────┬────────┐
+│ Application           │ Instance  │ PID    │ Child PID │ Arch   │ Branch │
+├───────────────────────┼───────────┼────────┼───────────┼────────┼────────┤
+│ org.gnome.font-viewer │ 654442786 │ 153522 │ 153535    │ x86_64 │ stable │
+└───────────────────────┴───────────┴────────┴───────────┴────────┴────────┘
+Total: 1 running Flatpak
+```
+
+### Terminating Applications (`--kill`)
+
+To safely stop a running Flatpak instance or terminate a hung process:
+
+```sh
+shelly run flatpak com.spotify.Client --kill
+# Or with shortcode:
+shelly -Xf com.spotify.Client -k
+```
+
+---
+
+## Upgrades & Maintenance
+
+### Upgrading Flatpaks
+
+<Tabs>
+  <TabItem label="Upgrade All Flatpaks">
+    Update every installed Flatpak application and runtime across user and
+    system scopes:
+
+    <Code
+      code={"shelly upgrade flatpak\n# Or with shortcode:\nshelly -Uf"}
+      lang="sh"
+    />
+  </TabItem>
+  <TabItem label="Update a Single Flatpak">
+    Update only a specific Flatpak without touching other applications:
+
+    <Code code="shelly update flatpak com.spotify.Client" lang="sh" />
+  </TabItem>
+</Tabs>
+
+### Cleaning Unused Runtimes (`shelly purify flatpak`)
+
+When Flatpak applications are uninstalled, their shared base runtimes (e.g. GNOME or KDE Platform runtimes) may remain
+on disk.
+
+Reclaim disk space by pruning unreferenced runtimes across both system and user installations:
+
+```sh
+shelly purify flatpak
+# Or with shortcode:
+shelly -Zf
+```
+
+---
+
+## Command Reference & Shortcodes
+
+| Action | Shortcode | Full Command Equivalent |
+| :------------------------ | :-------------------- | :-------------------------------- |
+| **Run Flatpak** | `shelly -Xf <app>` | `shelly run flatpak <app>` |
+| **Stop Flatpak** | `shelly -Xf <app> -k` | `shelly run flatpak <app> --kill` |
+| **List Running** | `shelly -Xf -l` | `shelly run flatpak --list` |
+| **Upgrade Flatpaks** | `shelly -Uf` | `shelly upgrade flatpak` |
+| **Purge Unused Runtimes** | `shelly -Zf` | `shelly purify flatpak` |
+
+---
+
+## Further Reading
+
+- [AppImage Configuration](/shelly-alpm/docs/appimage/) - Managing AppImage updates and release trackers.
+- [System Maintenance & Keyring](/shelly-alpm/docs/maintenance/) - Cleaning ALPM and AUR caches.
+- [System Upgrades & Backups](/shelly-alpm/docs/system-state/) - Coordinating multi-backend system upgrades.
+- [CLI Reference](/shelly-alpm/docs/cli-reference/) - Complete reference for all Shelly subcommands.

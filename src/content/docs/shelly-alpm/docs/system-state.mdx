@@ -1,0 +1,296 @@
+---
+title: System Upgrades, Rollbacks & Backups
+sidebar:
+  label: Upgrades & Backups
+description: Manage system transitions, recover from package regressions with shelly downgrade, pin versions with shelly mark, and export declarative backups with shelly backup.
+---
+
+import { Steps, Tabs, TabItem, Code } from "@astrojs/starlight/components";
+
+Arch Linux is a fast-moving, rolling-release operating system. To manage system evolution safely, Shelly provides
+unified tools for coordinated multi-backend upgrades, interactive version rollbacks, package pinning, and declarative
+system state backups:
+
+- **`shelly upgrade`** - Synchronize and update official ALPM packages, AUR recipes, Flatpaks, and AppImages in a single
+  coordinated action.
+- **`shelly downgrade`** - Interactively roll back packages to older versions using local caches or the Arch Linux
+  Archive.
+- **`shelly mark`** - Control upgrade exclusions (`IgnorePkg`), prevent accidental removals (`HoldPkg`), and change
+  install reasons.
+- **`shelly backup`** - Export your installed package state to reproducible TOML manifests and restore them on new
+  systems.
+
+---
+
+## Coordinated System Upgrades (`shelly upgrade`)
+
+Instead of juggling separate commands for `pacman`, AUR helpers, and `flatpak`, Shelly coordinates updates across all
+active package managers.
+
+### Upgrading All Backends in One Command
+
+Run `shelly upgrade all` (shortcode `shelly -U` or `shelly -Ux`) to build and execute a single coordinated upgrade plan:
+
+```sh
+shelly upgrade all
+```
+
+Shelly queries each package backend in parallel, presents an aggregated summary of available updates, and coordinates
+the transactions:
+
+### Targeted Upgrades & Filters
+
+<Tabs>
+  <TabItem label="Official Packages Only">
+    Synchronize repository databases and perform a standard ALPM system upgrade:
+
+    <Code
+      code={"# Synchronize databases and upgrade official packages\nshelly upgrade standard\n\n# Or with shortcode:\nshelly -Us"}
+      lang="sh"
+    />
+  </TabItem>
+  <TabItem label="AUR Upgrades Only">
+    Check for newer AUR releases and rebuild VCS (`-git`) packages:
+
+    <Code
+      code={"# Check AUR and rebuild VCS packages\nshelly upgrade aur\n\n# Or with shortcode:\nshelly -Ua"}
+      lang="sh"
+    />
+  </TabItem>
+  <TabItem label="Selective Backend Skips">
+    Skip specific backends during a full system upgrade:
+
+    <Code
+      code={"# Skip Flatpak and AppImage backends\nshelly upgrade all --no-flatpak --no-appimage\n\n# Skip checking VCS/development packages (-git):\nshelly upgrade all --no-devel"}
+      lang="sh"
+    />
+  </TabItem>
+</Tabs>
+
+:::caution[Avoid Partial Upgrades]
+Arch Linux does not support partial upgrades. Updating individual packages (`shelly update standard <pkg>`) can lead to
+shared library incompatibilities. When updating official repository packages, always perform a full system upgrade with
+`shelly upgrade standard` or `shelly upgrade all`.
+:::
+
+---
+
+## Package Rollbacks (`shelly downgrade`)
+
+If an upstream update introduces a bug or regression, `shelly downgrade` allows you to immediately roll back to a
+previous working version.
+
+Shelly searches both your **local package cache** (`/var/cache/pacman/pkg/`) and the
+**official Arch Linux Archive (ALA)** to locate older package releases.
+
+### Interactive Downgrade
+
+Run `shelly downgrade` followed by the package name:
+
+```sh
+shelly downgrade linux-cachyos
+```
+
+```text
+Looking for downgrade options for: linux-cachyos
+Select Package
+  1) linux-cachyos-7.0.11-1-x86_64.pkg.tar.zst (Remote: archive.cachyos.org)
+  2) linux-cachyos-7.1.3-2-x86_64.pkg.tar.zst (Remote: archive.cachyos.org)
+  3) linux-cachyos-7.1.6-1-x86_64.pkg.tar.zst (Remote: archive.cachyos.org)
+  4) linux-cachyos-7.2.0-1-x86_64_v4.pkg.tar.zst (Remote: archive.cachyos.org)
+  5) linux-cachyos-7.2.2-1-x86_64_v3.pkg.tar.zst (Remote: archive.cachyos.org)
+  6) linux-cachyos-7.2.2-1-x86_64_v4.pkg.tar.zst (Remote: archive.cachyos.org)
+  7) linux-cachyos-7.2.2-1-x86_64_v4.pkg.tar.zst (Local)
+  8) linux-cachyos-7.2.3-1-x86_64_v3.pkg.tar.zst (Remote: archive.cachyos.org)
+  9) linux-cachyos-7.2.3-1-x86_64_v4.pkg.tar.zst (Remote: archive.cachyos.org)
+  10) linux-cachyos-7.2.3-1-x86_64_v4.pkg.tar.zst (Local)
+  11) linux-cachyos-7.2.4-1-x86_64_v4.pkg.tar.zst (Local)
+  12) linux-cachyos-7.2.4-2-x86_64_v3.pkg.tar.zst (Remote: archive.cachyos.org)
+Select [1-12] (12): 
+```
+
+### Automated Downgrade & Version Pinning
+
+To prevent the next system upgrade from immediately overwriting your downgraded package, pass `-i` (or `--ignore`) to
+automatically add it to `IgnorePkg`:
+
+```sh
+# Downgrade and pin the package in one step
+shelly downgrade linux --ignore
+```
+
+You can also target specific versions directly without interactive prompts:
+
+```sh
+# Install an exact version
+shelly downgrade mesa --target 24.3.3-1
+
+# Select the oldest available version
+shelly downgrade mesa --oldest
+```
+
+---
+
+## Package Pinning & Marking (`shelly mark`)
+
+`shelly mark` modifies package state flags and rules in your ALPM configuration.
+
+### 1. Managing Upgrade Exclusions (`IgnorePkg`)
+
+Packages added to `IgnorePkg` are skipped during `shelly upgrade` transactions.
+
+<Tabs>
+  <TabItem label="List Ignored Packages">
+    <Code
+      code={"shelly mark ignore --list\n# Shortcode:\nshelly -Mgl"}
+      lang="sh"
+    />
+  </TabItem>
+  <TabItem label="Add to Ignore List">
+    <Code
+      code={"shelly mark ignore --add linux linux-headers\n# Shortcode:\nshelly -Mga linux linux-headers"}
+      lang="sh"
+    />
+  </TabItem>
+  <TabItem label="Remove from Ignore List">
+    <Code
+      code={"shelly mark ignore --remove linux linux-headers\n# Shortcode:\nshelly -Mgr linux linux-headers"}
+      lang="sh"
+    />
+  </TabItem>
+</Tabs>
+
+### 2. Protecting Packages from Removal (`HoldPkg`)
+
+Critical system packages (such as `systemd` or `glibc`) can be placed in `HoldPkg` to guard against accidental deletion:
+
+```sh
+# Add package to protection list
+shelly mark hold --add base-devel
+
+# List currently held packages
+shelly mark hold --list
+```
+
+### 3. Changing Installation Reasons
+
+ALPM tracks whether a package was installed **explicitly** by you or automatically as a **dependency**. This metadata
+determines whether `shelly purify` considers the package an orphan when other software is removed.
+
+<Tabs>
+  <TabItem label="Mark as Explicit">
+    Convert a dependency into an explicitly installed package so it is never
+    removed during orphan cleanups:
+
+    <Code
+      code={"shelly mark explicit git\n# Shortcode:\nshelly -Me git"}
+      lang="sh"
+    />
+  </TabItem>
+  <TabItem label="Mark as Dependency">
+    Convert an explicitly installed package into a dependency (eligible for
+    orphan cleanup when no longer required by other packages):
+
+    <Code
+      code={"shelly mark dependency libpng\n# Shortcode:\nshelly -Md libpng"}
+      lang="sh"
+    />
+  </TabItem>
+</Tabs>
+
+---
+
+## Declarative System Backups (`shelly backup`)
+
+Setting up a new machine or backing up your package configuration is seamless with `shelly backup`. It exports all
+explicitly installed packages across native ALPM, AUR, and Flatpak into a structured, portable TOML file.
+
+### 1. Exporting Your System State
+
+Export your installed packages to TOML:
+
+```sh
+shelly backup --export
+```
+
+By default, this writes a timestamped file such as `20260913103000_shelly.toml` to `$XDG_CACHE_HOME/Shelly/`. You can
+customize the name and directory:
+
+```sh
+shelly backup --export --name workstation-setup --directory ~/dotfiles/
+```
+
+### Example Backup File (`workstation-setup.toml`)
+
+```toml
+standard = [
+  "base",
+  "base-devel",
+  "git",
+  "kitty",
+  "neovim",
+  "pipewire",
+  "zig",
+]
+
+aur = [
+  "ccls-git",
+  "visual-studio-code-bin",
+  "zen-browser-bin",
+]
+
+flatpak = [
+  "com.spotify.Client",
+  "org.mozilla.Thunderbird",
+  "org.signal.Signal",
+]
+```
+
+### 2. Restoring on a New System
+
+To replicate your environment on a fresh Arch installation:
+
+```sh
+shelly backup --import --name workstation-setup --directory ~/dotfiles/
+```
+
+`--import` requires `--name` so Shelly can locate the manifest.
+
+Shelly reads the declarative manifest and coordinates the installation:
+
+1. Installs all official repository packages via ALPM.
+2. Clones, reviews, and compiles AUR packages.
+3. Installs Flatpak applications from configured remotes.
+
+---
+
+## Command Reference & Shortcodes
+
+### Summary of Shortcodes
+
+Shelly shortcodes provide fast keyboard access for common administrative flows:
+
+| Action | Shortcode | Full Command Equivalent |
+| :------------------- | :------------------- | :----------------------------------- |
+| **Upgrade All** | `shelly -U` | `shelly upgrade all` |
+| **Upgrade Standard** | `shelly -Us` | `shelly upgrade standard` |
+| **Upgrade AUR** | `shelly -Ua` | `shelly upgrade aur` |
+| **Upgrade Flatpaks** | `shelly -Uf` | `shelly upgrade flatpak` |
+| **Downgrade** | `shelly -D <pkg>` | `shelly downgrade <pkg>` |
+| **Downgrade & Pin** | `shelly -Di <pkg>` | `shelly downgrade <pkg> --ignore` |
+| **List Ignored** | `shelly -Mgl` | `shelly mark ignore --list` |
+| **Add Ignored** | `shelly -Mga <pkgs>` | `shelly mark ignore --add <pkgs>` |
+| **Remove Ignored** | `shelly -Mgr <pkgs>` | `shelly mark ignore --remove <pkgs>` |
+| **Mark Explicit** | `shelly -Me <pkg>` | `shelly mark explicit <pkg>` |
+| **Mark Dependency** | `shelly -Md <pkg>` | `shelly mark dependency <pkg>` |
+| **Export Backup** | `shelly -Be` | `shelly backup --export` |
+| **Import Backup** | `shelly -Bi` | `shelly backup --import` |
+
+---
+
+## Further Reading
+
+- [System Maintenance & Keyring](/shelly-alpm/docs/maintenance/) - Cache cleaning, orphan removal, and PGP key
+  maintenance.
+- [Building Packages](/shelly-alpm/docs/build/) - Building PKGBUILD recipes into package archives.
+- [CLI Reference](/shelly-alpm/docs/cli-reference/) - Complete reference for all Shelly subcommands.

@@ -1,0 +1,228 @@
+---
+title: System Maintenance & Keyring
+sidebar:
+  label: System Maintenance
+description: Keep your Arch Linux system clean, healthy, and secure with shelly purify, shelly news, and shelly keyring.
+---
+
+import { Steps, Tabs, TabItem, Code } from "@astrojs/starlight/components";
+
+Maintaining a rolling-release distribution like Arch Linux requires periodic housekeeping: reclaiming disk space from
+package caches, removing orphaned dependencies, checking upstream news before updates, and ensuring your PGP keyrings
+are up to date.
+
+Shelly provides three specialized subcommands for system health:
+
+- **`shelly purify`** - Prunes old ALPM package caches, removes compiled AUR build caches, removes unused orphaned
+  dependencies, and frees unreferenced Flatpak runtimes.
+- **`shelly news`** - Displays unread Arch Linux news announcements and manual intervention notices before running
+  system upgrades.
+- **`shelly keyring`** - Initializes distribution keyrings, refreshes keyservers, and imports developer signing keys for
+  AUR source verification.
+
+---
+
+## Cache & Storage Hygiene (`shelly purify`)
+
+Whenever you install or upgrade packages, ALPM stores the downloaded archives in `/var/cache/pacman/pkg/`. Over time,
+this cache grows and consumes gigabytes of disk space. Similarly, building AUR packages leaves compiled archives in
+Shelly's cache.
+
+`shelly purify` analyzes your system and builds a structured cleanup plan for package caches, orphaned dependencies, and
+unused Flatpak runtimes.
+
+### Common Cleanup Tasks
+
+<Tabs>
+  <TabItem label="Standard Cache Cleanup">
+    Remove older cached package versions while keeping the latest versions as a rollback buffer (retaining 3 versions by default):
+
+    <Code
+      code={"# Clean cache while keeping the 3 most recent versions\nshelly purify standard\n\n# Retain only the 2 most recent versions\nshelly purify standard --cache 2"}
+      lang="sh"
+    />
+  </TabItem>
+  <TabItem label="Purge AUR Build Caches">
+    Delete all compiled AUR package archives and their matching detached signatures from Shelly's build cache:
+
+    <Code code="shelly purify standard --aur-cache" lang="sh" />
+  </TabItem>
+  <TabItem label="Remove Orphaned Packages">
+    Identify and remove packages installed as dependencies that are no longer required by any currently installed package:
+
+    <Code code="shelly purify standard --orphans" lang="sh" />
+  </TabItem>
+  <TabItem label="Clean Unused Flatpaks">
+    Prune unused Flatpak runtimes and extension dependencies across both system and user installations:
+
+    <Code code="shelly purify flatpak" lang="sh" />
+  </TabItem>
+</Tabs>
+
+### Previewing with Dry Run
+
+Before making any changes to your filesystem or package database, pass `-d` (or `--dry-run`) to preview the exact
+packages and sizes targeted for removal:
+
+```sh
+shelly purify standard --orphans --cache 2 --dry-run
+```
+
+:::tip[Combined Maintenance]
+You can combine flags into a full cleanup:
+
+```sh
+shelly purify standard --orphans --aur-cache --cache 2
+```
+
+:::
+
+---
+
+## Arch Linux News (`shelly news`)
+
+On Arch Linux, major package transitions or upstream architectural changes occasionally require manual user
+intervention. The Arch Linux maintainers publish announcements on [archlinux.org/news](https://archlinux.org/news/).
+
+`shelly news` fetches the official news feed, displays unread announcements formatted cleanly in your terminal, and
+remembers which items you have already viewed.
+
+```sh
+# Show unread announcements
+shelly news
+```
+
+### Viewing All Historical News
+
+To inspect previously read announcements or browse the archive:
+
+```sh
+shelly news --all
+```
+
+:::note[State Tracking]
+Shelly tracks viewed news identifiers locally in `$XDG_CACHE_HOME/Shelly/` for your invoking user account, ensuring you
+are not prompted repeatedly for the same announcement.
+:::
+
+---
+
+## Keyring & Signature Verification (`shelly keyring`)
+
+Arch Linux packages and PKGBUILD sources rely on OpenPGP signatures to guarantee authenticity. If keyrings become
+desynchronized or missing, updates or AUR builds may fail with signature verification errors.
+
+Shelly integrates key management through `shelly keyring` (powered by `shelly-key`).
+
+### 1. Fixing Keyring Errors
+
+If you encounter `invalid or corrupted package (PGP signature)` errors during updates, repopulate the distribution
+keys. Note that `shelly keyring init` creates missing keyring structure but does **not** delete an existing keyring -
+if the keyring itself is corrupt, wipe it manually first (step 3 below).
+
+<Steps>
+
+1. #### Repopulate the existing keyring
+
+   Initialize the keyring structure, import and trust the signing keys from every installed distribution keyring
+   (Arch Linux, CachyOS, etc.), then refresh keys from the configured keyservers:
+
+   ```sh
+   shelly keyring init
+   shelly keyring populate
+   shelly keyring refresh
+   ```
+
+2. #### Retry the failed update
+
+   ```sh
+   shelly upgrade standard
+   ```
+
+   If signature errors are gone, no further action is needed.
+
+3. #### Reset the keyring from scratch
+
+   If errors persist, the keyring data itself is likely corrupt. Delete it and repopulate:
+
+   ```sh
+   sudo rm -rf /etc/pacman.d/gnupg/
+   shelly keyring init
+   shelly keyring populate
+   ```
+
+4. #### Rule out mirrors and stale databases
+
+   If signature errors continue even after a full reset, the keyring is not the problem - suspect a broken mirror
+   serving corrupted packages or a stale sync database. Switch to working mirrors, clear the package cache, and
+   remove the sync database so it is re-downloaded:
+
+   ```sh
+   sudo rm -R /var/lib/pacman/sync
+   ```
+
+</Steps>
+
+### 2. Importing Developer Keys for AUR Builds
+
+When a `PKGBUILD` specifies `validpgpkeys=(...)`, Shelly's build engine validates the downloaded source tarball against
+that developer's PGP key.
+
+To import an upstream developer's public key into your user keyring for source verification:
+
+```sh
+# Import into the user's GPG keyring
+shelly keyring recv <FINGERPRINT> --user
+
+# Optionally specify an explicit keyserver
+shelly keyring recv <FINGERPRINT> --user --keyserver hkps://keyserver.ubuntu.com
+```
+
+:::caution[Verify Fingerprints First]
+Always verify the developer's full 40-character fingerprint through an authoritative, independent upstream channel (such
+as the project's official website or Git repository) before importing. See
+[AUR Safety Practices](/shelly-alpm/docs/aur-safety/#verify-integrity-and-authenticity).
+:::
+
+---
+
+## Command Reference & Shortcodes
+
+### `shelly purify` Options
+
+| Option | Short | Description |
+| :------------ | :---- | :-------------------------------------------------------------------------------- |
+| `--cache <N>` | `-c` | Remove older cached package versions while retaining `<N>` versions (default: 3). |
+| `--orphans` | `-o` | Include orphaned dependencies in the cleanup plan. |
+| `--aur-cache` | | Delete all cached AUR package archives and signatures. |
+| `--dry-run` | `-d` | Display the planned cleanup targets without altering packages or deleting files. |
+
+### `shelly keyring` Subcommands
+
+| Subcommand | Shortcode | Description |
+| :------------------------ | :----------- | :----------------------------------------------------------- |
+| `shelly keyring init` | `shelly -Ki` | Initialize the system package-signing keyring. |
+| `shelly keyring populate` | `shelly -Kp` | Populate keyring with default distribution keys. |
+| `shelly keyring refresh` | `shelly -Kr` | Refresh keys from configured keyservers. |
+| `shelly keyring recv` | `shelly -Kv` | Receive public keys (use `--user` for PKGBUILD source keys). |
+| `shelly keyring lsign` | `shelly -Ks` | Locally sign a key in the keyring. |
+| `shelly keyring list` | `shelly -Kl` | List all keys in the package-signing keyring. |
+
+### Quick Shortcodes
+
+```sh
+shelly -Zs           # Equivalent to: shelly purify standard
+shelly -Zso          # Equivalent to: shelly purify standard --orphans
+shelly -Zsd          # Equivalent to: shelly purify standard --dry-run
+shelly -Zf           # Equivalent to: shelly purify flatpak
+shelly -N            # Equivalent to: shelly news
+shelly -Na           # Equivalent to: shelly news --all
+```
+
+---
+
+## Further Reading
+
+- [Building Packages](/shelly-alpm/docs/build/) - How Shelly builds and verifies packages.
+- [AUR Safety Practices](/shelly-alpm/docs/aur-safety/) - Reviewing build recipes and PGP verification.
+- [CLI Reference](/shelly-alpm/docs/cli-reference/) - Complete command syntax for Shelly.
