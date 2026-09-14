@@ -55,6 +55,7 @@ export const collections = {
         owner: "Seafoam-Labs",
         repo: "Shelly-ALPM",
         title: "Shelly Changelog",
+        token: process.env.GH_API_TOKEN,
         pagefind: false,
       },
       {
@@ -63,6 +64,7 @@ export const collections = {
         owner: "Seafoam-Labs",
         repo: "Aqueous",
         title: "Aqueous Changelog",
+        token: process.env.GH_API_TOKEN,
         pagefind: false,
       },
       {
@@ -71,6 +73,7 @@ export const collections = {
         owner: "Seafoam-Labs",
         repo: "Starfish",
         title: "Starfish Changelog",
+        token: process.env.GH_API_TOKEN,
         pagefind: false,
       },
       {
@@ -79,6 +82,7 @@ export const collections = {
         owner: "Seafoam-Labs",
         repo: "Pori",
         title: "Pori Changelog",
+        token: process.env.GH_API_TOKEN,
         pagefind: false,
       },
     ]),

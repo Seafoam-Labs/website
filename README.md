@@ -13,6 +13,16 @@ buildpack passes `--prod=false` when installing dependencies; pnpm 12 releases
 affected by [pnpm#14553](https://github.com/pnpm/pnpm/issues/14553) reject that
 flag. Validate the buildpack install command before upgrading the pnpm pin.
 
+## Changelog Rate Limits
+
+Changelog pages are fetched from the GitHub API on every dev start, `astro check`, and build, so
+the anonymous 60 requests per hour can run out and fail the build with `403 - rate limit
+exceeded`. Export a token with `Contents: read` to raise the cap to 5,000 per hour:
+
+```bash
+GH_API_TOKEN=$(gh auth token) pnpm run build
+```
+
 ## Project Structure
 
 Inside of the project, you'll see the following folders and files:
