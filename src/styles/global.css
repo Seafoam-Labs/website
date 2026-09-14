@@ -10,30 +10,20 @@
   --color-seafoam-light: #5eead4;
   --color-seafoam-dark: #14b8a6;
   --color-seafoam-muted: #0d9488;
+  --color-seafoam-deep: #0f766e;
 
   /* Purple from character's suit */
   --color-purple: #7c3aed;
   --color-purple-light: #a78bfa;
-  --color-purple-dark: #5b21b6;
 
   /* Pink accent from character */
   --color-pink: #ec4899;
-  --color-pink-light: #f472b6;
 
   /* Dark backgrounds */
   --color-bg-primary: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-bg-card: #1e293b;
-  --color-bg-input: #0f172a;
-
-  /* Text */
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
 
   /* Borders */
   --color-border: #334155;
-  --color-border-focus: var(--color-seafoam);
 }
 
 /* Starlight overrides */
@@ -59,6 +49,8 @@
   --sl-color-accent-low: var(--color-seafoam-light);
   --sl-color-accent: var(--color-seafoam-muted);
   --sl-color-accent-high: var(--color-seafoam-dark);
+  /* Starlight derives this from --sl-color-accent, which is too light for AA text. */
+  --sl-color-text-accent: var(--color-seafoam-deep);
   --sl-color-white: var(--color-bg-primary);
   --sl-color-gray-1: #1e293b;
   --sl-color-gray-2: #334155;

@@ -35,18 +35,21 @@ export function remoteTextLoader(sources: RemoteTextSource[]): Loader {
       for (const source of sources) {
         logger.info(`Fetching remote text: ${source.url}`);
 
-        const res = await fetch(source.url);
+        const res = await fetch(source.url, {
+          signal: AbortSignal.timeout(15_000),
+        }).catch((cause: unknown) => {
+          throw new Error(`Failed to fetch ${source.url}`, { cause });
+        });
         if (!res.ok) {
-          logger.error(
+          throw new Error(
             `Failed to fetch ${source.url}: ${res.status.toString()} ${res.statusText}`,
           );
-          continue;
         }
 
         const text = await res.text();
 
-        // Wrap the raw text in a fenced code block so it renders with syntax
-        // highlighting through the same markdown pipeline as remoteMarkdownLoader.
+        // Wrapping in a fenced code block is what lets arbitrary text reuse the
+        // markdown pipeline for syntax highlighting without being parsed as markup.
         const fence = fenceFor(text);
         const info = source.language ?? "";
         const markdown = `${fence}${info}\n${text}\n${fence}`;

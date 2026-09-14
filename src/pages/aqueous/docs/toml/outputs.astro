@@ -12,7 +12,9 @@ if (!entry || !entry.rendered) {
 const { Content } = await render(entry);
 ---
 
-<StarlightPage frontmatter={{ title: entry.data.title }} headings={[]}>
+<StarlightPage
+  frontmatter={{ title: entry.data.title, tableOfContents: false }}
+>
   <Aside type="note">
     Fetched directly from the Aqueous repository on every build, so this always
     reflects the latest <code>outputs.toml</code>. See the{" "}

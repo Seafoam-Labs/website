@@ -52,9 +52,12 @@ export const GET: APIRoute = async (context) => {
         sanitize({ dropElements: ["script", "style"] }),
       ],
     );
+    // Posts are feed-only and have no page of their own, so item identity comes
+    // from an opaque non-permalink guid rather than a link.
     items.push({
       ...post.data,
       content,
+      customData: `<guid isPermaLink="false">urn:seafoam-labs:shelly-news:${post.id}</guid>`,
     });
   }
 

@@ -51,6 +51,15 @@ export default defineConfig({
             sizes: "48x48",
           },
         },
+        {
+          tag: "link",
+          attrs: {
+            rel: "alternate",
+            type: "application/rss+xml",
+            title: "Seafoam Labs: Shelly news and updates",
+            href: "/shelly-alpm/feeds/news/rss.xml",
+          },
+        },
       ],
       social: [
         {
