@@ -1,10 +1,6 @@
 ---
-// Hack to add fluxer icon via SocialIcons.astro override
-// See https://github.com/withastro/starlight/blob/main/packages/starlight/components/SocialIcons.astro
-
 import config from "virtual:starlight/user-config";
 import { Icon } from "@astrojs/starlight/components";
-import FluxerIcon from "../../assets/icons/fluxer.svg";
 import BuyMeACoffeeIcon from "../../assets/icons/buymeacoffee.svg";
 
 const links = config.social || [];
@@ -17,9 +13,7 @@ const links = config.social || [];
         <a {href} rel="me" class="sl-flex">
           <span class="sr-only">{label}</span>
 
-          {label === "Fluxer" ? (
-            <FluxerIcon class="size-5 fill-current" />
-          ) : label === "Buy Me a Coffee" ? (
+          {label === "Buy Me a Coffee" ? (
             <BuyMeACoffeeIcon class="size-5 fill-current" />
           ) : (
             <Icon class="size-5" name={icon} />

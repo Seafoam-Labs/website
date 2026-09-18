@@ -69,8 +69,7 @@ export default defineConfig({
           href: "https://buymeacoffee.com/zoeyerinba3",
         },
         {
-          /* Hack to add fluxer icon via SocialIcons.astro override */
-          icon: "warning",
+          icon: "fluxer",
           label: "Fluxer",
           href: "https://fluxer.gg/vOjrMXcE",
         },
