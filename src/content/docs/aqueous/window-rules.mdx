@@ -28,9 +28,10 @@ namespaces.
 ## Matching
 
 Rules are evaluated from top to bottom and the **first match wins**. Every
-`[[window]]` block needs at least one of `app_id`, `class`, `title`, or
-`content_type`; a matcher-free block is discarded. When several matchers are
-present, all must match.
+managed `[[window]]` block needs at least one of `app_id`, `class`, `title`,
+`tag`, or `content_type`; a matcher-free block is discarded. Unmanaged X11
+rules use the separate scope described below and can also match `window_type`.
+When several matchers are present, all must match.
 
 String matchers are anchored, case-sensitive globs: `*` matches any number of
 characters and `?` matches one. A string without wildcards must match the
@@ -118,6 +119,23 @@ scrolling column, preserving the current layout when `layout` is omitted.
 Manual toggles, horizontal resizing, and size reset override it until a
 different matcher becomes active. As with other placement fields, it is ignored
 by rules containing `content_type`.
+
+A custom base width uses `scrolling_width`, a finite fraction greater than zero
+and at most one:
+
+```toml
+[[window]]
+app_id = "firefox"
+scrolling_width = 0.65
+```
+
+This gives the complete tile, including borders, 65% of the local scrolling
+viewport after reserved areas and outer gaps. It preserves the layout and
+height, including in scrolling composable regions and Game Mode remainders.
+Full width temporarily takes precedence; turning it off reveals the base width.
+Stacked members share a width owner. Horizontal resizing overrides the current
+members' fractions; vertical resizing preserves them. Size reset returns to the
+global column fraction. Put the field in the first matching rule.
 
 ### Game Mode geometry
 
@@ -230,6 +248,54 @@ takes precedence over fallback blur. Destroying the effect object restores
 fallback on the next surface commit. Requests are per surface and do not
 propagate to popups or subsurfaces. Global blur disable always wins.
 
+## Window purpose tags
+
+Native applications using `xdg-toplevel-tag-v1` can identify a window's purpose
+independently of its translated title. Combine a tag with `app_id`:
+
+```toml
+[[window]]
+app_id = "org.example.Editor"
+tag = "settings"
+floating = true
+```
+
+Tags use the same glob matching, are client-provided, and need not be unique.
+An unset tag does not match, even with `"*"`; an explicitly empty tag can match
+`""`. Changing a tag re-evaluates rules through the usual manual-override policy.
+`aqueousctl windows --json` reports tags and descriptions; `inspect --rule`
+includes a literal matcher for a nonempty tag. XWayland windows have no native tag.
+
+## XWayland notifications, menus, and tooltips
+
+Unmanaged X11 override-redirect surfaces have a separate rule scope. Inspect
+the actual class/title/type with `aqueousctl windows --json` or `inspect --rule`;
+for example, a Steam version may expose notification windows like this:
+
+```toml
+[[window]]
+scope = "override_redirect"
+class = "Steam*"
+window_type = "notification"
+opacity = 1.0
+focus = false
+output = "DP-1"
+x = 24
+y = 24
+```
+
+`scope` defaults to `"managed"`. Override-redirect rules require at least one of
+`class`, `title`, or `window_type`; all supplied matchers must match. Only
+`scope`, those matchers, `opacity`, `focus = false`, `output`, `x`, and `y` are
+supported. Unsupported fields or `focus = true` reject the reload and retain the
+previous rules.
+
+`x`/`y` are logical offsets from the selected output's full origin. An omitted
+axis keeps the client-requested offset. An unavailable output leaves client
+placement in effect until it becomes available. Removing a rule restores the
+latest client position and inherited opacity/focus policy. These surfaces remain
+outside workspaces and taskbars; they do not become managed windows.
+
 ## Reload only rules
 
 ```toml
@@ -238,5 +304,5 @@ reload_rules = "Super+Shift+R"
 ```
 
 This avoids running reload-time `[[exec]]` commands while iterating on rules.
-The [settings application](/aqueous/settings/) also provides an
-ordered rule editor with validation and content-type safety.
+Compatible settings frontends can edit ordered rules through the
+[configuration helper](/aqueous/settings/), which validates changes before saving.

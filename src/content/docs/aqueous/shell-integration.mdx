@@ -11,8 +11,9 @@ import { Aside } from "@astrojs/starlight/components";
 Aqueous owns window and workspace policy in the compositor. Desktop shells can
 use standard layer-shell, workspace, and foreign-toplevel protocols, plus the
 versioned Aqueous shell interface for richer state and typed runtime actions.
-Source Arch packages start Seafoam Labs' `dms-aqueous`; other package variants
-retain Noctalia. See [Installation](/aqueous/installation/#shell-and-package-variants).
+Component desktops select Pearl, DMS, Noctalia, or no shell through Welcome.
+See [Desktop selection](/aqueous/desktop-session/) and
+[Installation](/aqueous/installation/#shell-and-package-variants).
 
 ## Discover live capabilities
 
@@ -29,7 +30,8 @@ from the numbered workspace shortcuts in `wm.toml`.
 
 The CLI uses `aqueous_shell_manager_v1` on Wayland. Its typed commands can
 activate or close windows, set window states, move windows, activate or rename
-workspaces, switch keyboard layouts, control overview, and request session exit.
+workspaces, switch keyboard layouts, control overview, reload configuration,
+and request session exit.
 See [Command-line tools](/aqueous/command-line/#shell-state-and-runtime-actions).
 
 ## Persistent socket IPC
@@ -106,15 +108,73 @@ For exact fields, limits, schemas, and recovery rules, use the source
 [IPC v1 contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/compositor/protocol/aqueous-ipc-v1.md)
 and [Wayland shell contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/compositor/protocol/aqueous-shell-v1.md).
 
+## Window icons and unmanaged surfaces
+
+Negotiate `icon_metadata` and `icon_fetch` before requesting per-window icons.
+The read-only `window.icon` socket operation accepts the current window ID,
+icon revision, logical size, and scale, and returns bounded base64 PNG data.
+Use the request connection, not the subscription connection, and compare the
+reply's revision against current state before displaying it. Name-only icons
+can be resolved through the frontend's icon theme.
+
+The `unmanaged_windows` capability exposes mapped X11 override-redirect
+surfaces, including Steam notification bubbles, menus, and tooltips. Socket
+clients opt in with `{"include_unmanaged": true}` in snapshot/subscribe
+parameters. Updated CLI snapshots and watches select the corresponding Wayland
+subscription automatically. Older/default subscriptions retain managed-only
+behavior.
+
+Unmanaged records report type, class/title, geometry, owner, output, opacity,
+and rule effects. They are not taskbar/workspace members or valid targets for
+managed-window commands. See [popup rules](/aqueous/window-rules/#xwayland-notifications-menus-and-tooltips).
+
+## Input activity
+
+`aqueous-input-activity-v1` provides authorized consumers with keyboard activity,
+mouse-button activity, or both. It reports fresh physical presses on the default
+seat, including compositor shortcuts. It does not expose keys, button identities,
+text, coordinates, timestamps, or counts. Repeats, motion, scrolling, touch,
+tablets, and virtual devices do not count.
+
+The packaged Pearl service obtains authorization through
+`aqueous-activity-launch` on its existing Wayland connection. Same-user socket
+access alone does not grant activity access. Notifications are bounded and
+acknowledged; silence does not establish idle state. Activity is not included
+in general shell snapshots or `outputd.sock`.
+
+Integration details are in the
+[input-activity contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/compositor/protocol/aqueous-input-activity-v1.md).
+
+## Isolated window capture
+
+Foreign-toplevel scene capture renders the target window independently of
+windows covering it. The destination defaults to SDR sRGB/BT.709 primaries,
+gamma 2.2, and nominal 80 cd/m² white. Supported Vulkan SHM and DMA-BUF paths
+carry destination-color metadata through `aqueous-capture-color-v1`.
+
+These are SDR exports, including supported input-color conversion; source HDR
+metadata is not copied onto converted SDR frames. Pixman reports metadata only
+for supported SDR inputs and reports unavailable when conversion is required.
+Consumers must wait for successful frame completion and valid color metadata.
+Unknown paths remain unavailable. Session lock or window unmapping denies
+capture. Output warming affects composed output captures, not this isolated source.
+
+See the [capture-color contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/isolated-capture-color.md)
+for format support and export conversion requirements.
+
 ## Screen sharing and portals
 
 Packages include a private namespaced build of `xdg-desktop-portal-wlr` as
 `xdg-desktop-portal-aqueous`. It handles ScreenCast and Screenshot, while GTK
-handles the remaining portal interfaces. The package variant selects a DMS or
-Noctalia source chooser; installing another shell alone does not change it.
+handles the remaining portal interfaces. Component desktops route the source
+chooser through `aqueous-shell-action` using the active session choice: DMS
+uses its portal bridge, Noctalia uses its menu, and Pearl/Nothing use the
+standalone GTK picker supplied by Welcome. Installing another shell alone does
+not change the active selection. Explicit custom chooser overrides are retained.
 
 DMS sharing uses the independent **Aqueous Screen Sharing** (`aqueousPortal`)
-daemon plugin. It works without Aqueous Settings or a DankBar widget. The
+daemon plugin. It works independently of the retired settings UI and needs no
+DankBar widget. The
 bridge waits for discovery and enables this portal plugin on the first request
 unless it has been explicitly disabled. Re-enable it through DMS Settings →
 Plugins or:

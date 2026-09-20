@@ -179,6 +179,35 @@ per-output settings. Color-management-v1 advertises supported parametric and
 Windows HDR descriptions, while rules can override highlight expansion by
 window or content type. See [Outputs and HDR](/aqueous/outputs/#hdr10-output).
 
+## Hardware color conversion
+
+The experimental DRM hardware color pipeline can offload supported color
+conversion while retaining renderer fallback. Configure it in `wm.toml`:
+
+```toml
+[render]
+color_pipeline = "auto" # auto | off
+```
+
+`auto` is the default. It skips NVIDIA DRM backends and attempts supported
+pipelines on other GPUs. `off` retains the ordinary rendering path. This is
+startup-only: restart the compositor session after changing it. The optional
+`AQUEOUS_DRM_COLOR_PIPELINE=auto|off` startup environment override takes precedence
+and follows the same NVIDIA exclusion.
+
+This option does not enable HDR itself; use the
+[output HDR setting](/aqueous/outputs/#hdr10-output). Unsupported formats,
+effects, capture paths, and color operations fall back to renderer processing.
+Auto HDR expansion remains in the shader. No GPU/display combination has yet
+completed the project's physical color acceptance checks; see the
+[color-pipeline source guide](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/color-pipeline.md).
+
+## Screen warming
+
+Eligible SDR Vulkan outputs support experimental warming controlled by a
+compatible client such as Pearl. HDR outputs and mirrors are ineligible. See
+[Screen warming](/aqueous/screen-warming/) for setup, status, and restoration.
+
 ## DRM overlay planes
 
 Direct overlay promotion is disabled by default and startup-only:

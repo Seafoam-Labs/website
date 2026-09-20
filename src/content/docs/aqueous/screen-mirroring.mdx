@@ -43,11 +43,11 @@ do not need to be integer multiples. Aqueous copies frames at destination
 demand, skips intermediate source updates, and retains the latest complete
 image when the source is idle.
 
-The [settings plugin](/aqueous/settings/#displays) also offers **Extended
-desktop** and **Mirror of …** choices. Select compatible modes, SDR, and normal
-orientation before applying the relationship. Mirrors remain in the display
-selector but are omitted from the arrangement canvas. Position and scale are
-retained for a later return to extended mode.
+Configure compatible modes, SDR, and normal orientation before applying the
+relationship. Position and scale are retained for a later return to extended mode.
+The compositor mirroring path is separate from protected display previews:
+physical mirroring previews remain blocked in that path. A settings frontend
+must honor that capability result; see [Display previews](/aqueous/outputs/#display-previews).
 
 ## Return to an extended desktop
 

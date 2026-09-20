@@ -57,7 +57,8 @@ possible to define a broad dock policy followed by one specific monitor.
 
 - `mode` uses `WIDTHxHEIGHT@HZ`.
 - `scale` accepts `0.5` through `3.0`.
-- `position` is in logical output-layout coordinates.
+- `position` is in logical output-layout coordinates; negative X/Y values
+  place a display to the left of or above the origin.
 - `transform` accepts `normal`, `90`, `180`, `270`, `flipped`, and the three
   rotated flipped variants.
 - `primary` is a deterministic action/focus fallback. It does not steal focus
@@ -75,6 +76,26 @@ its mode and scale updates are retained while positions are recomputed.
 output directly beneath the pointer. This is a runtime transaction and does
 not rewrite `outputs.toml`, so a later reload may restore the configured
 transform.
+
+## Adaptive sync
+
+```toml
+[[output]]
+name = "DP-1"
+adaptive_sync = true
+fullscreen_only_adaptive_sync = true
+```
+
+`adaptive_sync` is the master VRR request. The optional
+`fullscreen_only_adaptive_sync` modifier defaults to false. When both are true,
+VRR is requested only while a visible fullscreen application occupies that
+monitor's active workspace. Focusing another monitor does not disable it;
+overview and session lock do.
+
+Native display observations distinguish the configured policy from
+`effective_adaptive_sync` (the runtime target), `actual_vrr` (backend status),
+and `adaptive_sync_error` (`null`, `unsupported`, or `commit_failed`). A saved
+VRR request alone does not establish that the hardware enabled it.
 
 ## Named profiles
 
@@ -120,8 +141,8 @@ sdr_white_level = 200 # 80–1000 cd/m²
 auto_hdr = false # Optional SDR highlight expansion; see Auto HDR below.
 ```
 
-Alternatively, enable HDR for the display in the
-[Aqueous settings application](/aqueous/settings/) and select **Apply**.
+Alternatively, use a compatible [settings frontend such as Pearl](/aqueous/settings/)
+to enable HDR, preview the change, and confirm it before saving.
 Run `aqueousctl outputs --json` afterward and check that the intended output
 reports `hdr: true`. `hdr_capable: true` reports support; it does not mean HDR
 is active. Enable the output before launching an HDR application.
@@ -215,6 +236,28 @@ hdr_expand = true
 Native PQ, Windows-scRGB/BT.2100, layer-shell, and lock-screen content is never
 expanded. Auto HDR requires the Vulkan effects build; `auto_hdr_boost = 0`
 reduces it to the configured SDR white level without highlight expansion.
+
+## Display previews
+
+Compatible settings frontends can preview an entire output change before saving
+it. Aqueous tests the target set and keeps at least one enabled, non-mirrored
+output. The confirmation interval begins only after the participating enabled
+outputs have presented the new state. Select **Keep** within 15 seconds to
+confirm, or revert. An unconfirmed preview writes no candidate configuration.
+
+Production DRM previews support advertised SDR modes, HDR, VRR, HDR with VRR,
+and Auto HDR when capability and preflight checks pass. Physical mirroring and
+custom modes remain blocked in this protected path. Nested backends are
+unsupported. These limits are distinct from the compositor's ordinary
+[mirroring configuration](/aqueous/screen-mirroring/).
+
+Locking, output removal, or a failed presentation can invalidate a preview.
+Restoration and persistence have separate reported outcomes; inspect an error
+rather than assuming a failed save or timed-out response completed a rollback.
+Changing `apply_on_reload` does not bypass protected helper validation.
+
+See the [display-preview contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/physical-display-preview.md)
+for exact state, recovery, and hardware qualification details.
 
 ## Hotplug and output ownership
 

@@ -69,6 +69,13 @@ split_ratio = 0.5
 start_axis = "vertical"
 ```
 
+## Moving tiles between outputs
+
+Hold `Super` and left-drag a tiled window onto another enabled output. It joins
+that output's active workspace and adopts the destination layout's placement
+policy. Fixed-position and fullscreen windows cannot use this tiled move path.
+Floating windows retain their separate cross-output move behavior.
+
 ## Tile resizing
 
 `Super`+right-drag on a tile member resizes it without making it floating.
@@ -180,8 +187,8 @@ desktop rather than by the general floating presentation state.
 
 The legacy `[layout.snap-zone.a]` through `d`,
 `builtin:snap_zone:<a-d>`, and `builtin:cycle_snap_zone` forms remain accepted
-for existing configurations. The settings plugin can copy them into a named
-layout.
+for existing configurations. The configuration helper supports named snap-layout
+editing for compatible frontends.
 
 ### Keyboard freeform actions
 
@@ -232,8 +239,9 @@ consume the first window from the right, expel a member into a new column, move
 a whole column, toggle one column to full viewport width, or pan without
 changing keyboard focus. Clipped focused members are revealed automatically.
 
-A window rule can set `scrolling_full_width = true` to start its column at full
-viewport width. Manual toggles and horizontal resizing override the preset;
+A window rule can set `scrolling_width = 0.65` for a 65% base column width,
+or `scrolling_full_width = true` to start at full viewport width. Full width
+temporarily takes precedence over a custom base width. Manual toggles and horizontal resizing override the preset;
 see [Scrolling width rules](/aqueous/window-rules/#scrolling-width-rules).
 
 With the primary modifier held, vertical wheel steps pan by column; adding Alt

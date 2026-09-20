@@ -1,0 +1,103 @@
+---
+title: Desktop Selection and Git Sessions
+description: Choose Pearl, DMS, Noctalia, or no shell, and manage separate stable and Git sessions.
+sidebar:
+  label: Desktop Selection
+  order: 2
+---
+
+The component desktop includes a native GTK4 Welcome application. It offers
+**Pearl**, **DMS**, **Noctalia**, or **Nothing**, plus an optional application
+catalog. Core-only installations do not include this desktop setup flow.
+
+## Choose a desktop
+
+Start `aqueous-welcome`, or `aqueous-welcome-git` in an Aqueous-Git session.
+Packaged bindings also open Welcome with `Super+Shift+F1`.
+
+1. Select a shell and review the proposed changes. Nothing installs no shell.
+2. Complete the package installation and configuration steps. Welcome uses
+   Shelly and requests a password when package installation requires elevation.
+3. Select **Close Welcome and start desktop** to activate the chosen shell in
+   the current matching session. Nothing offers **Close Welcome and use no shell**.
+
+Closing the window normally leaves activation for the next login. Outside the
+matching Aqueous session, Welcome also offers next-login instructions instead of
+attempting live activation. If startup fails, it restores the previous active
+choice and managed shell, then reopens with an error.
+
+The saved selection lives in the instance's `session.toml`:
+
+```toml
+version = 1
+shell = "pearl" # pearl | dms | noctalia | none
+```
+
+The session's active choice routes launcher, screenshot, lock, and portal
+actions through `aqueous-shell-action`. Saving another choice alone does not
+change those actions underneath the current shell. Existing custom commands
+are retained; recognized packaged commands can be updated during setup.
+
+Nothing retains compositor controls, the packaged terminal shortcut, shell-free
+screenshots, and a GTK portal picker. It does not configure a locker.
+
+## Switch shells in a Git session
+
+Run inside the matching, non-nested Aqueous-Git desktop:
+
+```sh
+aqueousctl-git shell switch pearl
+aqueousctl-git shell switch dms
+aqueousctl-git shell switch noctalia --json
+```
+
+Each command switches the managed shell immediately and saves the choice for
+future logins. Open applications and all shells' personal settings remain.
+The command does not install packages or reset configuration.
+
+Install the matching `aqueous-welcome-git` worker and target
+`aqueous-shell-<shell>-git` preset first. Pearl uses `pearl-git`, DMS uses
+`dms-shell`, and Noctalia uses `noctalia`. Missing dependencies are reported
+before stopping the current shell. Stable builds do not expose this switch
+command; use Welcome for their setup and activation flow.
+
+## Stable and Git instance paths
+
+| Item                    | Stable                    | Git                           |
+| ----------------------- | ------------------------- | ----------------------------- |
+| Login entry             | Aqueous                   | Aqueous-Git                   |
+| Compositor              | `aqueous`                 | `aqueous-git`                 |
+| CLI                     | `aqueousctl`              | `aqueousctl-git`              |
+| Configuration helper    | `aqueous-config`          | `aqueous-config-git`          |
+| Configuration directory | `~/.config/aqueous`       | `~/.config/aqueous-git`       |
+| Managed shell unit      | `aqueous-<shell>.service` | `aqueous-git-<shell>.service` |
+
+The configuration directories use `$XDG_CONFIG_HOME` when set. Helper journals
+use `$XDG_STATE_HOME/<instance>/config-writer`, and IPC endpoints belong to the
+running compositor instance. Run the matching tools from that session's terminal
+so they inherit the correct display and socket.
+
+When deliberately targeting a Git compositor from another session, obtain its
+actual endpoint values from a child process and set `AQUEOUS_GIT_WAYLAND_DISPLAY`
+and `AQUEOUS_GIT_SOCKET`. Do not guess display numbers or reuse a stable socket.
+See the [Git core guide](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/git-packages.md).
+
+## Recover from a failed switch
+
+Update the Git core and desktop worker together if a switch reports an old
+worker or prints the session-runtime usage text. The core package alone does
+not update the separately packaged Welcome worker.
+
+If DMS reports two services using `org.freedesktop.Notifications`, update
+`aqueous-integration-dms-git`. Current Arch integration units avoid the older
+notification-bus declaration conflict. Inspect the managed unit and any manual
+shell service if an extra shell survives a switch:
+
+```sh
+systemctl --user status aqueous-git-dms.service dms.service --no-pager
+```
+
+Switching controls this instance's managed units. Independently launched
+shells remain outside that ownership. The
+[CLI reference](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/aqueousctl-command-reference.md#switch-desktop-shells-git-sessions-only)
+contains detailed service recovery instructions.

@@ -24,9 +24,14 @@ files are sidecars for keeping each policy area understandable.
   - layout.toml layouts, options, slots, named stacking snap layouts, and mappings
   - input.toml keyboard, focus, gestures, mouse, touchpad, and tablet policy
   - rules.toml ordered window/layer rules and Game Mode policy
-  - appearance.toml settings-plugin font and cursor preferences, not read by the compositor
+  - appearance.toml helper-managed font and cursor preferences, not read by the compositor
+  - session.toml desktop shell selection, not read as compositor policy
 
 </FileTree>
+
+The paths below describe stable Aqueous. Co-installable Git packages use
+`~/.config/aqueous-git/` and suffixed tools. See
+[instance paths](/aqueous/desktop-session/#stable-and-git-instance-paths).
 
 ## Parsing and reloads
 
@@ -43,7 +48,9 @@ The compositor fingerprints the resolved files once per second. Changed files
 are parsed into complete replacement snapshots and applied in one manage cycle,
 so a cycle never sees half of an update. This includes keybindings, layouts,
 rules, input, effects, and output policy. `reload_config` performs the same
-reload immediately; `reload_rules` refreshes only `rules.toml`.
+reload immediately; `reload_rules` refreshes only `rules.toml`. From a terminal,
+`aqueousctl session reload --json` requests the full reload. Startup-only
+render settings still require a session restart.
 
 ```toml
 [keybinds]
@@ -242,12 +249,12 @@ requirements, path handling, and feedback behavior.
 
 ## Edit with the settings application
 
-The DMS and Noctalia plugins provide typed controls for common settings and
-complete raw editors for all five compositor files plus `appearance.toml`.
-Draft changes can be validated before Apply;
-the helper preserves comments and unknown keys, detects external edits, creates
-backups for multi-file writes, and never restarts the compositor. See
-[Settings application](/aqueous/settings/).
+Pearl uses the canonical `aqueous-config` backend for compositor configuration.
+The helper validates candidates, preserves comments and unrelated keys, detects
+external edits, and reports save/reload outcomes. Protected display changes use
+a preview and confirmation before persistence. The old DMS/Noctalia settings
+plugin instructions no longer apply to current packages. See
+[Settings and configuration helper](/aqueous/settings/).
 
 <CardGrid>
   <LinkCard title="wm.toml reference" href="/aqueous/docs/toml/wm/" />

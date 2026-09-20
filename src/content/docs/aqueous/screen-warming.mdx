@@ -1,0 +1,65 @@
+---
+title: Screen Warming
+description: Use experimental SDR screen warming with Pearl and understand output eligibility and status.
+sidebar:
+  label: Screen Warming
+  order: 7.5
+---
+
+Aqueous exposes experimental screen warming to compatible clients such as Pearl.
+It adjusts eligible SDR outputs through the Vulkan renderer. Normal builds
+include the protocol; no warming-specific build flag is required.
+
+## Requirements
+
+- A live SDR output using Vulkan with output color-transform support.
+- A neutral supported color baseline; arbitrary external calibration is not
+  adopted automatically.
+- A compatible client using `aqueous-output-warming-v1`, such as Pearl.
+
+HDR outputs, mirror sources/destinations, and unsupported renderers are
+ineligible. Physical SDR outputs can be eligible, but protocol availability
+does not establish measured display calibration or physical restoration accuracy.
+
+## Use warming
+
+Configure the schedule or temporary temperature override in Pearl. The shell
+owns the desired schedule; Aqueous reports whether each output can acquire and
+commit a warming adjustment. Native requests accept **2500–6500 K**, with
+**6500 K neutral**. These temperatures are adjustment parameters, not measured
+white points.
+
+There is no `outputs.toml` temperature setting or `aqueousctl` warming command.
+Use a compatible client and check its per-output result. A saved schedule alone
+does not mean the display has changed.
+
+| Status      | Meaning                                                      |
+| ----------- | ------------------------------------------------------------ |
+| Pending     | An adjustment is waiting to commit.                          |
+| Committed   | The backend committed the requested adjustment.              |
+| Restoring   | The compositor is restoring its current authorized baseline. |
+| Unavailable | The output or current color path is ineligible.              |
+| Busy        | Another client owns the color adjustment.                    |
+| Failed      | The requested operation did not complete successfully.       |
+
+Different outputs can have different results; a partially warmed desktop is not
+reported as all active. Version 1 acknowledges backend commits, not physical
+presentation or measured color accuracy.
+
+## Ownership and restoration
+
+Native warming and legacy gamma control share exclusive ownership. A competing
+client cannot displace an existing owner. Pearl uses the native protocol and
+does not fall back to legacy gamma when it is unavailable.
+
+Output mode/color changes, HDR activation, mirroring, session changes, renderer
+recovery, or output removal can revoke warming. Releasing a lease or disconnecting
+the client starts baseline restoration. Restoration can remain blocked after a
+backend failure; the reported state keeps that distinction.
+
+Composed output captures include warming. Isolated window captures are
+independent of the output adjustment. See
+[capture color behavior](/aqueous/shell-integration/#isolated-window-capture).
+
+The [source contract](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/screen-warming.md)
+documents protocol ownership, eligibility, commit results, and validation limits.

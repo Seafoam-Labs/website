@@ -1,232 +1,120 @@
 ---
-title: Settings Application
-description: Configure Aqueous through its Dank Material Shell or Noctalia settings plugin.
+title: Settings and Configuration Helper
+description: Configure Aqueous with Pearl, TOML, and the canonical aqueous-config backend.
 sidebar:
-  label: Settings Application
+  label: Settings
   order: 4
 ---
 
-import { Aside, Steps } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
 
-Aqueous Settings is available for Dank Material Shell and Noctalia v5. Both
-frontends use the shared `aqueous-config` helper and edit the same TOML files
-as the compositor. Source Arch packages install the DMS frontend.
+**Pearl supplies the settings UI for current Aqueous desktops.** Aqueous owns
+`aqueous-config`, the configuration backend used by Pearl and other clients.
+You can also edit the [TOML files](/aqueous/configuration/) directly.
 
-## Install or enable the plugin
+## Choose a settings frontend
 
-### Dank Material Shell
+Use [Welcome](/aqueous/desktop-session/) to select Pearl for a packaged desktop.
+Stable installations use `pearl`; the Git desktop uses `pearl-git` and its
+matching Aqueous helper. Pearl is distributed separately from the compositor.
+A core-only installation includes the helper without a settings window or shell.
 
-Enable **Aqueous Settings** in **DMS Settings → Plugins**, then add its widget
-to DankBar. Left-click opens the attached popout; right-click opens a separate
-settings window. Both share one draft model across all bar instances.
+The former `aqueous-settings` application and Aqueous Settings plugin workflow
+have been retired. Remove custom launch bindings that target the old executable.
+Package upgrades remove package-owned GUI files while retaining personal
+configuration, preferences, drafts, caches, and backups. The optional DMS
+appearance bridge is a backend integration, not a replacement settings UI.
 
-The enabled plugin can also open without a bar widget:
+## Configuration areas
+
+The compositor's configuration remains available regardless of shell choice:
+
+| Area                                                      | Guide                                      |
+| --------------------------------------------------------- | ------------------------------------------ |
+| Layouts, gaps, borders, stacking, and snap zones          | [Layouts](/aqueous/layouts/)               |
+| Window placement, scrolling widths, tags, and popup rules | [Window rules](/aqueous/window-rules/)     |
+| Keyboard, focus, mouse, touchpad, and gestures            | [Input](/aqueous/input/)                   |
+| Tablet mapping and discovery                              | [Tablets](/aqueous/tablets/)               |
+| Keybindings and application commands                      | [Keybindings](/aqueous/keybindings/)       |
+| Blur, opacity, scaling, and color conversion              | [Visual effects](/aqueous/visual-effects/) |
+| Bell feedback and sounds                                  | [System bell](/aqueous/system-bell/)       |
+
+Available controls depend on the installed frontend and negotiated helper
+capabilities. Use the relevant TOML guide for options a frontend does not expose.
+
+## Appearance
+
+`appearance.toml` stores helper-managed font and cursor preferences; the
+compositor does not parse it. The helper can synchronize supported preferences
+with GSettings, GTK, Qt configuration, and the selected shell adapter. Adapter
+results distinguish saved configuration from successful toolkit synchronization.
+
+`--shell none` selects neutral operation for Pearl. Legacy `--shell dms` and
+`--shell noctalia` adapters remain available to compatible clients. A missing
+optional toolkit does not invalidate the saved appearance configuration.
+
+For a live cursor change, use
+[`aqueousctl cursor`](/aqueous/command-line/#cursor-theme-and-size). Persistence
+and toolkit synchronization go through the configuration helper.
+
+## Displays
+
+Display settings cover modes, refresh rates, scale, signed logical positions,
+rotation, output profiles, HDR, SDR white, Auto HDR, and adaptive-sync policy.
+See [Outputs and HDR](/aqueous/outputs/) for TOML setup and runtime checks.
+
+Compatible frontends use the native display preview contract to try a change
+before saving it. Confirm a working preview with **Keep**, or revert it. The
+15-second confirmation interval starts only after the participating enabled
+outputs have presented the new state. An unconfirmed preview does not save the
+candidate configuration.
+
+Production physical-display previews support SDR, HDR, VRR, HDR with VRR, and
+Auto HDR when hardware checks pass. Mirroring and custom modes remain blocked
+in the protected physical-preview path, even though the compositor has a
+separate [SDR mirroring feature](/aqueous/screen-mirroring/). Nested backends do
+not support these previews. See [Display previews](/aqueous/outputs/#display-previews).
+
+## Inspect the configuration backend
+
+These commands are read-only:
 
 ```sh
-dms ipc call aqueousSettings open
-dms ipc call aqueousSettings toggle
-dms ipc call aqueousSettings close
+aqueous-config version --json
+aqueous-config snapshot --shell none
+aqueous-config raw --shell none --file outputs
 ```
 
-The plugin targets DMS 1.7 or newer and requires `aqueous-config` 0.7.0 or
-newer, plus `aqueousctl`. Helper 0.7.1 adds capability discovery. Its executable
-path can be configured in the plugin settings.
+In a Git installation, use `aqueous-config-git`. The helper resolves the
+instance's actual configuration sources, including inherited system files.
+Clients must negotiate capabilities before using newer collection, display,
+preview, or operation-recovery interfaces.
 
-For a development checkout, run `./dms-plugin/packaging/dev-install.sh` from the
-Aqueous repository. Reload changed plugin code through DMS's plugin UI or
-`dms ipc call plugin-scan reload aqueousSettings`.
+## Validation and saving
 
-Drafts survive closing the window or popout. Apply or discard them before
-disabling or reloading the plugin or restarting DMS, which clears in-memory drafts.
+The helper validates candidate edits, preserves comments and unrelated TOML,
+checks for concurrent file changes, and owns persistence and reload requests.
+Structured editing supports ordered rules, custom bindings, snap layouts, output
+declarations, and profile members. Removing a local override restores the
+normal inheritance rules; an explicit `false` or zero remains a value.
 
-### Noctalia
+Protected changes bind the reviewed candidate to the source snapshot. Display
+changes additionally require the applicable compositor preview authorization.
+Conflicts require a fresh snapshot and review. A saved file, a successful reload,
+and a toolkit synchronization result are separate outcomes.
 
-Noctalia package variants install the v5 plugin and the same helper. Fresh
-Noctalia profiles are seeded with the source, enabled plugin, and
-bar widget. Existing profiles receive a one-time registration attempt without
-overwriting their bars or re-enabling a plugin the user later disables.
-
-To register a standalone installation manually:
-
-```sh
-noctalia msg plugins source add aqueous path /usr/share/aqueous/noctalia-plugins
-noctalia msg plugins enable aqueous/settings
-```
-
-Then add **Aqueous Settings** from Noctalia's bar widget picker. You can also
-open the panel directly:
-
-```sh
-noctalia msg panel-toggle aqueous/settings:panel
-```
-
-## Available pages
-
-### Overview
-
-The overview shows the resolved configuration paths, whether each file is
-writable, helper/schema information, and a live workspace layout selector.
-The selector queries `aqueousctl` for a chosen output and can change that
-output's active workspace layout immediately without editing TOML.
-
-### Appearance
-
-Typed controls cover:
-
-- Global blur quality, noise, contrast, brightness, and vibrancy.
-- Stable or focus-sensitive opacity.
-- Workspace transition enablement and rate.
-- Static struts and maximize/fullscreen compatibility behavior.
-- Installed font families and faces, point size, and adapter status/retry.
-- Opt-in cursor theme and size management, including live application.
-
-The standalone `aqueous-settings` application also provides **Appearance →
-System bell** controls for visual feedback, a custom sound-file path, and bell
-volume. Changes are saved in `[bell]` in `wm.toml` and take effect on reload.
-See [System bell](/aqueous/system-bell/) for the four modes and sound setup.
-
-Typography is stored in `~/.config/aqueous/appearance.toml` and synchronized
-to the selected shell, GSettings, GTK 3, GTK 4, and qt5ct/qt6ct when those
-adapters are installed or configured. Each target reports available, active,
-and synced state. DMS applies family, weight, and scale, with partial coverage
-for exact face, slant, width, and separately scaled bars. Noctalia applies the
-family and reports partial coverage for an exact face.
-
-Cursor management applies theme and size through `aqueousctl`, updates GTK and
-the systemd/D-Bus activation environment, and writes
-`~/.config/uwsm/env-aqueous.d/90-aqueous-cursor` for future sessions. Existing
-applications may keep their own cursor surfaces until restarted. DMS-mode
-helper operations do not write or reload Noctalia settings.
-
-### Layouts
-
-The layouts page exposes all ten layouts, global gaps/borders/master settings,
-four layout slots, scrolling and recursive-layout options, and the complete
-stacking policy. Legacy `float`, `floating`, and `stack` values are presented as
-one canonical **Stacking** choice.
-
-Stacking controls include placement policy, cascade offset, fine/coarse move
-steps, resize step, snap gap and threshold, edge resistance, and top-edge
-maximize. The named snap-layout editor can create as many as eight layouts with
-sixteen zones apiece, choose the default, edit stable layout and zone IDs,
-names, padding, and normalized geometry, and apply half/third/quarter presets.
-It can migrate legacy zones `a` through `d` into a named layout and create
-custom bindings for a layout, zone, or layout cycle. The legacy A-D coordinate
-editor remains available for existing configurations.
-
-Named zones are strictly stacking-only. Dragging a stacking-owned window to an
-output edge shows the active layout's zones; releasing over the selected zone
-commits it. Keyboard zone actions follow the same ownership check, so they do
-nothing in tiled, scrolling, Game Mode, or composable layouts—even when the
-focused window is a persistent floating overlay.
-
-If several legacy stacking option sections coexist, the panel warns rather
-than silently choosing one. An explicit normalization operation merges known
-and unknown entries into `[layout.options.stacking]` and removes the aliases.
-Ordinary typed edits continue to update the effective existing alias in place.
-
-### Input
-
-Typed controls cover focus-follows-pointer, mouse-follows-focus,
-focus-new-windows, freeform raising and delay, XKB layout/variant/options,
-keyboard repeat, legacy global pointer speed, and mouse/touchpad libinput settings.
-
-### Displays
-
-The display canvas combines configured `[[output]]` entries with connected
-outputs. Monitor cards use a common scale, reflect their relative
-logical resolution, and remain visible when configured but offline. Drag a
-card before, after, above, or below another display; select normal or flipped
-rotation; or enter exact logical X/Y coordinates.
-
-Dragging creates a draft only. **Apply** writes position/transform overrides to
-the matching `outputs.toml` entry. Other display settings continue to inherit
-from `wm.toml` until explicitly changed. General display-policy fields include
-startup/reload application and fallback profile.
-
-Resolution and refresh selectors use advertised modes, including fractional
-refresh rates. Automatic refresh writes `WIDTHxHEIGHT`; an explicit rate writes
-`WIDTHxHEIGHT@Hz`. Offline outputs accept custom modes, and mode drafts survive
-movement and rotation. The canvas reflects resolution at the effective scale.
-
-Choose **Extended desktop** or **Mirror of …** for a destination display.
-Mirrors remain selectable but are omitted from the arrangement canvas. Select
-compatible SDR, orientation, and refresh settings before applying mirroring;
-see [Screen mirroring](/aqueous/screen-mirroring/).
-
-### Rules
-
-The ordered window-rule editor can add, duplicate, move, update, and delete
-rules. It covers identity and content-type matchers, layout/output/workspace,
-floating/state policy, stack layer, focus/task-list hints, placement and size,
-opacity/blur, client-buffer scaling, HDR expansion, and overlay preference.
-The scrolling full-width preset is also available.
-
-Choose **Unset** for a rule's layout to remove the `layout` field and preserve
-the workspace layout. Select **game-mode** explicitly when the rule should
-establish a Game Mode anchor. This applies to both settings editors.
-
-When content type is the only matcher, the editor disables placement fields to
-make the compositor's safety rule obvious. Aqueous treats every rule containing
-`content_type` as visual-only, so placement values combined with it are ignored.
-Rules require at least one matcher, and typed values are validated before
-writing. Game Mode companion and fallback layout settings are available on the
-same page.
-
-### Keybinds
-
-Every built-in action is listed, including currently unbound stacking actions.
-A field accepts one chord or comma-separated chords. Custom entries expose
-both chord and verb and can be created or deleted. Snap-layout shortcuts produce
-the correct `builtin:snap_zone:<layout>/<zone>`,
-`builtin:set_snap_layout:<layout>`, or `builtin:cycle_snap_layout` form and
-fall back to the legacy `builtin:snap_zone:a` preset when no named layout
-exists. The page also edits launcher, terminal, screenshot, and lock commands.
-
-### Advanced
-
-The raw editors expose the complete effective `wm.toml`, `outputs.toml`,
-`layout.toml`, `input.toml`, `rules.toml`, and plugin-owned `appearance.toml`.
-Use this page for composable regions, output profiles, gestures, managed
-commands, workspace mappings, layer rules, or any newer option not yet given a
-typed control.
-
-Search filters schema-backed settings on the selected page in DMS. Reset
-arrows stage defaults, and numeric controls report input errors. Resolve raw
-and typed drafts affecting the same file before Validate or Apply. Apply or
-discard a rule reorder before making other rule edits.
-
-## Safe editing model
-
-<Steps>
-
-1. The helper resolves the same environment, XDG, and sidecar paths as Aqueous.
-   A system file under `/etc/xdg` is shown as inherited; Apply creates a user
-   override instead of modifying it.
-
-2. Edits remain drafts until **Apply**. **Validate** performs the same schema
-   and structural checks without writing.
-
-3. Each request carries the generation that was loaded. If another program
-   changes a file, stale Apply is rejected and your draft remains available.
-
-4. Existing comments, ordering, whitespace, and unknown keys survive typed
-   changes. Raw files receive structural validation and the compositor's 1 MiB
-   size limit.
-
-5. Multi-file changes are copied to the plugin's persistent backup directory,
-   then written with atomic replacement. Aqueous's normal hot reload applies
-   the result; the plugin never restarts the compositor.
-
-</Steps>
-
-DMS backups live under
-`${XDG_STATE_HOME:-$HOME/.local/state}/aqueous/dms-plugin/backups`.
-If Apply times out or returns an invalid response, reload and inspect the saved
-state before retrying; the write may already have completed.
+For integration clients, `apply --result v1 --operation-id ID` enables recoverable
+results. After a lost reply, query `operation-status --operation-id ID` instead
+of blindly repeating the mutation or reload. The helper's state journal lives
+under `$XDG_STATE_HOME/<instance>/config-writer`, defaulting to
+`~/.local/state/<instance>/config-writer`.
 
 <Aside type="note">
-  Toolkit synchronization is observable per target rather than presented as a
-  false cross-process transaction. `appearance.toml` remains the source of truth
-  if an optional toolkit adapter is unavailable.
+  Configuration reload does not restart the compositor. Startup-only settings,
+  including hardware color-pipeline selection, require a session restart.
 </Aside>
+
+The source contracts document exact requests and capability names:
+[helper interfaces](https://github.com/Seafoam-Labs/Aqueous/blob/master/settingsApplication/docs/HELPER.md),
+[protected collections](https://github.com/Seafoam-Labs/Aqueous/blob/master/settingsApplication/docs/PROTECTED_COLLECTIONS.md),
+and [display declarations](https://github.com/Seafoam-Labs/Aqueous/blob/master/settingsApplication/docs/DISPLAY_MUTATIONS.md).

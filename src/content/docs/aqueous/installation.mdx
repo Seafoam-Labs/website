@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install Aqueous on Arch, Gentoo, or NixOS, or build it from source.
+description: Install Aqueous on Arch, Fedora, Gentoo, or NixOS, with separate core and desktop packages.
 sidebar:
   label: Installation
   order: 1
@@ -15,10 +15,14 @@ import {
   Code,
 } from "@astrojs/starlight/components";
 
-Aqueous packages include the compositor, `aqueousctl`, session integration,
-default configuration, a shell settings plugin and helper, protocol metadata,
-and Aqueous's pinned wlroots library. Shell integration depends on the package
-variant.
+Aqueous separates the compositor and configuration tools from the desktop
+session and shell. The core contains `aqueous`, `aqueousctl`, `aqueous-config`,
+and the matching private wlroots library. Desktop packages add session startup,
+Welcome, portals, and optional shell integrations.
+
+These instructions describe the current source packaging. Repository releases
+can lag behind; package names in a source recipe do not establish that a new
+package has been published to the AUR or a binary repository.
 
 ## Arch Linux
 
@@ -52,48 +56,101 @@ To build the Arch package from a checkout:
 ```sh
 git clone https://github.com/Seafoam-Labs/Aqueous.git
 cd Aqueous
-makepkg -si
+makepkg -s
+```
+
+After a successful build, install the desktop components together, leaving the
+optional shell presets for Welcome to select. In the same Bash shell:
+
+```bash
+mapfile -t packages < <(makepkg --packagelist | awk '!/\/aqueous-shell-/')
+sudo pacman -U "${packages[@]}"
 ```
 
 ### Shell and package variants
 
-| Source or package variant                                                          | Shell integration                                                                  |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `PKGBUILD`, `PKGBUILD-git`, `GitPKGBUILD/PKGBUILD`, Intel variants, `PKGBUILD-DMS` | Seafoam Labs' `dms-aqueous`, Aqueous Settings, and the DMS screen-sharing chooser. |
-| `PKGBUILD-bin`                                                                     | Noctalia and its settings plugin; no welcome application.                          |
-| `gitNoctalia/PKGBUILD`                                                             | Alternative `aqueous-git` build preserving Noctalia and Welcome.                   |
-| NixOS module and Gentoo installer                                                  | Noctalia integration.                                                              |
+| Package or recipe                  | Purpose                                                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `aqueous-core`                     | Stable compositor, CLI, configuration helper, and private wlroots; no desktop session or shell.    |
+| `aqueous` from the root `PKGBUILD` | Complete stable desktop composed from core, session, Welcome, portal, and shell integrations.      |
+| `PKGBUILD-bin`                     | Matching release component archives; use a generated recipe with release checksums.                |
+| `aqueous-core-git`                 | Development core alongside stable Aqueous, with suffixed commands and private configuration.       |
+| `aqueous-desktop-git`              | Optional Git desktop, login entry, Welcome, portal, and integrations around the matching Git core. |
 
-The DMS integration targets DMS 1.7 or newer and uses the
-[Seafoam Labs fork](https://github.com/Seafoam-Labs/DankMaterialShell).
-The release `PKGBUILD` builds its version tag; Git variants track repository
-development. Features documented from the current source may arrive in release
-packages later.
+Shell integration packages contain conditional services. The explicit
+`aqueous-shell-pearl`, `aqueous-shell-dms`, and `aqueous-shell-noctalia` presets
+also install their shell; Git desktops use the corresponding `-git` presets.
+Welcome offers Pearl, DMS, Noctalia, or Nothing. Installing an integration alone
+does not select or start a shell.
 
-### Switching an existing profile to DMS
+The old combined Git, Intel, DMS, and Noctalia package recipes have been retired.
+Existing legacy packages and personal configurations are not automatically
+renamed or migrated. Current x86_64 package builds target **x86-64-v3** on Intel
+and AMD; older CPUs need a custom lower-target build. Aarch64 uses its baseline.
 
-Existing user configuration is preserved. Copy the launcher and screenshot
-commands from `/usr/share/aqueous/wm.toml` into your own `wm.toml`:
+The separate `packaging/arch/aqueous/PKGBUILD` is compositor-only; unlike the
+root recipe, it does not install the full desktop.
 
-```toml
-[actions]
-toggle_start_menu = "dms ipc call spotlight toggle"
-screenshot = "dms screenshot region"
+### Build a co-installable Git desktop
 
-[keybinds.custom]
-"Super+Shift+S" = "spawn:dms screenshot region"
+From a checkout, build both recipes and install the core and desktop components
+together. In Bash:
+
+```bash
+repo=$PWD
+core="$repo/packaging/arch/aqueous-core-git"
+desktop="$repo/packaging/arch/aqueous-desktop-git"
+
+(cd "$core" && makepkg -s) && (cd "$desktop" && makepkg -s)
 ```
 
-Disable manually enabled shell services or shell startup commands before using
-packaged startup. `GitPKGBUILD/PKGBUILD` starts `dms.service` through
-`graphical-session.target`; the other DMS source variants use
-`aqueous-dms.service`. When moving to the former, remove manual enablement of
-the old `aqueous-dms.service` to avoid starting DMS twice.
+Continue only if both builds succeeded:
 
-DMS packages omit the Noctalia Welcome app. Enable Aqueous Settings in
-**DMS Settings → Plugins** and use it for compositor configuration. Review any
-portal `.pacnew` files or user overrides after changing shell variants, then
-log out and back in. See [screen sharing](/aqueous/shell-integration/#screen-sharing-and-portals).
+```bash
+mapfile -t core_packages < <(cd "$core" && makepkg --packagelist)
+mapfile -t desktop_packages < <(
+    cd "$desktop" && makepkg --packagelist | awk '!/\/aqueous-shell-/'
+)
+sudo pacman -U "${core_packages[@]}" "${desktop_packages[@]}"
+```
+
+The desktop recipe also builds optional shell presets; the filter leaves those
+for an explicit choice in Welcome. Use a normal Arch build environment and
+resolve the matching core dependency before building the desktop. These VCS
+recipes fetch upstream Git, rather than building unpublished local changes.
+See the [Git packaging guide](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/git-desktop-packages.md)
+for dependency and isolated-build details.
+
+Select **Aqueous-Git** at login. It uses `aqueous-git`, `aqueousctl-git`, and
+`aqueous-config-git`, with configuration under `~/.config/aqueous-git/`.
+Stable Aqueous continues to use `~/.config/aqueous/`. See
+[Desktop selection and Git sessions](/aqueous/desktop-session/).
+
+## Fedora
+
+On a mutable Fedora installation, run the installer as your normal user from
+the repository checkout:
+
+```sh
+bash scripts/fedora-install.sh
+```
+
+It fetches current upstream `master` into a separate build directory, installs
+build dependencies through DNF, and builds a local desktop RPM. It uses sudo
+for package transactions. Fedora must provide Zig 0.16 or newer and
+wayland-protocols 1.49 or newer.
+
+Useful options include `--build-only`, `--skip-deps`, and `--core-only`. Core-only
+mode produces an `aqueous-core` RPM without desktop session dependencies. The
+default desktop RPM retains the legacy `aqueous-git` name; it is distinct from
+the co-installable Arch Git packaging above. `--dms-git` explicitly enables the
+DMS development COPR and cannot be combined with `--core-only`.
+
+The installer does not support Atomic desktops such as Silverblue/Kinoite or
+bootc hosts. Existing user configuration is retained; edited system defaults
+may receive `.rpmnew` files. See the
+[Fedora source guide](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/fedora-install.md)
+for updating, removal, and package prerequisites.
 
 ## Gentoo
 
@@ -107,7 +164,9 @@ cd Aqueous
 sudo scripts/gentoo-install.sh all
 ```
 
-Use `deps`, `build`, or `install` instead of `all` to run one stage. Existing
+Use `deps`, `build`, or `install` instead of `all` to run one stage.
+For the shell-independent core, put `--core-only` before the stage, for example
+`sudo scripts/gentoo-install.sh --core-only all`. Existing
 files under `/etc` are preserved; changed packaged defaults are written beside
 them with an `.aqnew` suffix.
 
@@ -124,13 +183,20 @@ configuration repository, import both the module and overlay:
   programs.aqueous = {
     enable = true;
     package = pkgs.aqueous;
+    shell = "noctalia"; # noctalia | dms | pearl | none
   };
 }
 ```
 
-Set `programs.aqueous.noctalia.enable = false` to install the compositor
-session without enabling Noctalia. The Nix package intentionally excludes the
-Arch/Shelly-focused welcome application.
+Choose `programs.aqueous.shell` explicitly. DMS and Pearl also require
+`programs.aqueous.shellPackage`; Noctalia defaults to `pkgs.noctalia-shell`.
+Use `"none"` for a managed session without a shell. The old
+`noctalia.enable` setting is deprecated, and conflicting choices fail validation.
+An existing per-user `session.toml` takes precedence over the system default.
+
+`programs.aqueous.welcome.enable` optionally adds Welcome. Its package-install
+workflow requires Shelly to be available separately. Installing
+`pkgs.aqueousCore` alone installs the tools without enabling the session module.
 
 ## Build from source
 
@@ -183,15 +249,15 @@ Useful build switches are:
    `WAYLAND_DISPLAY` and optional XWayland environment, and starts the
    graphical-session services and portals.
 
-3. On a fresh packaged profile, the session seeds `wm.toml` and starts the
-   package's shell integration. The Noctalia Git variant also offers the welcome
-   application. Existing configuration and bar layouts are not overwritten.
+3. On a fresh component desktop, Welcome offers a shell choice. Select Pearl,
+   DMS, Noctalia, or Nothing, then complete setup. Existing selections and
+   personal configuration are retained.
 
 </Steps>
 
-The compositor works with compatible shells using standard layer-shell
-interfaces. Source Arch packages depend on `dms-aqueous`; choose the package
-variant appropriate to your shell.
+Use [Desktop selection](/aqueous/desktop-session/) for Welcome activation,
+Git-session shell switching, and recovery. Settings are supplied by Pearl and
+the [canonical configuration helper](/aqueous/settings/).
 
 To run a nested development session inside another Wayland compositor:
 
@@ -199,10 +265,12 @@ To run a nested development session inside another Wayland compositor:
 ./launch_aqueous.sh
 ```
 
-The launcher starts Aqueous and DMS (`dms run`) in the nested display. Set
+The launcher starts Aqueous and Pearl in the nested display, using `pearl` or
+`pearl-git` when available. Set
 `AQUEOUS_COMPOSITOR_BIN=/path/to/aqueous` to select a build and
-`AQUEOUS_DMS_CMD` to override the shell command and arguments. Default logs are
-`/tmp/aqueous.log` and `/tmp/dms.log`.
+`AQUEOUS_PEARL_CMD` to override the shell command. Nested sessions use Alt for
+the compositor modifier so they do not compete with the host's Super bindings.
+Default logs are `/tmp/aqueous.log` and `/tmp/pearl.log`.
 
 ## Runtime switches
 

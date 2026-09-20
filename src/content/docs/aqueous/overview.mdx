@@ -50,7 +50,7 @@ Aqueous-owned and integrated directly into the compositor.
 - Integrate shells through typed window, workspace, keyboard, overview, and
   session commands, with persistent socket IPC for state subscriptions.
 
-These guides track the source tree as of **September 8, 2026**. Distribution
+These guides track the source tree as of **September 20, 2026** (`1c3583b`). Distribution
 packages may lag behind; use `aqueous -version` and
 `aqueousctl shell capabilities --json` to check your installed build.
 
@@ -65,7 +65,8 @@ windows; `Super`+right-drag resizes tiles or scrolling members and manipulates
 freeform windows. Client-side title-bar move/resize, maximize, minimize, and
 fullscreen requests are integrated for both XDG and XWayland windows when the
 request is valid. Floating windows can cross differently scaled or transformed
-outputs while remaining reachable.
+outputs while remaining reachable. Tiled windows can also be dragged between
+outputs and join the destination's active workspace and layout.
 
 The `Super+W` overview displays frozen thumbnails of every focusable window on
 the active workspace, including scrolling windows outside the viewport. It is
@@ -80,7 +81,9 @@ Animations and Vulkan effects can also be excluded at build time.
 Capable DRM outputs can use a 10-bit BT.2020/PQ HDR10 profile with selectable
 peak mastering level and SDR white level. Aqueous exposes Windows scRGB and
 BT.2100 color descriptions for Wine/Proton and can optionally expand eligible
-SDR highlights toward the HDR peak. Rule-selected direct overlay promotion is
+SDR highlights toward the HDR peak. Eligible SDR outputs also support
+experimental [screen warming](/aqueous/screen-warming/). Fullscreen-only VRR
+policy and protected physical-display previews are available on supported hardware. Rule-selected direct overlay promotion is
 available as an opt-in, with automatic fallback to composition.
 
 Screen capture, task switchers, panels, launchers, portals, session lockers,
@@ -106,23 +109,26 @@ The packaged desktop also includes:
 - `aqueousctl`, for inspecting windows, outputs, scene nodes, overlay-plane
   decisions, cursor settings, and live shell state, and controlling windows,
   workspaces, keyboard layouts, and overview.
-- A Dank Material Shell settings plugin with typed controls, a draggable monitor canvas,
-  complete stacking and rule editors, named snap-layout and binding controls,
-  raw advanced file editing, validation, stale-write protection, backups, and
-  toolkit typography synchronization.
+- The `aqueous-config` backend used by Pearl, with validated edits, protected
+  collection transactions, display previews, conflict detection, recovery, and
+  toolkit preference synchronization.
+- A native Welcome application to choose Pearl, DMS, Noctalia, or no shell.
+  Stable and Git desktops can use separate configuration and command paths.
 - A shell-native screen-sharing chooser backed by Aqueous's private desktop
   portal backend.
 
 <Aside type="note">
-  Source Arch packages use Seafoam Labs' Dank Material Shell fork
-  (`dms-aqueous`). The binary package, Noctalia Git variant, NixOS module, and
-  Gentoo installer retain Noctalia integration. The Noctalia Git variant also
-  includes the welcome application. Aqueous supports other compatible
-  layer-shell clients; see [Installation](/aqueous/installation/).
+  Core packages install the compositor and configuration tools without a shell.
+  Component desktops add Welcome, portals, and shell integrations. Pearl
+  supplies the current settings UI; the old Aqueous settings GUI is retired. See
+  [Installation](/aqueous/installation/) and [Desktop
+  selection](/aqueous/desktop-session/).
 </Aside>
 
 <CardGrid>
   <LinkCard title="Installation" href="/aqueous/installation/" />
+  <LinkCard title="Desktop selection" href="/aqueous/desktop-session/" />
+  <LinkCard title="Screen warming" href="/aqueous/screen-warming/" />
   <LinkCard title="Configuration" href="/aqueous/configuration/" />
   <LinkCard title="Layouts" href="/aqueous/layouts/" />
   <LinkCard title="Outputs and HDR" href="/aqueous/outputs/" />

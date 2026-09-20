@@ -19,11 +19,19 @@ aqueousctl windows --json
 
 The table and JSON forms expose each managed window's stable identifier,
 backend, native `app_id` or XWayland class, title, output, workspace, geometry,
-active layout, committed content type, state flags, and matched-rule metadata.
+active layout, committed content type, client-provided tag/description, state
+flags, and matched-rule metadata.
 JSON also includes the xdg-decoration capability, requested mode, effective
 mode, and whether a configure response is pending. State includes focused,
 fullscreen, maximized, minimized, floating, always-above/below, fixed-position,
 and switcher/taskbar suppression where applicable.
+
+On current compositors, `windows --json` also includes unmanaged XWayland
+surfaces such as notification bubbles, menus, and tooltips. These have
+`managed: false`, `scope: "override_redirect"`, EWMH window types, geometry,
+owner/output information, and supported rule effects. They have no workspace
+or layout state and cannot receive managed-window commands. Filter for
+`managed: true` when a consumer needs only ordinary windows.
 
 Use JSON when feeding a bar, script, diagnostic report, or test:
 
@@ -59,7 +67,9 @@ aqueousctl inspect --rule
 
 This emits ready-to-paste `[[window]]` entries for mapped windows. Native
 Wayland windows use `app_id`; XWayland windows use their `WM_CLASS` as `class`.
-The title is included as a commented optional matcher.
+The title is included as a commented optional matcher. Native windows with a
+nonempty purpose tag also receive a literal `tag` matcher. Unmanaged XWayland
+surfaces receive their own scoped rule form.
 
 ## Scene graph and layer namespaces
 
@@ -222,6 +232,33 @@ success, 2 for malformed arguments, and 1 for operation/transport failure.
 These commands use the versioned Wayland shell protocol. For persistent socket
 clients, state sequencing, and capability negotiation, see
 [Shell integration and IPC](/aqueous/shell-integration/).
+
+## Reload configuration
+
+```sh
+aqueousctl session reload --json
+```
+
+This requests the normal full reload, including configured reload commands.
+Startup-only settings still require restarting the compositor. Clients targeting
+older builds should check the `config_reload` capability first.
+
+## Switch desktop shells
+
+Git desktop sessions support live shell switching:
+
+```sh
+aqueousctl-git shell switch pearl
+aqueousctl-git shell switch dms
+aqueousctl-git shell switch noctalia --json
+```
+
+The target shell and its matching preset must already be installed. The command
+preserves applications and shell configuration, saves the next-login selection,
+and restores the previous managed shell if activation fails. It is unavailable
+in stable builds and mismatched/nested sessions. See
+[Desktop selection](/aqueous/desktop-session/#switch-shells-in-a-git-session)
+for prerequisites and recovery.
 
 ## Compatibility clients
 

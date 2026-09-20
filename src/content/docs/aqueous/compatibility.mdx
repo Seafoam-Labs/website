@@ -22,9 +22,13 @@ seat, output, and data-device interfaces together with:
   explicit content type.
 - Linux DMA-BUF and explicit DRM synchronization where the renderer/backend
   support them.
-- Presentation timing, tearing control, and FIFO v1 commit pacing. FIFO is
-  available in both Vulkan and diagnostic builds; physical DRM/VRR and
-  FIFO plane-promotion qualification remain outstanding.
+- Presentation timing, tearing control, FIFO v1 commit pacing, and
+  `commit-timing-v1` per-commit deadlines. Both renderer paths are implemented;
+  physical DRM/VRR, scanout, and plane-promotion timing qualification remains
+  outstanding.
+- XDG dialogs, toplevel dragging, toplevel icons, and client-provided toplevel
+  tags/descriptions. Dragging uses the integrated per-seat drag-and-drop path;
+  external-policy mode hides that global. Tags can be used in window rules.
 - Color representation and color-management-v1, including parametric image
   descriptions and the supported Windows HDR descriptions in the Vulkan
   effects build.
@@ -109,6 +113,8 @@ and XWayland drawing-application compatibility still require device testing.
 
 `keyboard-shortcuts-inhibit-v1` lets eligible focused clients inhibit normal
 compositor bindings. Built-in virtual-terminal switching remains reserved.
+`pointer-warp-v1` supports client cursor repositioning after checks on focus,
+client ownership, a recent pointer-enter serial, coordinates, grabs, and constraints.
 
 ## XWayland
 
@@ -131,19 +137,36 @@ clients and the Vulkan renderer on the same device in hybrid-GPU setups. The
 Vulkan effects build requires the renderer and the pinned wlroots render hook
 to expose the required integration.
 
+## DRM leasing
+
+`drm-lease-v1` is implemented for non-desktop DRM connectors, including the
+connector class used by VR headsets. Aqueous reserves these outside desktop
+output handling and revokes leases on lock/session changes. Availability depends
+on the backend and hardware; security-context clients are restricted.
+
+Protocol and headless tests pass, but physical DRM/VR qualification remains
+outstanding. Protocol support alone is not a claim that a headset has been tested.
+
+## Aqueous extension protocols
+
+- [Screen warming](/aqueous/screen-warming/) provides exclusive per-output
+  adjustments and commit/restoration status for eligible SDR Vulkan outputs.
+- [Input activity](/aqueous/shell-integration/#input-activity) supplies authorized
+  category-only keyboard/mouse press notifications to Pearl.
+- [Capture color metadata](/aqueous/shell-integration/#isolated-window-capture)
+  describes the destination encoding of supported isolated window captures.
+
 ## Known protocol gaps
 
-The current compositor does not expose DRM lease v1 or the legacy wlr
-input-inhibitor protocol. The practical effects
-are:
+`ext-transient-seat-v1` remains unavailable, so clients cannot create temporary
+independent seats through that protocol. The legacy wlr input-inhibitor
+protocol is also unavailable; use an ext-session-lock client for screen locking.
+Superseded generations of xdg-foreign, tablet, input-method, and text-input
+remain omitted in favor of their supported modern interfaces.
 
-- VR headsets that require DRM leasing are not yet supported.
-- Old lock tools that only understand wlr input inhibition should be replaced
-  with an ext-session-lock client.
-
-Staging XDG dialog/toplevel-drag protocols and superseded legacy generations
-of xdg-foreign, tablet, input-method, and text-input are also not exposed.
-Modern versions of those capabilities are supported where listed above.
+The [source protocol inventory](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/missing-protocols.md)
+tracks implementation and qualification limits. Registry availability can vary
+with build, renderer, backend, and client policy.
 
 <Aside type="note">
   General Plasma- and GNOME-private shell APIs are not implemented beyond the
