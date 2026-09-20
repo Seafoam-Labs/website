@@ -106,15 +106,25 @@ distinguish complete success, partial application, and per-spec rejection.
 
 ## HDR10 output
 
+Use `aqueousctl outputs` to find the connector for your HDR display, then edit
+its matching block in `~/.config/aqueous/outputs.toml`. Replace `DP-1` below
+with that connector. Set `apply_on_reload = true` in the file's `[display]`
+section to apply saved changes through configuration hot reload.
+
 ```toml
 [[output]]
 name = "DP-1"
 hdr = true
 hdr_level = "auto" # auto | 100 | 400 | 1000 cd/m²
 sdr_white_level = 200 # 80–1000 cd/m²
-auto_hdr = true
-auto_hdr_boost = 0.5 # 0.0–1.0
+auto_hdr = false # Optional SDR highlight expansion; see Auto HDR below.
 ```
+
+Alternatively, enable HDR for the display in the
+[Aqueous settings application](/aqueous/settings/) and select **Apply**.
+Run `aqueousctl outputs --json` afterward and check that the intended output
+reports `hdr: true`. `hdr_capable: true` reports support; it does not mean HDR
+is active. Enable the output before launching an HDR application.
 
 `hdr = true` requests 10-bit scanout, BT.2020 primaries, and the ST 2084 PQ
 transfer function with static HDR10 mastering metadata. Aqueous rejects it
@@ -133,7 +143,64 @@ color-management-v1 for Wine/Proton when the renderer supports the complete
 encodings. SDR outputs continue to report SDR luminance, preventing false HDR
 detection.
 
+## HDR in Steam games with Proton-CachyOS
+
+The display, Proton, and the game each need HDR enabled. After enabling
+[HDR10 output](#hdr10-output) in Aqueous:
+
+1. Open the game's **Properties → Compatibility** in Steam and select
+   Proton-CachyOS. These instructions apply to its native Wayland path,
+   including `Proton-cachyos-11.0-20260703 (Steam Linux Runtime)`.
+2. Under **General → Launch Options**, enter this as one line:
+
+   ```sh
+   PROTON_ENABLE_WAYLAND=1 DXVK_HDR=1 %command%
+   ```
+
+3. Fully exit and relaunch the game on the HDR-enabled display, then enable
+   HDR in the game's own display settings. The game must support native HDR.
+
+`PROTON_ENABLE_WAYLAND=1` selects Wine's native Wayland driver. `DXVK_HDR=1`
+exposes HDR to the game through DXVK's DXGI implementation, which is also
+used by Direct3D 12 games such as Stellar Blade.
+
+<Aside type="caution" title="The CachyOS HDR variable changed">
+  Current Proton-CachyOS releases have retired `PROTON_ENABLE_HDR` in favor of
+  `DXVK_HDR`. Replace `PROTON_ENABLE_HDR=1` in older launch options with
+  `DXVK_HDR=1`; the old variable has no effect in the build above. See the
+  [upstream retired-variable
+  list](https://github.com/CachyOS/proton-cachyos#retired-environment-variables).
+  Other Proton distributions may use different options; check their
+  documentation.
+</Aside>
+
+### If the HDR option is missing
+
+- Check `aqueousctl outputs --json` again for the display running the game.
+  A rejected HDR output change leaves the previous working state active.
+- Confirm Steam is using the selected Proton-CachyOS build and that both
+  variables precede `%command%` in the game's launch options.
+- Capture a fresh Proton log with:
+
+  ```sh
+  PROTON_ENABLE_WAYLAND=1 DXVK_HDR=1 PROTON_LOG=1 %command%
+  ```
+
+  The log defaults to `~/steam-<APPID>.log`; Stellar Blade uses
+  `~/steam-3489700.log`. Check the Proton version at the top and look for
+  the game process loading `winewayland.drv`. Remove `PROTON_LOG=1` after
+  troubleshooting.
+
+- An EDID or `Failed to parse display metadata + colorimetry info` error alone
+  does not prove HDR is unavailable. DXVK can use fallback display metadata;
+  check the output state and launch options before treating it as the cause.
+
 ## Auto HDR
+
+Auto HDR is optional SDR highlight expansion. Native HDR games do not require
+it, and enabling it does not unlock a game's HDR setting. To use it, set
+`auto_hdr = true` in the HDR output's block and optionally set
+`auto_hdr_boost = 0.5` (range `0.0`–`1.0`).
 
 Auto HDR expands eligible SDR highlights toward the output's configured peak.
 By default, fullscreen windows and windows declaring `content_type = "game"`
