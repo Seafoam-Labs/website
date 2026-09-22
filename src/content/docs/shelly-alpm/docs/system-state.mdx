@@ -48,6 +48,7 @@ the transactions:
       code={"# Synchronize databases and upgrade official packages\nshelly upgrade standard\n\n# Or with shortcode:\nshelly -Us"}
       lang="sh"
     />
+
   </TabItem>
   <TabItem label="AUR Upgrades Only">
     Check for newer AUR releases and rebuild VCS (`-git`) packages:
@@ -56,6 +57,7 @@ the transactions:
       code={"# Check AUR and rebuild VCS packages\nshelly upgrade aur\n\n# Or with shortcode:\nshelly -Ua"}
       lang="sh"
     />
+
   </TabItem>
   <TabItem label="Selective Backend Skips">
     Skip specific backends during a full system upgrade:
@@ -64,6 +66,7 @@ the transactions:
       code={"# Skip Flatpak and AppImage backends\nshelly upgrade all --no-flatpak --no-appimage\n\n# Skip checking VCS/development packages (-git):\nshelly upgrade all --no-devel"}
       lang="sh"
     />
+
   </TabItem>
 </Tabs>
 
@@ -106,7 +109,7 @@ Select Package
   10) linux-cachyos-7.2.3-1-x86_64_v4.pkg.tar.zst (Local)
   11) linux-cachyos-7.2.4-1-x86_64_v4.pkg.tar.zst (Local)
   12) linux-cachyos-7.2.4-2-x86_64_v3.pkg.tar.zst (Remote: archive.cachyos.org)
-Select [1-12] (12): 
+Select [1-12] (12):
 ```
 
 ### Automated Downgrade & Version Pinning
@@ -148,13 +151,17 @@ Packages added to `IgnorePkg` are skipped during `shelly upgrade` transactions.
   </TabItem>
   <TabItem label="Add to Ignore List">
     <Code
-      code={"shelly mark ignore --add linux linux-headers\n# Shortcode:\nshelly -Mga linux linux-headers"}
+      code={
+        "shelly mark ignore --add linux linux-headers\n# Shortcode:\nshelly -Mga linux linux-headers"
+      }
       lang="sh"
     />
   </TabItem>
   <TabItem label="Remove from Ignore List">
     <Code
-      code={"shelly mark ignore --remove linux linux-headers\n# Shortcode:\nshelly -Mgr linux linux-headers"}
+      code={
+        "shelly mark ignore --remove linux linux-headers\n# Shortcode:\nshelly -Mgr linux linux-headers"
+      }
       lang="sh"
     />
   </TabItem>
@@ -186,6 +193,7 @@ determines whether `shelly purify` considers the package an orphan when other so
       code={"shelly mark explicit git\n# Shortcode:\nshelly -Me git"}
       lang="sh"
     />
+
   </TabItem>
   <TabItem label="Mark as Dependency">
     Convert an explicitly installed package into a dependency (eligible for
@@ -195,6 +203,7 @@ determines whether `shelly purify` considers the package an orphan when other so
       code={"shelly mark dependency libpng\n# Shortcode:\nshelly -Md libpng"}
       lang="sh"
     />
+
   </TabItem>
 </Tabs>
 
@@ -270,21 +279,21 @@ Shelly reads the declarative manifest and coordinates the installation:
 
 Shelly shortcodes provide fast keyboard access for common administrative flows:
 
-| Action | Shortcode | Full Command Equivalent |
+| Action               | Shortcode            | Full Command Equivalent              |
 | :------------------- | :------------------- | :----------------------------------- |
-| **Upgrade All** | `shelly -U` | `shelly upgrade all` |
-| **Upgrade Standard** | `shelly -Us` | `shelly upgrade standard` |
-| **Upgrade AUR** | `shelly -Ua` | `shelly upgrade aur` |
-| **Upgrade Flatpaks** | `shelly -Uf` | `shelly upgrade flatpak` |
-| **Downgrade** | `shelly -D <pkg>` | `shelly downgrade <pkg>` |
-| **Downgrade & Pin** | `shelly -Di <pkg>` | `shelly downgrade <pkg> --ignore` |
-| **List Ignored** | `shelly -Mgl` | `shelly mark ignore --list` |
-| **Add Ignored** | `shelly -Mga <pkgs>` | `shelly mark ignore --add <pkgs>` |
-| **Remove Ignored** | `shelly -Mgr <pkgs>` | `shelly mark ignore --remove <pkgs>` |
-| **Mark Explicit** | `shelly -Me <pkg>` | `shelly mark explicit <pkg>` |
-| **Mark Dependency** | `shelly -Md <pkg>` | `shelly mark dependency <pkg>` |
-| **Export Backup** | `shelly -Be` | `shelly backup --export` |
-| **Import Backup** | `shelly -Bi` | `shelly backup --import` |
+| **Upgrade All**      | `shelly -U`          | `shelly upgrade all`                 |
+| **Upgrade Standard** | `shelly -Us`         | `shelly upgrade standard`            |
+| **Upgrade AUR**      | `shelly -Ua`         | `shelly upgrade aur`                 |
+| **Upgrade Flatpaks** | `shelly -Uf`         | `shelly upgrade flatpak`             |
+| **Downgrade**        | `shelly -D <pkg>`    | `shelly downgrade <pkg>`             |
+| **Downgrade & Pin**  | `shelly -Di <pkg>`   | `shelly downgrade <pkg> --ignore`    |
+| **List Ignored**     | `shelly -Mgl`        | `shelly mark ignore --list`          |
+| **Add Ignored**      | `shelly -Mga <pkgs>` | `shelly mark ignore --add <pkgs>`    |
+| **Remove Ignored**   | `shelly -Mgr <pkgs>` | `shelly mark ignore --remove <pkgs>` |
+| **Mark Explicit**    | `shelly -Me <pkg>`   | `shelly mark explicit <pkg>`         |
+| **Mark Dependency**  | `shelly -Md <pkg>`   | `shelly mark dependency <pkg>`       |
+| **Export Backup**    | `shelly -Be`         | `shelly backup --export`             |
+| **Import Backup**    | `shelly -Bi`         | `shelly backup --import`             |
 
 ---
 

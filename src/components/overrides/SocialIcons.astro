@@ -6,23 +6,21 @@ import BuyMeACoffeeIcon from "../../assets/icons/buymeacoffee.svg";
 const links = config.social || [];
 ---
 
-{
-  links.length > 0 && (
-    <>
-      {links.map(({ label, href, icon }) => (
-        <a {href} rel="me" class="sl-flex">
-          <span class="sr-only">{label}</span>
+{links.length > 0 && (
+  <>
+    {links.map(({ label, href, icon }) => (
+      <a {href} rel="me" class="sl-flex">
+        <span class="sr-only">{label}</span>
 
-          {label === "Buy Me a Coffee" ? (
-            <BuyMeACoffeeIcon class="size-5 fill-current" />
-          ) : (
-            <Icon class="size-5" name={icon} />
-          )}
-        </a>
-      ))}
-    </>
-  )
-}
+        {label === "Buy Me a Coffee" ? (
+          <BuyMeACoffeeIcon class="size-5 fill-current" />
+        ) : (
+          <Icon class="size-5" name={icon} />
+        )}
+      </a>
+    ))}
+  </>
+)}
 
 <style>
   @layer starlight.core {

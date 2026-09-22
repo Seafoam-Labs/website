@@ -42,16 +42,14 @@ const pages = [
   <div class="sl-flex print:hidden">
     <div class="flex items-center gap-6 sm:gap-8">
       <nav class="inline-flex gap-7 max-[28rem]:hidden">
-        {
-          pages.map((page) => (
-            <a
-              class="text-base font-semibold text-(--sl-color-text) no-underline hover:text-(--sl-color-text-accent)"
-              href={page.href}
-            >
-              {page.title}
-            </a>
-          ))
-        }
+        {pages.map((page) => (
+          <a
+            class="text-base font-semibold text-(--sl-color-text) no-underline hover:text-(--sl-color-text-accent)"
+            href={page.href}
+          >
+            {page.title}
+          </a>
+        ))}
       </nav>
       {shouldRenderSearch && <Search />}
     </div>
@@ -118,7 +116,7 @@ const pages = [
         );
         display: grid;
         grid-template-columns:
-        /* 1 (site title): runs up until the main content column’s left edge or the width of the title, whichever is the largest  */
+              /* 1 (site title): runs up until the main content column’s left edge or the width of the title, whichever is the largest  */
           minmax(
             calc(
               var(--__sidebar-width) +

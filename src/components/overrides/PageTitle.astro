@@ -14,25 +14,23 @@ const isBlogPost = Astro.url.pathname
   .startsWith("blog/");
 ---
 
-{
-  isBlogPost ? (
-    <Fragment>
-      <a
-        href="/blog"
-        class="text-(--sl-color-text-accent) no-underline hover:underline"
-      >
-        Blog
-      </a>
-      <h1
-        class="mt-1 text-(length:--sl-text-h1) leading-(--sl-line-height-headings) font-medium tracking-[-1px] text-(--sl-color-white)"
-        id="_top"
-      >
-        {title}
-      </h1>
-    </Fragment>
-  ) : (
-    <Default>
-      <slot />
-    </Default>
-  )
-}
+{isBlogPost ? (
+  <Fragment>
+    <a
+      href="/blog"
+      class="text-(--sl-color-text-accent) no-underline hover:underline"
+    >
+      Blog
+    </a>
+    <h1
+      class="mt-1 text-(length:--sl-text-h1) leading-(--sl-line-height-headings) font-medium tracking-[-1px] text-(--sl-color-white)"
+      id="_top"
+    >
+      {title}
+    </h1>
+  </Fragment>
+) : (
+  <Default>
+    <slot />
+  </Default>
+)}

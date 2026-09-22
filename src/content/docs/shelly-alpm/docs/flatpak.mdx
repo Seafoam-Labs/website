@@ -56,22 +56,26 @@ shelly install flatpak com.spotify.Client --user
     `flathub-beta`), specify the remote explicitly:
 
     <Code code="shelly install flatpak org.blender.Blender --remote flathub-beta" lang="sh" />
+
   </TabItem>
   <TabItem label="From a .flatpakref File">
     Install directly from a downloaded `.flatpakref` file:
 
     <Code code="shelly install flatpak ~/Downloads/app.flatpakref --ref-file" lang="sh" />
+
   </TabItem>
   <TabItem label="From a Flatpak Bundle">
     Install an offline `.flatpak` single-file bundle:
 
     <Code code="shelly install flatpak ~/Downloads/application.flatpak --bundle" lang="sh" />
+
   </TabItem>
   <TabItem label="Repairing an Installation">
     Reinstall a corrupted Flatpak application and its runtime dependencies while
     preserving all user configuration and application data:
 
     <Code code="shelly install flatpak com.spotify.Client --repair" lang="sh" />
+
   </TabItem>
 </Tabs>
 
@@ -133,11 +137,13 @@ shelly -Xf com.spotify.Client -k
       code={"shelly upgrade flatpak\n# Or with shortcode:\nshelly -Uf"}
       lang="sh"
     />
+
   </TabItem>
   <TabItem label="Update a Single Flatpak">
     Update only a specific Flatpak without touching other applications:
 
     <Code code="shelly update flatpak com.spotify.Client" lang="sh" />
+
   </TabItem>
 </Tabs>
 
@@ -158,13 +164,13 @@ shelly -Zf
 
 ## Command Reference & Shortcodes
 
-| Action | Shortcode | Full Command Equivalent |
+| Action                    | Shortcode             | Full Command Equivalent           |
 | :------------------------ | :-------------------- | :-------------------------------- |
-| **Run Flatpak** | `shelly -Xf <app>` | `shelly run flatpak <app>` |
-| **Stop Flatpak** | `shelly -Xf <app> -k` | `shelly run flatpak <app> --kill` |
-| **List Running** | `shelly -Xf -l` | `shelly run flatpak --list` |
-| **Upgrade Flatpaks** | `shelly -Uf` | `shelly upgrade flatpak` |
-| **Purge Unused Runtimes** | `shelly -Zf` | `shelly purify flatpak` |
+| **Run Flatpak**           | `shelly -Xf <app>`    | `shelly run flatpak <app>`        |
+| **Stop Flatpak**          | `shelly -Xf <app> -k` | `shelly run flatpak <app> --kill` |
+| **List Running**          | `shelly -Xf -l`       | `shelly run flatpak --list`       |
+| **Upgrade Flatpaks**      | `shelly -Uf`          | `shelly upgrade flatpak`          |
+| **Purge Unused Runtimes** | `shelly -Zf`          | `shelly purify flatpak`           |
 
 ---
 

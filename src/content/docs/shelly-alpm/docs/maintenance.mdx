@@ -41,21 +41,25 @@ unused Flatpak runtimes.
       code={"# Clean cache while keeping the 3 most recent versions\nshelly purify standard\n\n# Retain only the 2 most recent versions\nshelly purify standard --cache 2"}
       lang="sh"
     />
+
   </TabItem>
   <TabItem label="Purge AUR Build Caches">
     Delete all compiled AUR package archives and their matching detached signatures from Shelly's build cache:
 
     <Code code="shelly purify standard --aur-cache" lang="sh" />
+
   </TabItem>
   <TabItem label="Remove Orphaned Packages">
     Identify and remove packages installed as dependencies that are no longer required by any currently installed package:
 
     <Code code="shelly purify standard --orphans" lang="sh" />
+
   </TabItem>
   <TabItem label="Clean Unused Flatpaks">
     Prune unused Flatpak runtimes and extension dependencies across both system and user installations:
 
     <Code code="shelly purify flatpak" lang="sh" />
+
   </TabItem>
 </Tabs>
 
@@ -190,23 +194,23 @@ as the project's official website or Git repository) before importing. See
 
 ### `shelly purify` Options
 
-| Option | Short | Description |
+| Option        | Short | Description                                                                       |
 | :------------ | :---- | :-------------------------------------------------------------------------------- |
-| `--cache <N>` | `-c` | Remove older cached package versions while retaining `<N>` versions (default: 3). |
-| `--orphans` | `-o` | Include orphaned dependencies in the cleanup plan. |
-| `--aur-cache` | | Delete all cached AUR package archives and signatures. |
-| `--dry-run` | `-d` | Display the planned cleanup targets without altering packages or deleting files. |
+| `--cache <N>` | `-c`  | Remove older cached package versions while retaining `<N>` versions (default: 3). |
+| `--orphans`   | `-o`  | Include orphaned dependencies in the cleanup plan.                                |
+| `--aur-cache` |       | Delete all cached AUR package archives and signatures.                            |
+| `--dry-run`   | `-d`  | Display the planned cleanup targets without altering packages or deleting files.  |
 
 ### `shelly keyring` Subcommands
 
-| Subcommand | Shortcode | Description |
+| Subcommand                | Shortcode    | Description                                                  |
 | :------------------------ | :----------- | :----------------------------------------------------------- |
-| `shelly keyring init` | `shelly -Ki` | Initialize the system package-signing keyring. |
-| `shelly keyring populate` | `shelly -Kp` | Populate keyring with default distribution keys. |
-| `shelly keyring refresh` | `shelly -Kr` | Refresh keys from configured keyservers. |
-| `shelly keyring recv` | `shelly -Kv` | Receive public keys (use `--user` for PKGBUILD source keys). |
-| `shelly keyring lsign` | `shelly -Ks` | Locally sign a key in the keyring. |
-| `shelly keyring list` | `shelly -Kl` | List all keys in the package-signing keyring. |
+| `shelly keyring init`     | `shelly -Ki` | Initialize the system package-signing keyring.               |
+| `shelly keyring populate` | `shelly -Kp` | Populate keyring with default distribution keys.             |
+| `shelly keyring refresh`  | `shelly -Kr` | Refresh keys from configured keyservers.                     |
+| `shelly keyring recv`     | `shelly -Kv` | Receive public keys (use `--user` for PKGBUILD source keys). |
+| `shelly keyring lsign`    | `shelly -Ks` | Locally sign a key in the keyring.                           |
+| `shelly keyring list`     | `shelly -Kl` | List all keys in the package-signing keyring.                |
 
 ### Quick Shortcodes
 

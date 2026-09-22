@@ -5,7 +5,14 @@ sidebar:
 description: Build PKGBUILD recipes into installable Arch Linux packages with shelly build, featuring static parsing, Landlock sandboxing, and no makepkg dependency.
 ---
 
-import { Steps, Tabs, TabItem, Card, CardGrid, Code } from "@astrojs/starlight/components";
+import {
+  Steps,
+  Tabs,
+  TabItem,
+  Card,
+  CardGrid,
+  Code,
+} from "@astrojs/starlight/components";
 
 `shelly build` compiles a `PKGBUILD` recipe into an installable Arch Linux package archive (`.pkg.tar.zst`). It is
 Shelly's native, standalone package build engine, the same `shelly install aur` uses, made entirely in
@@ -27,24 +34,26 @@ Shelly offers two distinct workflows for building packages:
     **Compiles local recipes without installing.**
 
     Use this when you are writing a `PKGBUILD`, testing a modified recipe, or building a standalone package archive (`.pkg.tar.zst`) for distribution or later installation.
+
   </Card>
   <Card title="shelly install aur" icon="download">
     **Fetches, reviews, builds, and installs in one command.**
 
     Use this when you want to discover, download, and install a package directly from the Arch User Repository (AUR) onto your current system.
+
   </Card>
 </CardGrid>
 
 ### Differences from `makepkg`
 
-| Feature | `shelly build` | `makepkg` |
-| :--- | :--- | :--- |
-| **Metadata Parsing** | **Static analysis** (safe, bash-aware parser; no arbitrary code execution) | Sourced directly in host Bash |
-| **Privilege Model** | Strict non-root builder execution | Requires `fakeroot` / LD_PRELOAD |
-| **File Ownership** | **Virtual ownership journal** (mapped by inode into `.PKGINFO` & `.MTREE`) | Relies on `fakeroot` host translation |
-| **Integrity Checks** | **SHA-256 review digest lock** (prevents TOCTOU modifications) | Manual recipe inspection |
-| **Sandboxing** | **Kernel Landlock LSM** (restricts filesystem access to `$HOME`) | Unrestricted host access by default |
-| **Configuration** | Structured TOML (`shellybuild.conf`) | Shell script (`makepkg.conf`) |
+| Feature              | `shelly build`                                                             | `makepkg`                             |
+| :------------------- | :------------------------------------------------------------------------- | :------------------------------------ |
+| **Metadata Parsing** | **Static analysis** (safe, bash-aware parser; no arbitrary code execution) | Sourced directly in host Bash         |
+| **Privilege Model**  | Strict non-root builder execution                                          | Requires `fakeroot` / LD_PRELOAD      |
+| **File Ownership**   | **Virtual ownership journal** (mapped by inode into `.PKGINFO` & `.MTREE`) | Relies on `fakeroot` host translation |
+| **Integrity Checks** | **SHA-256 review digest lock** (prevents TOCTOU modifications)             | Manual recipe inspection              |
+| **Sandboxing**       | **Kernel Landlock LSM** (restricts filesystem access to `$HOME`)           | Unrestricted host access by default   |
+| **Configuration**    | Structured TOML (`shellybuild.conf`)                                       | Shell script (`makepkg.conf`)         |
 
 ---
 
@@ -70,9 +79,11 @@ Shelly offers two distinct workflows for building packages:
 
    :::tip[Building from any directory]
    You can also specify a path to a recipe located anywhere on disk:
+
    ```sh
    shelly build ~/src/my-package/PKGBUILD
    ```
+
    :::
 
 3. ### Review the recipe and security findings
@@ -131,19 +142,19 @@ shelly build [<pkgbuild>] [options]
 
 ### Common Options
 
-| Option | Short | Description |
-| :--- | :--- | :--- |
-| `--sync-deps` | `-s` | Automatically install missing build and runtime dependencies with before building. |
-| `--check` | `-c` | Execute the `check()` test suite in the `PKGBUILD` and install check dependencies. |
-| `--no-check` | | Skip the `check()` test function, overriding `shellybuild.conf`. |
-| `--isolated` | `-i` | Build in a fresh, unprivileged `systemd-nspawn` container environment. |
-| `--sign` | | Generate a detached OpenPGP signature (`.sig`) next to each built package archive. |
-| `--nosign` | | Skip package signing, overriding `shellybuild.conf`. |
-| `--key <key>` | | Specify the GPG key ID or 40-character fingerprint to use for package signing. |
-| `--package-destination <dir>` | | Save package archives to a specified absolute directory instead of the default location. |
-| `--reviewed` | `-r` | Mark the recipe as reviewed and bypass the interactive prompt (use only for automated workflows or trusted recipes). |
-| `--makesrcinfo` | | Statically parse the recipe, generate `.SRCINFO` to standard output, and exit without building. |
-| `--noverify` | | Skip the `PKGBUILD`'s `verify()` function (not recommended). |
+| Option                        | Short | Description                                                                                                          |
+| :---------------------------- | :---- | :------------------------------------------------------------------------------------------------------------------- |
+| `--sync-deps`                 | `-s`  | Automatically install missing build and runtime dependencies with before building.                                   |
+| `--check`                     | `-c`  | Execute the `check()` test suite in the `PKGBUILD` and install check dependencies.                                   |
+| `--no-check`                  |       | Skip the `check()` test function, overriding `shellybuild.conf`.                                                     |
+| `--isolated`                  | `-i`  | Build in a fresh, unprivileged `systemd-nspawn` container environment.                                               |
+| `--sign`                      |       | Generate a detached OpenPGP signature (`.sig`) next to each built package archive.                                   |
+| `--nosign`                    |       | Skip package signing, overriding `shellybuild.conf`.                                                                 |
+| `--key <key>`                 |       | Specify the GPG key ID or 40-character fingerprint to use for package signing.                                       |
+| `--package-destination <dir>` |       | Save package archives to a specified absolute directory instead of the default location.                             |
+| `--reviewed`                  | `-r`  | Mark the recipe as reviewed and bypass the interactive prompt (use only for automated workflows or trusted recipes). |
+| `--makesrcinfo`               |       | Statically parse the recipe, generate `.SRCINFO` to standard output, and exit without building.                      |
+| `--noverify`                  |       | Skip the `PKGBUILD`'s `verify()` function (not recommended).                                                         |
 
 ### Shortcodes
 
@@ -152,13 +163,17 @@ Shelly provides concise shortcodes where `-A` represents `shelly build`. Options
 <Tabs>
   <TabItem label="Common Workflows">
     <Code
-      code={"shelly -A                         # Build PKGBUILD in current directory\nshelly -As                        # Build and install missing dependencies\nshelly -Ac                        # Build and run test suites (check)\nshelly -Asc                       # Build, install dependencies, and run check()\nshelly -Ai                        # Build in an isolated systemd-nspawn container"}
+      code={
+        "shelly -A                         # Build PKGBUILD in current directory\nshelly -As                        # Build and install missing dependencies\nshelly -Ac                        # Build and run test suites (check)\nshelly -Asc                       # Build, install dependencies, and run check()\nshelly -Ai                        # Build in an isolated systemd-nspawn container"
+      }
       lang="sh"
     />
   </TabItem>
   <TabItem label="Automation & Maintenance">
     <Code
-      code={"shelly -Ar                        # Build and mark recipe as reviewed\nshelly -Ars                       # Non-interactive build with dependency sync\nshelly -A ~/pkg/PKGBUILD          # Build recipe at specific path\nshelly -Ah                        # Show build command help"}
+      code={
+        "shelly -Ar                        # Build and mark recipe as reviewed\nshelly -Ars                       # Non-interactive build with dependency sync\nshelly -A ~/pkg/PKGBUILD          # Build recipe at specific path\nshelly -Ah                        # Show build command help"
+      }
       lang="sh"
     />
   </TabItem>
