@@ -102,12 +102,54 @@ Shelly offers two distinct workflows for building packages:
    shelly install standard ./my-package-1.0.0-1-x86_64.pkg.tar.zst
    ```
 
+   :::tip[Or let Shelly install it for you]
+   Pass `-l` (or `--install`) to install the built archives as soon as the build succeeds, like `makepkg -i`. See
+   [Build and Install in One Step](#build-and-install-in-one-step).
+   :::
+
 </Steps>
 
 :::note[Build Logs]
 Every build attempt-including cancelled or failed runs-creates a structured log file under the configured log
 destination (default: `/var/log/shelly/build/` or user cache). Output streams real-time stdout and stderr separately, so
 you can always inspect failed builds.
+:::
+
+---
+
+## Build and Install in One Step
+
+`-l` (`--install`) installs the archives the build just produced, so a package no longer has to be built and then
+installed by hand:
+
+```sh
+shelly build --install
+# Equivalent to makepkg -si
+shelly build -s --install
+shelly -Asl
+```
+
+Like `makepkg -i`, only the freshly built archives are added, so combine the flag with `-s` when the package's own
+dependencies may be missing.
+
+Administrator credentials are requested **once, up front** — the builder locks itself against elevation with
+`PR_SET_NO_NEW_PRIVS` and can never elevate afterwards. The build runs unprivileged as your regular user, and the
+elevated coordinator installs the archives afterwards, through the same path as `shelly install standard <archive>`.
+
+Other details worth knowing:
+
+- With `-s -l`, build-dependency cleanup runs _after_ the install, so a runtime dependency the built package now needs
+  is not removed.
+- Split package members are installed in one transaction, so they can satisfy each other's dependencies.
+- With `-i`, the guest exports the archives and the host coordinator installs them; the container never writes to the
+  host database.
+- Combining it with `--json`, `--ui-mode`, `--review-only`, or `--makesrcinfo` exits `2` with
+  `Cannot combine --install with <mode>.` before building.
+
+:::caution[Short options do not cluster]
+`-l` is the install alias; `-i` remains `--isolated`. So `shelly build -si` is rejected — write `shelly build -s -l` for
+sync-then-install and `shelly build -s -i` for a sync-then-isolated build. The [shortcode](/shelly-alpm/docs/cli-reference/#shortcodes)
+form does combine: `-Asl` means `shelly build -s -l`, while `-Asi` is the isolated build.
 :::
 
 ---
@@ -148,6 +190,7 @@ shelly build [<pkgbuild>] [options]
 | `--check`                     | `-c`  | Execute the `check()` test suite in the `PKGBUILD` and install check dependencies.                                   |
 | `--no-check`                  |       | Skip the `check()` test function, overriding `shellybuild.conf`.                                                     |
 | `--isolated`                  | `-i`  | Build in a fresh, unprivileged `systemd-nspawn` container environment.                                               |
+| `--install`                   | `-l`  | Install the built package archives after a successful build. With `-s` this mirrors `makepkg -si`.                   |
 | `--sign`                      |       | Generate a detached OpenPGP signature (`.sig`) next to each built package archive.                                   |
 | `--nosign`                    |       | Skip package signing, overriding `shellybuild.conf`.                                                                 |
 | `--key <key>`                 |       | Specify the GPG key ID or 40-character fingerprint to use for package signing.                                       |
@@ -164,7 +207,7 @@ Shelly provides concise shortcodes where `-A` represents `shelly build`. Options
   <TabItem label="Common Workflows">
     <Code
       code={
-        "shelly -A                         # Build PKGBUILD in current directory\nshelly -As                        # Build and install missing dependencies\nshelly -Ac                        # Build and run test suites (check)\nshelly -Asc                       # Build, install dependencies, and run check()\nshelly -Ai                        # Build in an isolated systemd-nspawn container"
+        "shelly -A                         # Build PKGBUILD in current directory\nshelly -As                        # Build and install missing dependencies\nshelly -Al                        # Build, then install the built package\nshelly -Asl                       # Sync dependencies, build, and install (makepkg -si)\nshelly -Ac                        # Build and run test suites (check)\nshelly -Asc                       # Build, install dependencies, and run check()\nshelly -Ai                        # Build in an isolated systemd-nspawn container"
       }
       lang="sh"
     />
@@ -300,6 +343,9 @@ shelly build -i
 
 This builds the package as an unprivileged user inside a fresh `systemd-nspawn` container root. It ensures no host files
 or undeclared dependencies influence the compilation, mirroring official Arch package build environments.
+
+Adding `-l` (`--install`) is safe here: the guest exports the archives and the host coordinator installs them, so the
+container never writes into the host system database.
 
 ---
 

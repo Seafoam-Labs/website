@@ -1352,5 +1352,6 @@ Options:
 | `--key <key>` | `string` | Specifies the GPG key used for package signing |
 | `--noverify` | `bool` | Skips the PKGBUILD verify() function |
 | `--isolated, -i` | `bool` | Builds as an unprivileged user in a fresh systemd-nspawn root |
+| `--install, -l` | `bool` | Installs the built packages after a successful build (with `--sync-deps` this mirrors `makepkg -si`; `-i` is `--isolated`, not install) |
 
 {/* prettier-ignore-end */}
