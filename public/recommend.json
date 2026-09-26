@@ -229,6 +229,6 @@
   },
   {
     "name": "Seafoam Labs recommends",
-    "packages": ["fluxer-canary", "ghostty", "kitty"]
+    "packages": ["caligula", "fluxer-canary", "ghostty", "kitty"]
   }
 ]
