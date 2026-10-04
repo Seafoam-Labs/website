@@ -11,8 +11,7 @@ description: Auto-generated CLI reference for Shelly ALPM.
 
 ## Overview
 
-Shelly — a native, unified package manager for Arch Linux repository packages, the AUR, Flatpaks, and AppImages. A bare
-value searches standard repositories and the AUR, then prompts for a package to install.
+Shelly — a native, unified package manager for Arch Linux repository packages, the AUR, Flatpaks, and AppImages. A bare value searches standard repositories and the AUR, then prompts for a package to install.
 
 ## Commands
 
@@ -33,9 +32,11 @@ value searches standard repositories and the AUR, then prompts for a package to 
 | `shelly sync` | Synchronize ALPM package databases, AppImage metadata, or cached Flatpak AppStream metadata. |
 | `shelly update` | Update selected standard, AUR, or Flatpak packages. |
 | `shelly config` | Read and modify Shelly configuration. |
-| `shelly keyring` | Manage pacman package-signing keys and user PKGBUILD source-signing keys. |
+| `shelly keyring` | Manage package-signing keys and user PKGBUILD source-signing keys. |
 | `shelly run` | Launch or stop a Flatpak or AppImage application. |
 | `shelly build` | Builds a PKGBUILD into an installable package |
+| `shelly resolve` | Resolve exact package names to source package bases without changing package state. |
+| `shelly repo-db` | Add, remove, list, or verify entries in a pacman repository database (repo-add / repo-remove). |
 
 ## Shortcodes
 
@@ -83,6 +84,7 @@ value searches standard repositories and the AUR, then prompts for a package to 
 | `-Es` | `shelly update standard` |
 | `-Ea` | `shelly update aur` |
 | `-Ef` | `shelly update flatpak` |
+| `-C` | `shelly config appimage` |
 | `-C` | `shelly config` |
 | `-Cg` | `shelly config get` |
 | `-Cs` | `shelly config set` |
@@ -97,6 +99,11 @@ value searches standard repositories and the AUR, then prompts for a package to 
 | `-Xf` | `shelly run flatpak` |
 | `-Xi` | `shelly run appimage` |
 | `-A` | `shelly build` |
+| `-Q` | `shelly resolve` |
+| `-Ga` | `shelly repo-db add` |
+| `-Gr` | `shelly repo-db remove` |
+| `-Gl` | `shelly repo-db list` |
+| `-Gv` | `shelly repo-db verify` |
 
 ## Global Options
 
@@ -117,14 +124,13 @@ Subcommands:
 
 | Command | Description |
 | --- | --- |
-| `shelly search standard` | Search ALPM repository and installed packages, or Shelly-managed local binary packages. With a package and no source modifier, show exact package details. |
+| `shelly search standard` | Search available ALPM repository packages by default. Use --installed or --local to select installed packages, or --detail for exact package metadata. |
 | `shelly search aur` | Search the AUR RPC, fetch exact package PKGBUILDs, append high-confidence standard repository matches, or show complete metadata for one AUR package. |
 | `shelly search flatpak` | Search cached AppStream catalogs from every configured system and user Flatpak remote, with local pagination and remote-reference sizes and permissions. |
 
 #### `shelly search standard`
 
-Search ALPM repository and installed packages, or Shelly-managed local binary packages. With a package and no source
-modifier, show exact package details.
+Search available ALPM repository packages by default. Use --installed or --local to select installed packages, or --detail for exact package metadata.
 
 Usage:
 
@@ -136,28 +142,27 @@ Arguments:
 
 | Argument | Arity | Description |
 | --- | --- | --- |
-| `<package>` | 0..1 | Package name or search term; without a source modifier, an exact name opens package details |
+| `<package>` | 0..1 | Package name or search term; omit to list packages, or use --detail for one exact name |
 
 Options:
 
 | Option | Type | Description |
 | --- | --- | --- |
 | `--repos, -r` | `bool` | List repositories parsed from pacman.conf and ignore other search modifiers |
-| `--available, -v` | `bool` | Search packages from the configured ALPM synchronization databases |
+| `--available, -v` | `bool` | Search packages from the configured ALPM synchronization databases (the default source) |
 | `--installed, -i` | `bool` | Search packages from the local ALPM database |
 | `--local, -l` | `bool` | Search Shelly-managed binary packages installed under /opt/shelly |
 | `--limit, -t <limit>` | `int` | Maximum number of search results to return per page |
 | `--page, -p <page>` | `int` | Page number for paginated results |
-| `--show-hidden, -w` | `bool` | Include packages hidden by pacman IgnorePkg configuration |
+| `--show-hidden, -w` | `bool` | Include packages excluded by the configured ignore list |
 | `--detail, --info, -d` | `bool` | Show complete metadata for one exact ALPM package name |
 | `--group, -g` | `bool` | List package groups or restrict available packages to the requested group |
-| `--explicit, -e` | `bool` | Shows only explicitly installed pacakges |
-| `--depends, -D` | `bool` | Shows only dependency packages |
+| `--explicit, -e` | `bool` | Filter installed packages to explicitly installed packages; select installed packages when no source is specified |
+| `--depends, -D` | `bool` | Filter installed packages to dependencies; select installed packages when no source is specified |
 
 #### `shelly search aur`
 
-Search the AUR RPC, fetch exact package PKGBUILDs, append high-confidence standard repository matches, or show complete
-metadata for one AUR package.
+Search the AUR RPC, fetch exact package PKGBUILDs, append high-confidence standard repository matches, or show complete metadata for one AUR package.
 
 Usage:
 
@@ -181,8 +186,7 @@ Options:
 
 #### `shelly search flatpak`
 
-Search cached AppStream catalogs from every configured system and user Flatpak remote, with local pagination and
-remote-reference sizes and permissions.
+Search cached AppStream catalogs from every configured system and user Flatpak remote, with local pagination and remote-reference sizes and permissions.
 
 Usage:
 
@@ -205,8 +209,7 @@ Options:
 
 ### `shelly install`
 
-Install packages or applications from ALPM repositories, the AUR, AppImages, Flatpak remotes, or local Flatpak files,
-and repair installed Flatpaks.
+Install packages or applications from ALPM repositories, the AUR, AppImages, Flatpak remotes, or local Flatpak files, and repair installed Flatpaks.
 
 Subcommands:
 
@@ -219,8 +222,7 @@ Subcommands:
 
 #### `shelly install standard`
 
-Install ALPM repository packages, local Arch or Shelly binary archives, and package archives downloaded from HTTP(S)
-URLs.
+Install ALPM repository packages, local Arch or Shelly binary archives, and package archives downloaded from HTTP(S) URLs.
 
 Usage:
 
@@ -242,6 +244,7 @@ Options:
 | `--make-deps, -m` | `bool` | Install make dependencies for the requested packages |
 | `--no-deps, -d` | `bool` | Pass the ALPM nodeps transaction flag when installing repository packages |
 | `--upgrade, -u` | `bool` | After confirmation, synchronize and upgrade the standard system before installing the requested repository packages |
+| `--needed` | `bool` | Skip reinstalling ALPM packages that are already up to date |
 
 #### `shelly install appimage`
 
@@ -267,8 +270,7 @@ Options:
 
 #### `shelly install aur`
 
-Fetch, review, build, and install one or more AUR packages, install one package's build dependencies, or install one
-package at an exact Git commit.
+Fetch, review, build, and install one or more AUR packages, install one package's build dependencies, or install one package at an exact Git commit.
 
 Usage:
 
@@ -294,11 +296,11 @@ Options:
 | `--sign` | `bool` | Sign built packages with GPG |
 | `--nosign` | `bool` | Skip signing built packages |
 | `--version, -v` | `bool` | Install exactly one AUR package from the following Git commit operand |
+| `--needed` | `bool` | Skip building and reinstalling AUR packages whose installed version is current; dynamic versions may still require a build |
 
 #### `shelly install flatpak`
 
-Install a Flatpak application, runtime, .flatpakref file, or bundle, or repair an installed Flatpak while preserving its
-configuration.
+Install a Flatpak application, runtime, .flatpakref file, or bundle, or repair an installed Flatpak while preserving its configuration.
 
 Usage:
 
@@ -340,8 +342,7 @@ Subcommands:
 
 #### `shelly upgrade standard`
 
-Synchronize ALPM repositories, show the available repository package upgrades, perform a full system upgrade, and report
-required restarts.
+Synchronize ALPM repositories, show the available repository package upgrades, perform a full system upgrade, and report required restarts.
 
 Usage:
 
@@ -357,8 +358,7 @@ Options:
 
 #### `shelly upgrade all`
 
-Build and confirm an invoking-user upgrade plan, then upgrade every enabled package backend in one coordinated action,
-continuing through independent backend failures and returning failure if any selected backend fails.
+Build and confirm an invoking-user upgrade plan, then upgrade every enabled package backend in one coordinated action, continuing through independent backend failures and returning failure if any selected backend fails.
 
 Usage:
 
@@ -404,7 +404,7 @@ Options:
 | `--no-check` | `bool` | Skip each PKGBUILD check() function during AUR upgrade builds |
 | `--sign` | `bool` | Sign upgraded AUR packages with GPG |
 | `--nosign` | `bool` | Skip signing upgraded AUR packages |
-| `--singlepane` | `bool` | Use the shared pacman-style linear output (already the native Zig non-UI output mode) |
+| `--singlepane` | `bool` | Use single-pane terminal output. |
 | `--no-devel` | `bool` | Skip checking -git packages |
 
 #### `shelly upgrade flatpak`
@@ -639,14 +639,14 @@ Subcommands:
 
 | Command | Description |
 | --- | --- |
-| `shelly list standard` | List packages installed in the local ALPM database, with optional IgnorePkg and install-reason filters. |
+| `shelly list standard` | List packages installed in the local ALPM database, including ignored packages, with optional install-reason filters. |
 | `shelly list appimage` | List installed AppImages. |
 | `shelly list aur` | List installed foreign packages tracked as AUR packages. |
 | `shelly list flatpak` | List installed Flatpaks, configured system and user remotes, or cached AppStream JSON for one or every remote. |
 
 #### `shelly list standard`
 
-List packages installed in the local ALPM database, with optional IgnorePkg and install-reason filters.
+List packages installed in the local ALPM database, including ignored packages, with optional install-reason filters.
 
 Usage:
 
@@ -658,7 +658,7 @@ Options:
 
 | Option | Type | Description |
 | --- | --- | --- |
-| `--show-hidden, -w` | `bool` | Include hidden packages |
+| `--show-hidden, -w` | `bool` | Accepted for compatibility; ignored packages are always included |
 | `--explicitOnly, -e` | `bool` | List explicitly installed packages only |
 | `--dependencyOnly, -d` | `bool` | List dependency-installed packages only |
 | `--required-by` | `bool` | Include packages that directly require each listed package |
@@ -755,9 +755,9 @@ Options:
 | `--docs, -d` | `bool` | Write Markdown CLI reference documentation to standard output |
 | `--completions, -c <completions>` | `string` | Write a Bash, Fish, or Zsh completion script to standard output Choices: `bash`, `fish`, `zsh`. |
 | `--pacfiles, -p` | `bool` | Run the pacdiff-compatible pacnew, pacorig, and pacsave maintenance workflow |
-| `--find, -F` | `bool` | Recursively find pacfiles instead of reading the pacman database |
-| `--locate, -l` | `bool` | Find pacfiles with locate instead of reading the pacman database |
-| `--pacmandb, -P` | `bool` | Search backup paths from the local pacman database (default) |
+| `--find, -F` | `bool` | Recursively find pacfiles instead of reading the local package database |
+| `--locate, -l` | `bool` | Find pacfiles with locate instead of reading the local package database |
+| `--pacmandb, -P` | `bool` | Search backup paths from the local package database (default) |
 | `--backup, -b` | `bool` | Save the old original as .bak before overwriting |
 | `--cachedir, -C <cachedir>` | `string` | Package cache directory for three-way base archives; repeat to add directories |
 | `--output, -o` | `bool` | Print discovered pacfile paths without modifying them |
@@ -783,7 +783,7 @@ Arguments:
 | Argument | Arity | Description |
 | --- | --- | --- |
 | `<name>` | 0..1 | Repository (database) name, e.g. my-repo |
-| `<url>` | 0..1 | Server URL; required for --add, e.g. `<https://my-repo.ee/$arch/$repo>`, ignored for --remove/--list |
+| `<url>` | 0..1 | Server URL; required for --add, e.g. '[https://my-repo.ee/$arch/$repo](https://my-repo.ee/$arch/$repo)', ignored for --remove/--list |
 
 Options:
 
@@ -793,7 +793,7 @@ Options:
 | `--remove, -x` | `bool` | Remove the named repository |
 | `--list, -l` | `bool` | List configured repositories |
 | `--no-sync, -n` | `bool` | Skip the final database refresh |
-| `--lsign-key, -s <lsign-key>` | `string` | Key to locally sign with pacman-key before adding |
+| `--lsign-key, -s <lsign-key>` | `string` | Key to locally sign before adding |
 
 ### `shelly purify`
 
@@ -808,8 +808,7 @@ Subcommands:
 
 #### `shelly purify standard`
 
-Plan corrupted archives, optional orphan cleanup, and optional cache retention cleanup; show the targets, then confirm
-before changing ALPM or cache state.
+Plan corrupted archives, optional orphan cleanup, and optional cache retention cleanup; show the targets, then confirm before changing ALPM or cache state.
 
 Usage:
 
@@ -823,6 +822,7 @@ Options:
 | --- | --- | --- |
 | `--dry-run, -d` | `bool` | Show the cleanup plan without changing packages |
 | `--orphans, -o` | `bool` | Include orphaned packages |
+| `--aur-cache` | `bool` | Delete all built AUR package archives and matching signatures from Shelly's cache |
 | `--cache, -c <cache>` | `uint` | Remove older cached package versions while retaining this many versions |
 
 #### `shelly purify flatpak`
@@ -970,8 +970,7 @@ Options:
 
 #### `shelly sync appimage`
 
-Synchronize extracted AppImage metadata, or configure an installed AppImage's update source with the appimage/url/type
-overload.
+Synchronize extracted AppImage metadata, or configure an installed AppImage's update source with the appimage/url/type overload.
 
 Usage:
 
@@ -1096,6 +1095,7 @@ Subcommands:
 
 | Command | Description |
 | --- | --- |
+| `shelly config appimage` | Edit an installed AppImage's environment overrides. |
 | `shelly config get` | Read a Shelly configuration value. |
 | `shelly config set` | Set a Shelly configuration value. |
 | `shelly config reset` | Reset Shelly configuration to native defaults. |
@@ -1106,6 +1106,31 @@ Usage:
 ```text
 shelly config
 ```
+
+#### `shelly config appimage`
+
+Edit an installed AppImage's environment overrides.
+
+Usage:
+
+```text
+shelly config appimage <name> [options]
+```
+
+Arguments:
+
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<name>` | 1..1 | Exact installed AppImage name |
+
+Options:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `--set-env <set-env>` | `string` | Add or replace one KEY=value environment override |
+| `--unset-env <unset-env>` | `string` | Remove one environment override by key |
+| `--clear-env` | `bool` | Remove all environment overrides |
+| `--replace-env <replace-env>` | `string` | Replace all overrides with a JSON object of string values |
 
 #### `shelly config get`
 
@@ -1164,26 +1189,26 @@ Arguments:
 
 | Argument | Arity | Description |
 | --- | --- | --- |
-| `<downloadCount>` | 1..1 | Maximum number of parallel downloads |
+| `<downloadCount>` | 1..1 | Maximum number of parallel downloads (1-255; default: 100) |
 
 ### `shelly keyring`
 
-Manage pacman package-signing keys and user PKGBUILD source-signing keys.
+Manage package-signing keys and user PKGBUILD source-signing keys.
 
 Subcommands:
 
 | Command | Description |
 | --- | --- |
-| `shelly keyring init` | Initialize the pacman keyring. |
-| `shelly keyring list` | List keys in the pacman keyring. |
-| `shelly keyring refresh` | Refresh pacman keyring keys from the configured keyserver. |
-| `shelly keyring lsign` | Locally sign one or more keys in the pacman keyring. |
-| `shelly keyring populate` | Populate the pacman keyring with default or named distribution keys. |
-| `shelly keyring recv` | Receive keys into the pacman keyring or the current user's source-signing keyring. |
+| `shelly keyring init` | Initialize the package-signing keyring. |
+| `shelly keyring list` | List package-signing keys. |
+| `shelly keyring refresh` | Refresh package-signing keys from the configured keyserver. |
+| `shelly keyring lsign` | Locally sign one or more package-signing keys. |
+| `shelly keyring populate` | Populate the package-signing keyring with default or named distribution keys. |
+| `shelly keyring recv` | Receive keys into the package-signing keyring or the current user's source-signing keyring. |
 
 #### `shelly keyring init`
 
-Initialize the pacman keyring.
+Initialize the package-signing keyring.
 
 Usage:
 
@@ -1193,7 +1218,7 @@ shelly keyring init
 
 #### `shelly keyring list`
 
-List keys in the pacman keyring.
+List package-signing keys.
 
 Usage:
 
@@ -1203,7 +1228,7 @@ shelly keyring list
 
 #### `shelly keyring refresh`
 
-Refresh pacman keyring keys from the configured keyserver.
+Refresh package-signing keys from the configured keyserver.
 
 Usage:
 
@@ -1213,7 +1238,7 @@ shelly keyring refresh
 
 #### `shelly keyring lsign`
 
-Locally sign one or more keys in the pacman keyring.
+Locally sign one or more package-signing keys.
 
 Usage:
 
@@ -1229,7 +1254,7 @@ Arguments:
 
 #### `shelly keyring populate`
 
-Populate the pacman keyring with default or named distribution keys.
+Populate the package-signing keyring with default or named distribution keys.
 
 Usage:
 
@@ -1245,7 +1270,7 @@ Arguments:
 
 #### `shelly keyring recv`
 
-Receive keys into the pacman keyring or the current user's source-signing keyring.
+Receive keys into the package-signing keyring or the current user's source-signing keyring.
 
 Usage:
 
@@ -1343,6 +1368,10 @@ Options:
 | Option | Type | Description |
 | --- | --- | --- |
 | `--reviewed, -r` | `bool` | Marks the package as reviewed |
+| `--review-only` | `bool` | Reviews evaluated PKGBUILD inputs and emits JSON without building |
+| `--review-digest <review-digest>` | `string` | Requires an accepted 64-character SHA-256 review digest |
+| `--package-destination <package-destination>` | `string` | Writes packages to an existing absolute directory |
+| `--compression-level <compression-level>` | `string` | Selects archive compression preset 1-5: conservative, fast, balanced, compact, maximum; omission uses configured or library defaults |
 | `--makesrcinfo` | `bool` | Generates SRCINFO on standard output and exits |
 | `--sync-deps, -s` | `bool` | Installs missing dependencies |
 | `--check, -c` | `bool` | Performs check on PKGBUILD and installs check depends |
@@ -1352,6 +1381,131 @@ Options:
 | `--key <key>` | `string` | Specifies the GPG key used for package signing |
 | `--noverify` | `bool` | Skips the PKGBUILD verify() function |
 | `--isolated, -i` | `bool` | Builds as an unprivileged user in a fresh systemd-nspawn root |
-| `--install, -l` | `bool` | Installs the built packages after a successful build (with `--sync-deps` this mirrors `makepkg -si`; `-i` is `--isolated`, not install) |
+| `--install, -l` | `bool` | Installs the built packages after a successful build (with --sync-deps this mirrors makepkg -si; -i is --isolated, not install) |
+
+### `shelly resolve`
+
+Resolve exact package names to source package bases without changing package state.
+
+Usage:
+
+```text
+shelly resolve <name>... [options]
+```
+
+Arguments:
+
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<name>` | 1..* | Exact binary package names to resolve in input order |
+
+Options:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `--source <source>` | `string` | Resolution source: auto, standard, or aur Choices: `auto`, `standard`, `aur`. |
+| `--repository <repository>` | `string` | Permits a standard repository; repeatable |
+
+### `shelly repo-db`
+
+Add, remove, list, or verify entries in a pacman repository database (repo-add / repo-remove).
+
+Subcommands:
+
+| Command | Description |
+| --- | --- |
+| `shelly repo-db add` | Add package archives to a pacman repository database (repo-add). |
+| `shelly repo-db remove` | Remove package entries from a pacman repository database (repo-remove). |
+| `shelly repo-db list` | List the entries of a repository database. |
+| `shelly repo-db verify` | Verify the detached gpg signatures of a repository database. Verification is trust-based: a good signature from an untrusted key is reported as invalid. |
+
+#### `shelly repo-db add`
+
+Add package archives to a pacman repository database (repo-add).
+
+Usage:
+
+```text
+shelly repo-db add <database> <packages>... [options]
+```
+
+Arguments:
+
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<database>` | 1..1 | Path to the `<name>.db.tar.<ext>` database |
+| `<packages>` | 1..* | Package archive paths to add |
+
+Options:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `--new` | `bool` | Skip packages whose identical entry already exists |
+| `--prevent-downgrade, -p` | `bool` | Skip packages older than the database entry |
+| `--remove-old-files, -R` | `bool` | Delete replaced package files (and .sig) after publishing |
+| `--exclude-sigs` | `bool` | Do not embed existing `<pkg>.sig` signatures |
+| `--wait, -w` | `bool` | Block until the database lock is free |
+| `--quiet, -q` | `bool` | Do not print per-package adding lines |
+| `--sign, -s` | `bool` | Sign each published database archive with gpg |
+| `--key, -k <key>` | `string` | gpg key id to sign with (requires --sign) |
+
+#### `shelly repo-db remove`
+
+Remove package entries from a pacman repository database (repo-remove).
+
+Usage:
+
+```text
+shelly repo-db remove <database> <names>... [options]
+```
+
+Arguments:
+
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<database>` | 1..1 | Path to the `<name>.db.tar.<ext>` database |
+| `<names>` | 1..* | Exact package names to remove |
+
+Options:
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `--remove-old-files, -R` | `bool` | Delete replaced package files (and .sig) after publishing |
+| `--wait, -w` | `bool` | Block until the database lock is free |
+| `--quiet, -q` | `bool` | Do not print per-package removing lines |
+| `--sign, -s` | `bool` | Sign each published database archive with gpg |
+| `--key, -k <key>` | `string` | gpg key id to sign with (requires --sign) |
+
+#### `shelly repo-db list`
+
+List the entries of a repository database.
+
+Usage:
+
+```text
+shelly repo-db list <database>
+```
+
+Arguments:
+
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<database>` | 1..1 | Path to the `<name>.db.tar.<ext>` database |
+
+#### `shelly repo-db verify`
+
+Verify the detached gpg signatures of a repository database. Verification is trust-based: a good signature from an untrusted key is reported as invalid.
+
+Usage:
+
+```text
+shelly repo-db verify <database>
+```
+
+Arguments:
+
+| Argument | Arity | Description |
+| --- | --- | --- |
+| `<database>` | 1..1 | Path to the `<name>.db.tar.<ext>` database |
 
 {/* prettier-ignore-end */}
