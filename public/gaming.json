@@ -1,0 +1,14 @@
+{
+  "packages": [
+    {
+      "name": "Steam",
+      "pkg": "steam",
+      "description": "Valve's digital software delivery system"
+    },
+    {
+      "name": "Faugus Launcher",
+      "pkg": "faugus-launcher",
+      "description": "A simple and lightweight app for running Windows games"
+    }
+  ]
+}
