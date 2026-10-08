@@ -63,10 +63,9 @@ export default defineConfig({
       ],
       social: [
         {
-          /* Hack to add fluxer icon via SocialIcons.astro override */
-          icon: "warning",
-          label: "Buy Me a Coffee",
-          href: "https://buymeacoffee.com/zoeyerinba3",
+          icon: "patreon",
+          label: "Patreon",
+          href: "https://www.patreon.com/cw/SeafoamLabs",
         },
         {
           icon: "fluxer",
