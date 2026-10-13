@@ -1,0 +1,308 @@
+---
+title: RLPM
+sidebar:
+  label: RLPM
+description: Compare Shelly's two native package engines, libalpm and RLPM, switch between them with one setting, and see what stays the same on your system.
+---
+
+import {
+  Steps,
+  Tabs,
+  TabItem,
+  Card,
+  CardGrid,
+  Code,
+} from "@astrojs/starlight/components";
+
+A package backend is the engine Shelly uses to read repositories, resolve dependencies and apply
+package transactions. Shelly ships two of them and builds both by default: `libalpm`, the C library
+behind `pacman`, is the default, so nothing changes unless you opt in. The alternative is RLPM, the
+Rolling Linux Package Manager, Shelly's own native package engine written entirely in Zig. Choosing
+between the two is a single, reversible configuration setting.
+
+---
+
+## Which Engine?
+
+Most systems are served by the default. Pick an engine based on how you want transactions to run
+under the hood:
+
+<CardGrid>
+  <Card title="libalpm (default)" icon="download">
+    **The library behind `pacman`.**
+
+    Nothing to configure or migrate: repositories, locks, keyrings and caches are exactly the ones
+    `pacman` already uses on your system.
+
+  </Card>
+  <Card title="RLPM" icon="seti:config">
+    **Shelly's own native engine, written in Zig.**
+
+    Repositories, dependency resolution and transactions are implemented natively, with no `libalpm`
+    dependency at all. It supports both traditional `pacman` tar databases and in-memory SQLite
+    databases alongside runtime `x86_64_v2/v3/v4` architecture detection, and powers RLPM-only
+    builds.
+
+  </Card>
+</CardGrid>
+
+---
+
+## Checking and Switching
+
+The active engine is the `NativePackageBackend` entry in your CLI configuration
+(`~/.config/shelly/config.json`), so the standard `shelly config` commands are all you need:
+
+<Steps>
+
+1. ### Check the current engine
+
+   ```sh
+   shelly config get NativePackageBackend
+   ```
+
+   This prints `libalpm` or `rlpm`. On a default installation the answer is `libalpm`.
+
+2. ### Switch engines
+
+   ```sh
+   shelly config set NativePackageBackend rlpm
+   ```
+
+3. ### Run your next command
+
+   The setting takes effect on the next CLI invocation, not inside an already-running session. The
+   desktop app has no separate switch: it runs the engine the CLI is set to.
+
+</Steps>
+
+### Reverting and repairing
+
+Switch back the same way:
+
+```sh
+shelly config set NativePackageBackend libalpm
+```
+
+:::note[config reset resets everything]
+If configuration gets tangled, `shelly config reset` restores **all** CLI settings to their
+defaults, not just the backend. Prefer a targeted `shelly config set` when only the engine is wrong.
+:::
+
+:::caution[No automatic fallback]
+Shelly never silently switches engines after an initialization or transaction failure. A value the
+current build does not accept reports:
+
+> NativePackageBackend must be libalpm or rlpm. Correct the setting with shelly config set
+> NativePackageBackend rlpm.
+
+Selecting an engine that is not part of the current build reports:
+
+> The configured native package backend is not included in this build. Set NativePackageBackend to
+> rlpm or install a build with libalpm enabled.
+
+Both messages name the exact repair command, and `shelly config get`, `list`, `set` and `reset`
+stay usable while the setting is invalid.
+:::
+
+---
+
+## What Does Not Change
+
+Switching engines is intentionally boring. On a standard Arch Linux system, your package state and
+workflow are identical either way:
+
+- **Configuration source:** `pacman.conf` is still read for repositories and paths, and path
+  defaults stay on the standard `pacman` profile: `/etc/pacman.conf`, `/var/lib/pacman`,
+  `/var/cache/pacman/pkg` and the standard keyring and hook directories.
+- **Installed database:** the local database is still `/var/lib/pacman`, in the format both engines
+  read and write.
+- **Locking:** both engines hold the same `db.lck` transaction lock, so `pacman` and Shelly still
+  cannot run transactions at the same time.
+- **Existing data:** switching does not touch downloaded archives, mirror definitions, the keyring
+  or your installed state.
+- **Other package sources:** AUR, Flatpak and AppImage workflows are unaffected. The setting only
+  selects the engine for native repository packages.
+- **No migration step:** there is nothing to convert, reinstall or clean up when switching.
+  RLPM update previews automatically copy local metadata into a separate database and replace
+  legacy cache links.
+
+For how this native configuration relates to Shelly's CLI settings and the separate
+`shellybuild.conf` used by `shelly build`, see the
+[configuration guide](/shelly-alpm/docs/config/#configuration-files-and-their-roles).
+
+---
+
+## What RLPM Does Differently
+
+Where `libalpm` calls into Arch's C library, RLPM re-implements the engine natively. The
+differences you can observe:
+
+- **No libalpm linkage:** RLPM does not load or call `libalpm`. Repository handling, dependency
+  resolution and transactions are Shelly's own Zig implementation, and RLPM-only builds ship
+  without any `libalpm` dependency.
+- **SQLite repository databases:** a repository database containing a `pacman.db` member is read as
+  SQLite directly in memory (`sqlite3_deserialize`), with no member extracted to disk, alongside
+  ordinary tar repositories.
+- **Runtime architecture detection:** `Architecture = auto` expands through detected CPU and OS
+  capabilities into the ordered `x86_64`, `x86_64_v2`, `x86_64_v3`, `x86_64_v4` set, selecting the
+  highest supported microarchitecture tier.
+- **Repository provenance:** installed packages remember which repository they came from
+  (`%INSTALLED_DB%`), and that record survives even after the repository is removed from the
+  configuration.
+- **Sealed verification:** archives are copied into an anonymous sealed in-memory file
+  (`memfd_create`) before verification, preventing time-of-check to time-of-use (TOCTOU)
+  modifications so the bytes GPG and the archive reader inspect cannot change afterwards. Checksums
+  prefer SHA-256 over MD5, and an embedded signature supersedes repository digests.
+- **Isolated hooks:** hooks and scriptlets execute inside an unprivileged network namespace with
+  loopback only. A hook opts in with `NetworkAccess=allowed`, and administrators can lift isolation
+  with `DisableSandboxNetwork` (or `DisableSandbox`) in the native package configuration
+  (`pacman.conf` or `shelly.conf`, depending on the path profile); the programmatic API exposes this
+  as `sandbox.disable_network`.
+- **Root-relative confinement:** filesystem inspection and mutations use Linux `openat2` with
+  `RESOLVE_IN_ROOT | RESOLVE_NO_MAGICLINKS`, ensuring symlink resolutions stay confined to the held
+  root directory descriptor without path traversal risks.
+- **Conservative space preflight:** `check_space` applies a native safety cushion (the smaller of
+  roughly 5% capacity and 20 MiB) and accounts for staging, directory overhead, and database
+  journals, catching capacity issues before payload mutations.
+- **Durable record keeping:** each installed record is published through a journal behind a
+  filesystem sync barrier. An interrupted journal is detected and repaired on recovery by restoring
+  the last coherent record, rather than leaving a half-written database entry.
+
+---
+
+## How a Transaction Runs
+
+RLPM runs the same transaction lifecycle you know from `libalpm`, in five stages:
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ 1. Load and verify databases                                │
+│    • Local and sync snapshots under the held lock           │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 2. Resolve the plan and ask questions                       │
+│    • Dependencies, conflicts, providers, sizes              │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 3. Acquire and verify package archives                      │
+│    • Cache acquisition, checksums, sealed signatures        │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 4. Preflight the filesystem, run pre-transaction hooks      │
+│    • Conflicts, backups, disk space, then pre hooks         │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────┐
+│ 5. Commit payload and records, then finish                  │
+│    • Removals, additions, ldconfig, post hooks              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+The plan is reviewed before anything runs: dependency resolution, provider questions and the full
+list of additions and removals are settled while you are still being prompted, and the commit step
+only executes the reviewed plan.
+
+There is no rollback. If a mutation fails, RLPM stops at the failed step and keeps the work it has
+already done, reporting which packages completed and which remain. Installed records stay coherent
+through the journal described above, so recovery means fixing the underlying condition and running
+the transaction again, not undoing.
+
+Version comparison follows `libalpm`'s ordering: RLPM's comparison results were recorded from
+`alpm_pkg_vercmp` in the C locale, so upgrade and downgrade decisions match `pacman`'s.
+
+---
+
+## Building and Packaging
+
+Engine selection is also a build-time choice for packagers and embedders:
+
+<Tabs>
+  <TabItem label="Source builds">
+    The CLI, the TUI and `Shelly.PackageManager` all accept the same build option. The default build
+    contains both engines and starts on `libalpm`; `-Dlibalpm=false` produces an RLPM-only build:
+
+    <Code code="(cd Shelly.Cli.Zig && zig build -Dlibalpm=false)" lang="sh" />
+
+    RLPM-only source packages omit the `pacman` build and runtime dependency that the default
+    variant carries. To choose distribution path defaults at build time, specify `-Dpath-profile=pacman`
+    (the default) or `-Dpath-profile=devario`.
+
+  </TabItem>
+  <TabItem label="Recipe builds">
+    `PKGBUILD` recipes honor `SHELLY_LIBALPM`. Setting the variable to `false` builds the RLPM-only
+    variant; omitting the variable builds both engines:
+
+    <Code code="SHELLY_LIBALPM=false makepkg" lang="sh" />
+
+    RLPM-only recipes omit `pacman` and `libalpm` dependencies and verify that the resulting
+    binary contains no dynamic `libalpm` linkage.
+
+  </TabItem>
+  <TabItem label="Embedding & workers">
+    Download and action workers are reserved internal modes of the same `shelly` executable
+    (`--internal-download-worker` and `--internal-rlpm-action-worker`), re-executing `/proc/self/exe`
+    so there are no companion binaries to ship.
+
+    Applications embedding `Shelly_Rlpm` or `Shelly.PackageManager` must dispatch worker arguments
+    before application setup:
+
+    <Code code="if (rlpm.Workers.dispatch(init, args[1..])) |status| std.process.exit(status);" lang="zig" />
+
+    Alternatively, configure `worker_executable` (or `OwnerConfiguration.worker_executable`) with an
+    absolute path to an executable implementing both modes.
+
+  </TabItem>
+</Tabs>
+
+### Distribution and Configuration Knobs
+
+- **Per-command config (`--config`):** Select another native configuration file (for example,
+  `--config /etc/shelly.conf`), before or after the command. The path is made absolute and retained
+  across privilege elevation and child processes.
+- **Hook directory policy (`HookDirMode`):** In `pacman.conf` or `shelly.conf`, setting
+  `HookDirMode = Replace` tells the backend to use only explicit `HookDir` entries instead of
+  appending them to system defaults (`HookDirMode = Append`).
+- **Distribution path profiles (`-Dpath-profile`):** Build-time path selection is independent of
+  backend selection. Builds default to the `pacman` profile. Independent distributions that do not
+  ship `pacman` select the `devario` profile:
+
+  - **`pacman` profile (default):** `/etc/pacman.conf`, `/etc/pacman.d/`, `/var/lib/pacman/`,
+    `/var/cache/pacman/pkg/`, `/etc/pacman.d/gnupg/`, `/usr/share/pacman/keyrings/`, and
+    `/usr/share/libalpm/hooks/`.
+  - **`devario` profile (pacman-less):** `/etc/shelly.conf`, `/etc/shelly.d/`, `/var/lib/shelly/`,
+    `/var/cache/shelly/pkg/`, `/etc/shelly.d/gnupg/`, `/usr/share/shelly/keyrings/`, and
+    `/usr/share/rlpm/hooks/`.
+
+  `/etc/shelly.conf` uses the exact same INI format and directive syntax as `pacman.conf`
+  (`[options]`, `SigLevel`, repository sections, and mirror URLs).
+
+---
+
+## Status and Limitations
+
+`libalpm` is the default engine, and RLPM is an opt-in alternative selected per machine with the
+setting above. RLPM's compatibility with `libalpm` is tracked row by row in an in-repo ledger, no
+row claims verified full parity yet, and release acceptance gates remain open for privileged
+sandboxes, independent reference behavior, parser fuzzing, large-repository performance and full
+frontend workflows. Practically, recovery is always one command away,
+`shelly config set NativePackageBackend libalpm`, because neither engine falls back to the other
+automatically.
+
+---
+
+## Further Reading
+
+- [Shelly Overview](/shelly-alpm/overview/) - What Shelly is and how it fits Arch Linux.
+- [Shelly Configuration Guide](/shelly-alpm/docs/config/) - Every CLI setting, including
+  `NativePackageBackend`.
+- [Building Packages](/shelly-alpm/docs/build/) - Building `PKGBUILD` recipes into package archives.
+- [System Maintenance & Keyring](/shelly-alpm/docs/maintenance/) - Cache cleaning, orphan removal,
+  and PGP key maintenance.
+- [Shelly CLI Reference](/shelly-alpm/docs/cli-reference/) - Complete command-line syntax for all
+  Shelly commands.
+- [Shelly-ALPM on GitHub](https://github.com/Seafoam-Labs/Shelly-ALPM) - Source code, issues and
+  releases.

@@ -9,7 +9,7 @@ description: Discover Shelly – a modern, easy-to-use package manager for Arch 
 
 Shelly is a fresh, modern way to manage software on Arch Linux and Arch-based systems. It’s designed to be simple, friendly, and visually appealing - making it easy for anyone to install, update, or remove apps and packages, whether you prefer a beautiful desktop app or a powerful command line.
 
-Built to make Arch more accessible without compromising its core principles, Shelly communicates directly with `libalpm` for fast, native package management rather than wrapping existing tools.
+Built to make Arch more accessible without compromising its core principles, Shelly communicates directly with Arch’s package layer for fast, native package management rather than wrapping existing tools. Two engines are built in: `libalpm`, the library behind `pacman`, is the default, and Shelly’s own RLPM engine is one setting away. See [RLPM](/shelly-alpm/docs/rlpm/) for the comparison and how to switch.
 
 ![Shelly Packages page](../../../assets/screenshots/shelly-packages.png)
 

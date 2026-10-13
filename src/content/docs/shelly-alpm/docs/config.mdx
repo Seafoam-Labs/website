@@ -5,15 +5,30 @@ sidebar:
 description: Learn how to configure Shelly ALPM CLI (config.json) and GUI (settings.json).
 ---
 
-In Shelly v3, configuration is split into two separate JSON files located in `~/.config/shelly/`:
+Shelly configuration is divided by responsibility. The CLI and GUI have separate JSON preferences,
+while native package operations and package builds each have their own configuration:
 
-- `config.json` - Used for configuring the command-line interface (`shelly`).
-- `settings.json` - Used for configuring the graphical user interface (`shelly-ui`) and background tray service
-  (`shelly-notifications`).
+- `~/.config/shelly/config.json` - CLI preferences, including `NativePackageBackend`.
+- `~/.config/shelly/settings.json` - GUI and notification-service preferences.
+- `/etc/pacman.conf` or `/etc/shelly.conf` - Native repositories and package-manager options. The selected
+  distribution path profile determines the default file; RLPM reads the configured native package settings.
+- `/etc/shellybuild.conf` - Settings for the separate `shelly build` package builder. It does not configure RLPM
+  or native package transactions. See [Building Packages](/shelly-alpm/docs/build/).
 
-If there is a breaking issue with your configuration, you can edit these files directly, use `shelly config reset` to
-restore CLI defaults, or remove them (e.g., `rm ~/.config/shelly/config.json ~/.config/shelly/settings.json`) to allow
-Shelly to regenerate default configuration files on start.
+The `pacman` path profile is the default. A distribution can build Shelly with the `devario` profile to use
+Shelly-owned system paths, including `/etc/shelly.conf` instead of `/etc/pacman.conf`. Backend selection
+(`libalpm` or RLPM) and path-profile selection are separate choices. See [RLPM](/shelly-alpm/docs/rlpm/) for
+the profile paths and backend details.
+
+If a CLI or GUI preference file is broken, you can edit it directly. `shelly config reset` restores CLI defaults;
+removing `config.json` or `settings.json` allows Shelly to regenerate that preference file on start. This reset does
+not change the native package configuration or `shellybuild.conf`.
+
+## Configuration Files and Their Roles
+
+The files above configure different parts of Shelly and are not interchangeable. In particular,
+`NativePackageBackend` selects the native transaction engine; it does not select the distribution path profile.
+`shellybuild.conf` controls package compilation only and has no effect on repository transactions.
 
 ## CLI Configuration (`config.json`)
 
@@ -21,14 +36,19 @@ Below is the authoritative default configuration for the Shelly CLI (`~/.config/
 
 ```json
 {
+  "NativePackageBackend": "libalpm",
   "FileSizeDisplay": "Megabytes",
-  "ParallelDownloadCount": 10,
+  "ParallelDownloadCount": 100,
   "DownloadAddressFamilyPolicy": "PreferIPv4",
   "ProgressBarStyle": "Blocks",
   "ProgressBarWidth": 24,
   "OutputMode": "singlepane",
   "AppImageInstallPath": null,
+  "DisableAppImageUpdateCheck": false,
+  "DisableFlatpakUpdateCheck": false,
   "AutoConfirmCacheClean": false,
+  "DisableCacheClean": false,
+  "CollapsePkgbuildDiff": true,
   "AurUrl": "https://aur.archlinux.org"
 }
 ```
@@ -37,43 +57,67 @@ Below is the authoritative default configuration for the Shelly CLI (`~/.config/
 
 The following fields configure the CLI (`shelly`). Modifying these options affects only CLI operations.
 
-1. `FileSizeDisplay`
+1. `NativePackageBackend`
+   - Native package engine used for repository operations. `"libalpm"` selects the library behind
+     `pacman`; `"rlpm"` selects Shelly's own native engine. Takes effect on the next CLI invocation,
+     and the GUI follows the CLI selection. See [RLPM](/shelly-alpm/docs/rlpm/) for the full
+     comparison and the switch walk-through.
+   - **Options:** `"libalpm"` (default) and `"rlpm"`. RLPM-only builds accept only `"rlpm"`.
+   - **Type:** string (default: `"libalpm"`).
+2. `FileSizeDisplay`
    - Display format for file and package sizes in CLI output.
    - **Options:** `"Bytes"`, `"Megabytes"`, `"Gigabytes"` (default: `"Megabytes"`).
-2. `ParallelDownloadCount`
+3. `ParallelDownloadCount`
    - Maximum number of concurrent downloads used by the ALPM download engine. Setting this to `1` disables parallel
      downloads. Higher values can cause rate limiting from package mirrors.
-   - **Type:** integer (default: `10`).
-3. `DownloadAddressFamilyPolicy`
+   - **Type:** integer (default: `100`).
+4. `DownloadAddressFamilyPolicy`
    - Network address resolution and connection policy used during package downloads.
    - **Options:**
      - `"PreferIPv4"` (default) - Prefers IPv4 connections.
      - `"PreferIPv6"` - Uses Happy Eyeballs connection racing with an IPv6 preference.
      - `"IPv4Only"` - Forces IPv4-only connections.
      - `"IPv6Only"` - Forces IPv6-only connections.
-4. `ProgressBarStyle`
+5. `ProgressBarStyle`
    - Visual animation and layout style of download and transaction progress bars.
    - **Options:**
      - `"Blocks"` (default) - Renders solid Unicode block segments filling the progress bar width.
      - `"Pacman"` - Renders a Pac-Man animation eating power pellets, matching `pacman`'s `ILoveCandy` mode.
-5. `ProgressBarWidth`
+6. `ProgressBarWidth`
    - Character column width of the progress bar in the CLI terminal output.
    - **Type:** integer (default: `24`).
-6. `OutputMode`
+7. `OutputMode`
    - Layout mode for terminal progress and log output.
    - **Options:** `"singlepane"` (default).
-7. `AppImageInstallPath`
+8. `AppImageInstallPath`
    - Custom filesystem path where AppImage binaries are downloaded and integrated into the desktop environment. When set
      to `null` or omitted, defaults to `~/.local/bin` (`$XDG_BIN_HOME`).
    - **Type:** string or `null` (default: `null`).
-8. `AutoConfirmCacheClean`
-   - Automatically answers yes to removing extra cache entries during aggregate upgrades (`shelly upgrade all`),
-     without prompting for confirmation.
+9. `DisableAppImageUpdateCheck`
+   - Skips the AppImage update check during aggregate upgrades (`shelly upgrade all`, or any upgrade command with
+     `--all`). The `--disable-appimage-update-check` flag overrides this per invocation.
    - **Type:** boolean (default: `false`).
-9. `AurUrl`
-   - Base URL of the Arch User Repository (AUR) service used for Git clones and RPC requests. Can be overridden per
-     command using the `--aur-url` option.
-   - **Type:** string (default: `"https://aur.archlinux.org"`).
+10. `DisableFlatpakUpdateCheck`
+    - Skips the Flatpak update check during aggregate upgrades (`shelly upgrade all`, or any upgrade command with
+      `--all`). The `--disable-flatpak-update-check` flag overrides this per invocation.
+    - **Type:** boolean (default: `false`).
+11. `AutoConfirmCacheClean`
+    - Automatically answers yes to removing extra cache entries during aggregate upgrades (`shelly upgrade all`),
+      without prompting for confirmation.
+    - **Type:** boolean (default: `false`).
+12. `DisableCacheClean`
+    - Skips removing extra cache entries during aggregate upgrades (`shelly upgrade all`, or any upgrade command with
+      `--all`). `AutoConfirmCacheClean` instead auto-answers the removal prompt. The `--disable-cache-clean` flag
+      overrides this per invocation.
+    - **Type:** boolean (default: `false`).
+13. `CollapsePkgbuildDiff`
+    - Collapses the `PKGBUILD` review diff to changed sections when a previous version of the recipe exists, instead of
+      displaying the complete file.
+    - **Type:** boolean (default: `true`).
+14. `AurUrl`
+    - Base URL of the Arch User Repository (AUR) service used for Git clones and RPC requests. Can be overridden per
+      command using the `--aur-url` option.
+    - **Type:** string (default: `"https://aur.archlinux.org"`).
 
 ## GUI Configuration (`settings.json`)
 
