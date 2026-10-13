@@ -154,6 +154,24 @@ export default defineConfig({
           ],
         },
         {
+          label: "Pearl",
+          items: [
+            "pearl/overview",
+            "pearl/installation",
+            {
+              label: "Documentation",
+              items: [{ autogenerate: { directory: "pearl/docs" } }],
+            },
+            ...makeChangelogsSidebarLinks([
+              {
+                type: "all",
+                base: "pearl/changelog",
+                label: "Changelog",
+              },
+            ]),
+          ],
+        },
+        {
           label: "Pori",
           items: [
             { autogenerate: { directory: "pori" } },

@@ -1,0 +1,137 @@
+---
+title: Installation
+description: Install Pearl from the Seafoam Labs package repository, or build the stable and Git packages from a checkout.
+sidebar:
+  label: Installation
+  order: 1
+---
+
+import {
+  Steps,
+  Tabs,
+  TabItem,
+  Aside,
+  Card,
+  Code,
+} from "@astrojs/starlight/components";
+
+Pearl requires [Aqueous](/aqueous/installation/): packages depend on
+`aqueous>0.7`, and the settings integration needs `aqueous-config` 0.8.2 or
+newer. The shell package bundles `pearl`, `pearlctl`, `pearl-lock`,
+`pearl-settings`, `pearl-themes`, the desktop portal backend, and the Phyto,
+Dome, and Coral companion applications. The login greeter is a separate
+package that runs on ordinary Aqueous and is independent of the shell.
+
+## Seafoam Labs repository (Recommended)
+
+The `seafoam-labs` repository publishes the Git shell and greeter, the
+optional Qt style package, and the matching Aqueous Git desktop stack.
+
+Add it to Shelly or pacman by following the
+[repository setup instructions](https://repo.seafoam-labs.org/setup). The key
+import, repository entry and sync commands there are generated from the
+repository's published address and current signing key.
+
+Then install:
+
+<Card title="Pearl shell (Git)" icon="download">
+  <Tabs>
+    <TabItem label="shelly">
+      <Code code="shelly -Is pearl-git" lang="sh" />
+    </TabItem>
+    <TabItem label="pacman">
+      <Code code="sudo pacman -S pearl-git" lang="sh" />
+    </TabItem>
+  </Tabs>
+</Card>
+
+Install the Aqueous Git desktop alongside it if you do not already run
+Aqueous: `aqueous-core-git`, `aqueous-git`, `aqueous-session-git`,
+`aqueous-integration-pearl-git`, `aqueous-shell-pearl-git`, and
+`xdg-desktop-portal-aqueous-git`. The repository also publishes the stable
+Aqueous stack (`aqueous`, `aqueous-session`, `aqueous-integration-pearl`,
+`aqueous-shell-pearl`); the stable Pearl package is not published there yet.
+
+Optional packages in the same repository:
+
+- `pearl-greeter-git`: the greetd login screen. Installing it selects Pearl
+  Greeter as the display manager for the next boot and backs up an existing
+  `/etc/greetd/config.toml`. Nothing is restarted; reboot when ready. See the
+  [greeter documentation](https://github.com/Seafoam-Labs/pearl/blob/main/docs/GREETER.md).
+- `pearl-darkly-style` with `qtengine`: Darkly application styles for shared
+  Qt 5/6 appearance management.
+
+You can browse the full catalog at
+[repo.seafoam-labs.org](https://repo.seafoam-labs.org/).
+
+<Aside type="note">
+  The Devario platform repositories (`devario-core` and friends) are separate
+  and are not usable on Arch Linux. On [Devario](/devario/overview/), Pearl
+  ships as part of the Devario desktop.
+</Aside>
+
+## Build from a checkout
+
+| Recipe                         | Packages                                    | Purpose                                                                |
+| ------------------------------ | ------------------------------------------- | ---------------------------------------------------------------------- |
+| `packaging/arch`               | `pearl`                                     | Stable shell built from the published release tag.                     |
+| `packaging/arch-git`           | `pearl-git`, `pearl-greeter-git`            | Split Git build from upstream; co-installable with the stable package. |
+| `packaging/arch-darkly-style*` | `pearl-darkly-style` variants               | Optional Qt Darkly application styles.                                 |
+| `packaging/Devario`            | `pearl`, `pearl-greeter`, `devario-desktop` | Stable recipes used to build the Devario desktop.                      |
+
+Building requires **Zig 0.16.0 exactly**, plus `git`, `pkgconf`, `gcc`,
+`qt5-base`, `qt6-base`, Python, `rust`, `rust-wasm`, and `librsvg`; `makepkg -s`
+resolves these together with the GTK 4 runtime libraries.
+
+Build the Git shell and greeter:
+
+```sh
+git clone https://github.com/Seafoam-Labs/pearl.git
+cd pearl/packaging/arch-git
+makepkg -s
+sudo pacman -U ./pearl-git-*.pkg.tar.zst ./pearl-greeter-git-*.pkg.tar.zst
+```
+
+Install only the greeter by passing its archive alone to `pacman -U`. The Git
+package suffixes its binaries (`pearl-git`, `pearlctl-git`, and so on), so it
+can coexist with a stable installation. The stable recipe in `packaging/arch`
+fetches the release tag, which must be published before the build succeeds.
+
+A plain development build without packaging:
+
+```sh
+ZIG_GLOBAL_CACHE_DIR="$PWD/.cache/zig" zig build -Doptimize=ReleaseSafe
+```
+
+### Optional runtime dependencies
+
+Enable the desktop services you want; Pearl degrades gracefully without them:
+
+| Package                 | Enables                                 |
+| ----------------------- | --------------------------------------- |
+| `networkmanager`        | Wi-Fi controls and saved profiles.      |
+| `bluez`                 | Bluetooth pairing and discovery.        |
+| `upower`                | Battery status.                         |
+| `power-profiles-daemon` | Power profile switching.                |
+| `matugen`               | Dynamic Material colors from wallpaper. |
+| `qtengine`              | Shared Qt 5/6 appearance management.    |
+| `gvfs`, `file-roller`   | Phyto file manager extras.              |
+| `nvidia-utils`          | NVIDIA GPU metrics in Dome.             |
+
+## Starting a session
+
+<Steps>
+
+1. Install an Aqueous desktop. See the [Aqueous installation
+   guide](/aqueous/installation/).
+
+2. Select **Aqueous** from the display manager's Wayland session list.
+
+3. On a fresh Aqueous desktop, Welcome offers a shell choice. Select Pearl,
+   then complete setup. Existing selections and personal configuration are
+   retained.
+
+</Steps>
+
+The Aqueous session starts Pearl as a user service; `pearl-git` uses its own
+suffixed service and can run beside a stable installation.

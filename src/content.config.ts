@@ -69,6 +69,15 @@ export const collections = {
       },
       {
         provider: "github",
+        base: "pearl/changelog",
+        owner: "Seafoam-Labs",
+        repo: "pearl",
+        title: "Pearl Changelog",
+        token: process.env.GH_API_TOKEN,
+        pagefind: false,
+      },
+      {
+        provider: "github",
         base: "starfish/changelog",
         owner: "Seafoam-Labs",
         repo: "Starfish",

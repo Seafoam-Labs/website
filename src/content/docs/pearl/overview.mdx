@@ -1,0 +1,95 @@
+---
+title: Pearl
+description: A native GTK desktop shell built exclusively for the Aqueous compositor.
+sidebar:
+  label: Overview
+  order: 0
+prev: false
+---
+
+import { CardGrid, LinkCard, Aside } from "@astrojs/starlight/components";
+
+**Pearl** is a desktop shell for the [Aqueous](/aqueous/overview/) Wayland
+compositor, written in Zig with GTK 4. Its look and feel is closely modeled on
+Dank Material Shell: Material palettes generated from your wallpaper, compact
+bar flyouts, and a full settings application. Pearl runs exclusively on
+Aqueous and supplies the current Aqueous settings UI; the old Aqueous settings
+frontend is retired.
+
+## What Pearl can do
+
+- Show a configurable bar on any edge of every output, with start, center, and
+  end groups, optional autohide, multiple time-zone clocks, running
+  applications, a wallpaper picker, and resource monitor widgets. Horizontal
+  bars wrap when space is tight; vertical bars keep their thickness and
+  scroll.
+- Keep favorite applications in a dock and in floating bar islands, with
+  persistent pins and custom launchers for running applications.
+- Search and launch applications and windows through GIO, run desktop actions,
+  and evaluate arithmetic expressions in the launcher's built-in calculator.
+- Open a local calendar and a control center with compact Sound, Network,
+  Bluetooth, and Power pages, plus session and workspace-layout actions.
+- Edit Pearl and Aqueous configuration in a standalone Settings application
+  with schema-driven pages, drafts that survive external edits,
+  conflict-aware merging, and compositor-owned display previews.
+- Theme the desktop with per-output wallpapers, dynamic Material palettes,
+  system and installed GTK 4 themes, Night Light, and opt-in Qt 5/6 styling
+  through QtEngine and Darkly.
+- Create themes from three colors or import community theme repositories over
+  HTTPS, and publish your own.
+- Connect to Wi-Fi networks through NetworkManager and pair Bluetooth devices
+  through BlueZ, both from the control center.
+- Control audio devices and streams, battery, brightness, and power profiles,
+  with on-screen feedback and confirmed power-off and restart actions.
+- Manage notifications with history, do-not-disturb and filters, use
+  StatusNotifier tray menus, and control MPRIS media players with artwork.
+- Keep an in-memory clipboard history and capture the screen or a region,
+  with save and copy controls.
+- Secure the session with idle and sleep policies, a polkit agent, a native
+  lock screen, and fingerprint login with password fallback.
+- Log in through an optional greetd-based greeter with an installed-desktop
+  chooser, themed to match the shell.
+- Extend the shell with experimental WebAssembly plugins that install,
+  update, and remove without a restart.
+- Drive the session from the command line with `pearlctl`, including settings
+  dispatch, layout control, and a diagnostics report bundle.
+
+Pearl packages also bundle three companion applications: the **Phyto** file
+manager, the **Dome** resource monitor, and the **Coral** text editor.
+
+<Aside type="note">
+  Pearl requires Aqueous and does not run on other compositors. Install the
+  matching Aqueous desktop first; see the [Aqueous overview](/aqueous/overview/)
+  and [Pearl installation](/pearl/installation/).
+</Aside>
+
+These guides track the source tree as of **October 13, 2026** (`d4ea6c3`).
+Distribution packages may lag behind; use `pearlctl status` to inspect your
+running shell.
+
+<CardGrid>
+  <LinkCard title="Installation" href="/pearl/installation/" />
+  <LinkCard title="Desktop" href="/pearl/docs/desktop/" />
+  <LinkCard title="Settings application" href="/pearl/docs/settings/" />
+  <LinkCard title="Appearance and theming" href="/pearl/docs/appearance/" />
+  <LinkCard title="Theme creation" href="/pearl/docs/theme-creation/" />
+  <LinkCard title="Connectivity" href="/pearl/docs/connectivity/" />
+  <LinkCard title="Audio and power" href="/pearl/docs/audio-power/" />
+  <LinkCard
+    title="Notifications, tray and media"
+    href="/pearl/docs/notifications-media/"
+  />
+  <LinkCard
+    title="Clipboard and screenshots"
+    href="/pearl/docs/clipboard-screenshots/"
+  />
+  <LinkCard title="Session security" href="/pearl/docs/security/" />
+  <LinkCard title="Login greeter" href="/pearl/docs/greeter/" />
+  <LinkCard title="Plugins" href="/pearl/docs/plugins/" />
+  <LinkCard title="Command line and logs" href="/pearl/docs/command-line/" />
+</CardGrid>
+
+## Project source
+
+The source, development specifications, packaging, and plugin development
+guide live in the [Pearl GitHub repository](https://github.com/Seafoam-Labs/pearl).
