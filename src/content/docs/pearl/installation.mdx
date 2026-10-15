@@ -18,9 +18,9 @@ import {
 Pearl requires [Aqueous](/aqueous/installation/): packages depend on
 `aqueous>0.7`, and the settings integration needs `aqueous-config` 0.8.2 or
 newer. The shell package bundles `pearl`, `pearlctl`, `pearl-lock`,
-`pearl-settings`, `pearl-themes`, the desktop portal backend, and the Phyto,
-Dome, and Coral companion applications. The login greeter is a separate
-package that runs on ordinary Aqueous and is independent of the shell.
+`pearl-settings`, `pearl-themes`, `pearl-agent`, the desktop portal backend,
+and the Phyto, Dome, and Coral companion applications. The login greeter is a
+separate package that runs on ordinary Aqueous and is independent of the shell.
 
 ## Seafoam Labs repository (Recommended)
 
@@ -72,12 +72,12 @@ You can browse the full catalog at
 
 ## Build from a checkout
 
-| Recipe                         | Packages                                    | Purpose                                                                |
-| ------------------------------ | ------------------------------------------- | ---------------------------------------------------------------------- |
-| `packaging/arch`               | `pearl`                                     | Stable shell built from the published release tag.                     |
-| `packaging/arch-git`           | `pearl-git`, `pearl-greeter-git`            | Split Git build from upstream; co-installable with the stable package. |
-| `packaging/arch-darkly-style*` | `pearl-darkly-style` variants               | Optional Qt Darkly application styles.                                 |
-| `packaging/Devario`            | `pearl`, `pearl-greeter`, `devario-desktop` | Stable recipes used to build the Devario desktop.                      |
+| Recipe                         | Packages                                                                      | Purpose                                                                |
+| ------------------------------ | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `packaging/arch`               | `pearl`                                                                       | Stable shell built from the published release tag.                     |
+| `packaging/arch-git`           | `pearl-git`, `pearl-greeter-git`                                              | Split Git build from upstream; co-installable with the stable package. |
+| `packaging/arch-darkly-style*` | `pearl-darkly-style` variants                                                 | Optional Qt Darkly application styles.                                 |
+| `packaging/Devario`            | `pearl`, `pearl-greeter`, `pearl-git`, `pearl-greeter-git`, `devario-desktop` | Stable and Git recipes used to build the Devario desktop.              |
 
 Building requires **Zig 0.16.0 exactly**, plus `git`, `pkgconf`, `gcc`,
 `qt5-base`, `qt6-base`, Python, `rust`, `rust-wasm`, and `librsvg`; `makepkg -s`
@@ -107,16 +107,17 @@ ZIG_GLOBAL_CACHE_DIR="$PWD/.cache/zig" zig build -Doptimize=ReleaseSafe
 
 Enable the desktop services you want; Pearl degrades gracefully without them:
 
-| Package                 | Enables                                 |
-| ----------------------- | --------------------------------------- |
-| `networkmanager`        | Wi-Fi controls and saved profiles.      |
-| `bluez`                 | Bluetooth pairing and discovery.        |
-| `upower`                | Battery status.                         |
-| `power-profiles-daemon` | Power profile switching.                |
-| `matugen`               | Dynamic Material colors from wallpaper. |
-| `qtengine`              | Shared Qt 5/6 appearance management.    |
-| `gvfs`, `file-roller`   | Phyto file manager extras.              |
-| `nvidia-utils`          | NVIDIA GPU metrics in Dome.             |
+| Package                                            | Enables                                                                         |
+| -------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `networkmanager`                                   | Wi-Fi controls and saved profiles.                                              |
+| `bluez`                                            | Bluetooth pairing and discovery.                                                |
+| `upower`                                           | Battery status.                                                                 |
+| `power-profiles-daemon`                            | Power profile switching.                                                        |
+| `qtengine`                                         | Shared Qt 5/6 appearance management.                                            |
+| `pearl-assistant-runtime` or `llama-cpp`           | Local model runtime for the launcher assistant.                                 |
+| `foot`, `kitty`, `alacritty`, `konsole` or `xterm` | Terminal for the assistant's interactive runtime setup; Arch also needs `sudo`. |
+| `gvfs`, `file-roller`                              | Phyto file manager extras.                                                      |
+| `nvidia-utils`                                     | NVIDIA GPU metrics in Dome.                                                     |
 
 ## Starting a session
 
