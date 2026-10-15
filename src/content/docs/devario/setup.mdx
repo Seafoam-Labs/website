@@ -1,0 +1,66 @@
+---
+title: Setup and defaults
+description: A quick walkthrough of Devario installation, first login, and the tools included in the Community desktop.
+sidebar:
+  label: Setup and defaults
+  order: 1
+---
+
+Devario's live image includes the desktop and installer together. Check the
+[hardware requirements](/devario/readiness/) for your image before starting.
+
+## Install the desktop
+
+1. **Boot the image in 64-bit UEFI mode.** The live environment signs in as
+   `liveuser` and starts Aqueous with Pearl. BIOS boot is available for trying
+   the live system, but installation requires UEFI.
+2. **Open Install Devario from the launcher.** Calamares provides the guided
+   installer with Pearl appearance, dark and light palettes, and reduced-motion
+   support.
+3. **Choose your language, region, keyboard, and disk layout.** Btrfs is the
+   default; ext4, XFS, and F2FS are available. Review the partition summary
+   carefully: applying it can erase data on the selected disk.
+4. **Create your local user and confirm installation.** Calamares copies the
+   prepared desktop, configures hardware and services, and installs
+   systemd-boot with the EFI partition at `/boot`. The base installation works
+   offline.
+5. **Restart into the installed system.** Pearl Greeter replaces live
+   autologin. Sign in to the Aqueous session with your new account.
+
+The [installer sequence](https://github.com/Seafoam-Labs/devario-os/blob/main/iso/airootfs/etc/calamares/settings.conf)
+and [partition defaults](https://github.com/Seafoam-Labs/devario-os/blob/main/iso/airootfs/etc/calamares/modules/partition.conf)
+describe the actual image setup.
+
+## Make it yours
+
+| Task                                           | Where to start                                                                           |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Change wallpaper, colors, bar, or dock         | Pearl Settings; see [Pearl's desktop features](/pearl/overview/)                         |
+| Switch from floating windows to another layout | Pearl's layout controls and [Aqueous layouts](/aqueous/layouts/)                         |
+| Configure monitors, scaling, or input          | [Display settings](/aqueous/outputs/) and [input settings](/aqueous/input/)              |
+| Customize shortcuts and window behavior        | [Keybindings](/aqueous/keybindings/) and [window rules](/aqueous/window-rules/)          |
+| Install applications or update the system      | Shelly's Package and Update pages; see [package management](/shelly-alpm/docs/packages/) |
+| Mount an additional disk at startup            | [Pori's user guide](/pori/user-guide/)                                                   |
+
+The default cursor is Vimix, with Papirus icons and Matugen available for
+color generation. Personal Aqueous settings live in `~/.config/aqueous/` and
+take precedence over the system defaults.
+
+## Everyday services
+
+Pearl's control center connects to **NetworkManager** for networking,
+**BlueZ** for Bluetooth, and **PipeWire/WirePlumber** for audio. **UPower**
+reports battery state and **power-profiles-daemon** supplies power profiles.
+
+**GNOME Keyring** stores credentials, with **Seahorse** available to manage
+them. Password login through greetd unlocks the login keyring when its
+password matches your login password. **UFW** is enabled with incoming and
+forwarded connections denied and outgoing connections allowed by default.
+
+**Ghostty** opens a **Fish** shell. Fastfetch displays the Devario system
+summary in each new terminal; nested shells stay quiet. A personal
+`~/.config/fastfetch/config.jsonc` overrides the system summary.
+
+For the underlying service and configuration files, see
+[How Devario is built](/devario/platform/). For collecting a troubleshooting
+report, see [Hardware and status](/devario/readiness/#diagnostics).

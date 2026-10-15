@@ -1,101 +1,98 @@
 ---
 title: Devario
-description: Managed Linux workstations for small-business fleets, with central software policy and Windows-connected identity.
+description: A quick guide to the free Devario Community desktop, its setup, and the open-source projects that power it.
 sidebar:
   label: Overview
   order: 0
 prev: false
 ---
 
-import {
-  Aside,
-  Card,
-  CardGrid,
-  LinkButton,
-} from "@astrojs/starlight/components";
+import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
 
-Devario is a **managed Linux workstation platform** for small businesses. It
-combines a modern desktop, central software policy, trusted package execution,
-and Windows-connected identity in one intentionally focused system.
+Devario is a **free, open-source Linux desktop** built around Seafoam Labs
+projects. The Community edition combines an Arch Linux-derived base, the
+Aqueous Wayland compositor, Pearl desktop shell, and Shelly package manager.
+It can be built, installed, and used independently, without an organization
+account or management service.
 
-It is designed for lean IT teams and managed service providers that want to
-introduce Linux without turning every workstation into a separate
-administration project—or replacing every Windows device at once.
-
-<div class="devario-statement">
-  <span>Managed workstation platform</span>
-  <strong>One login. One software policy. One fleet view.</strong>
-</div>
-
-## What Devario brings together
+## What runs your desktop
 
 <CardGrid>
-  <Card title="Governed software" icon="setting">
-    Remora defines approved catalogs, required and prohibited packages, update
-    channels, rollout timing, and device assignments.
+  <Card title="Aqueous · windows and displays" icon="laptop">
+    Handles windows, workspaces, displays, and input. Devario starts with
+    floating windows; switch to tiling, scrolling, or other layouts when you
+    want. See [Aqueous layouts](/aqueous/layouts/) and [display
+    settings](/aqueous/outputs/).
   </Card>
-  <Card title="Trusted execution" icon="approve-check-circle">
-    Shelly verifies signed software, resolves dependencies, applies package
-    transactions, and returns structured results.
+  <Card title="Pearl · the desktop around them" icon="setting">
+    Provides the bar, dock, launcher, notifications, control center, and
+    settings. Pearl Greeter handles sign-in through greetd. See the [Pearl
+    overview](/pearl/overview/) for desktop controls and customization.
   </Card>
-  <Card title="A modern workspace" icon="laptop">
-    Devario provides the managed operating system, guided installer, approved
-    applications, and an Aqueous desktop session.
+  <Card title="Shelly · applications and updates" icon="puzzle">
+    Installs, removes, and updates packages through a graphical interface and
+    CLI. Devario uses Shelly's native RLPM backend. Start with [package
+    management](/shelly-alpm/docs/packages/) or the [CLI
+    reference](/shelly-alpm/docs/cli-reference/).
   </Card>
-  <Card title="Connected identity" icon="padlock">
-    Active Directory remains the authority for users, groups, and computer
-    accounts while Devario governs software separately.
+  <Card title="Pori · persistent disk mounts" icon="database">
+    Sets up local disks to mount again after reboot using systemd mount units.
+    Follow the [Pori user guide](/pori/user-guide/) to configure an additional
+    drive.
   </Card>
 </CardGrid>
 
-## Built for coexistence
+## From live image to your own system
 
-Devario is not positioned as another general-purpose distribution or a
-universal replacement for every Windows workstation. A business can start with
-one compatible group—such as a browser-first back-office team, shared
-workstation pool, or training room—while Windows remains in place for
-specialized applications, drivers, and peripherals.
+Boot the live image to try Aqueous and Pearl, then open **Install Devario**.
+The Calamares installer guides you through language, keyboard, disk layout,
+and a local user account. Installation copies the prepared live filesystem,
+so the base desktop can be installed offline.
 
-That makes adoption a measured operational decision:
+The image targets **x86-64-v3 hardware**. Live media can boot through BIOS or
+UEFI, but installation requires **64-bit UEFI** and uses systemd-boot. Btrfs
+is the default filesystem; ext4, XFS, and F2FS are also offered.
+See [Setup and defaults](/devario/setup/) before installing.
 
-1. Qualify a role with strong Linux application and hardware compatibility.
-2. Deploy a small Devario cohort beside the existing Windows fleet.
-3. Validate login, software delivery, updates, recovery, and support effort.
-4. Expand by device group only when the evidence is good.
+## What else is included
 
-<Aside type="caution" title="Development-stage platform">
-  Devario has a bootable operating-system and installer foundation, a
-  Shelly-only package-management boundary, and a Remora development build.
-  Production hardening, release operations, broad hardware validation, and the
-  complete installer-led domain-login and GPO workflow remain in progress.
-</Aside>
+| Part of the system       | Included software                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| Kernel and boot          | Seafoam Labs' `linux-devario` kernel, Devario's dracut integration, systemd-boot, and a Plymouth boot splash |
+| Everyday applications    | Firefox, Ghostty, and Pearl's Phyto file manager, Dome resource monitor, and Coral text editor               |
+| Terminal                 | Fish, with a Devario Fastfetch summary in each new terminal                                                  |
+| Connectivity             | NetworkManager, BlueZ for Bluetooth, and Bolt tools for Thunderbolt authorization                            |
+| Sound and power          | PipeWire, WirePlumber, UPower, and power-profiles-daemon                                                     |
+| Appearance               | Matugen color generation, Papirus icons, Vimix cursors, and Devario backgrounds                              |
+| Credentials and firewall | GNOME Keyring, Seahorse, Polkit, and UFW                                                                     |
+| Graphics                 | Mesa and Vulkan drivers, XWayland, and NVIDIA open kernel modules for supported GPUs                         |
 
-## Where to go next
+The [ISO package list](https://github.com/Seafoam-Labs/devario-os/blob/main/iso/packages.x86_64)
+is the full inventory. The [OS README](https://github.com/Seafoam-Labs/devario-os#readme)
+explains how those packages are integrated; individual project guides may
+describe features newer than the packages in a particular image.
+
+## Explore the setup
 
 <CardGrid>
-  <Card title="Understand the platform" icon="puzzle">
-    See how Remora, Shelly, Devario endpoints, and Active Directory divide
-    responsibility in the [platform architecture](/devario/platform/).
-  </Card>
-  <Card title="Check business fit" icon="analytics">
-    Review the initial customer profile, suitable workloads, and qualification
-    boundaries in [Devario for business](/devario/for-business/).
-  </Card>
-  <Card title="Plan a pilot" icon="rocket">
-    Use the [pilot program](/devario/pilot/) to define a cohort, application
-    baseline, rollout plan, and measurable success criteria.
-  </Card>
-  <Card title="Review readiness" icon="information">
-    Separate what exists today from planned production work on the [product
-    readiness](/devario/readiness/) page.
-  </Card>
+  <LinkCard
+    title="Setup and defaults"
+    description="Installation, first login, desktop settings, and everyday tools."
+    href="/devario/setup/"
+  />
+  <LinkCard
+    title="How it is built"
+    description="Package management, boot, repositories, and source locations."
+    href="/devario/platform/"
+  />
+  <LinkCard
+    title="Hardware and status"
+    description="Current requirements, limitations, and diagnostics."
+    href="/devario/readiness/"
+  />
+  <LinkCard
+    title="Devario OS source"
+    description="Community image, package recipes, build scripts, and tests."
+    href="https://github.com/Seafoam-Labs/devario-os"
+  />
 </CardGrid>
-
-<LinkButton
-  href="mailto:developers@seafoam-labs.org?subject=Devario%20pilot"
-  variant="primary"
-  icon="email"
-  iconPlacement="start"
->
-  Talk to us about a pilot
-</LinkButton>

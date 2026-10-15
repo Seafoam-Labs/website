@@ -1,111 +1,61 @@
 ---
-title: Product readiness
-description: A transparent view of Devario's implemented foundation and remaining production work.
+title: Hardware and status
+description: Devario Community hardware requirements, current implementation limits, and local diagnostics.
 sidebar:
-  label: Product readiness
-  order: 4
+  label: Hardware and status
+  order: 3
 ---
 
-import { Aside, Badge, Card, CardGrid } from "@astrojs/starlight/components";
+Devario has a bootable Community image, an Aqueous and Pearl desktop,
+Calamares installation, and Shelly package management. Hardware coverage and
+release validation are ongoing; the source configuration does not guarantee
+that every published image contains the latest changes.
 
-Devario has enough working foundation to validate the product thesis. It is not
-yet represented as a production-certified platform or a completed enterprise
-management suite.
+## Hardware and installation
 
-This page distinguishes current implementation from intended behavior so pilot
-planning can be based on evidence rather than roadmap language.
+| Area                   | Current setup                                                                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| CPU                    | x86-64-v3 target for the Devario kernel and image                                                                                         |
+| Firmware               | BIOS or UEFI for live boot; **64-bit UEFI required for installation**                                                                     |
+| Secure Boot            | Not configured by the image                                                                                                               |
+| Intel and AMD graphics | Mesa and Vulkan drivers are included; check your hardware with the live desktop                                                           |
+| NVIDIA graphics        | Open kernel modules for supported Turing-and-newer GPUs; Calamares checks the packaged driver's PCI support list before partitioning      |
+| Older NVIDIA GPUs      | Unsupported by this image; Nouveau is blacklisted                                                                                         |
+| External GPUs          | Bolt authorization tools and GPU hotplug handling are included; physical hotplug, display, and suspend/resume validation remain necessary |
 
-## Current status
+## Software and release boundaries
 
-| Area                                                         | Status                                                         | Remaining work                                                                             |
-| ------------------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Core operating system, live desktop, and Calamares installer | <Badge text="Current" variant="success" size="small" />        | Complete release-candidate hardware coverage and production hardening                      |
-| Shelly-only package-management boundary                      | <Badge text="Implemented" variant="success" size="small" />    | Continue integration and repository validation as the supported endpoint interface matures |
-| Signed Devario repository workflow                           | <Badge text="Local workflow" variant="note" size="small" />    | Operationalize production keys, signing, publication, rotation, and recovery               |
-| Remora server, endpoint, policy, and reporting               | <Badge text="Development ready" variant="note" size="small" /> | Production deployment, security hardening, observability, backup, and support operations   |
-| Active Directory enrollment                                  | <Badge text="Locally validated" variant="note" size="small" /> | Complete installer integration and broader environment testing                             |
-| Domain login and applicable GPO logon rights                 | <Badge text="In progress" variant="caution" size="small" />    | Complete SSSD/PAM integration, enforcement, recovery, and production validation            |
+- The base installation is offline. Repository downloads and updates need
+  access to the configured software sources.
+- Shelly's native RLPM backend is the Devario package engine. The optional
+  AUR build toolchain is absent from the default desktop.
+- Development images and public release images have different repository
+  trust requirements. Public release builds require signed inputs.
+- Calamares currently remains installed on the target system.
+- Boot splash handoff, encrypted-root unlock, and hardware-specific behavior
+  still need image-level acceptance testing.
 
-<Aside type="caution" title="What these labels do not claim">
-  They do not represent production certification, customer traction, revenue,
-  guaranteed hardware compatibility, complete Windows GPO parity, or a service
-  level agreement.
-</Aside>
+The [OS README](https://github.com/Seafoam-Labs/devario-os#development-limitations)
+tracks development limitations, and the
+[test suite](https://github.com/Seafoam-Labs/devario-os/tree/main/tests)
+covers image, installer, package, desktop, and boot behavior.
 
-## What can be evaluated today
+## Diagnostics
 
-<CardGrid>
-  <Card title="Tangible workstation" icon="laptop">
-    A bootable live environment, Aqueous desktop, and guided Calamares installer
-    make the endpoint experience testable on representative hardware.
-  </Card>
-  <Card title="Trusted package foundation" icon="approve-check-circle">
-    Devario's patched Shelly path covers native package operations without a
-    runtime dependency on Pacman executables.
-  </Card>
-  <Card title="Management implementation" icon="setting">
-    The Remora development build provides a concrete basis for policy, endpoint,
-    inventory, channel, and reporting validation.
-  </Card>
-  <Card title="Defined pilot measures" icon="list-format">
-    Enrollment, login, deployment, compliance, support, outage, and recovery
-    outcomes can be agreed before a design-partner pilot begins.
-  </Card>
-</CardGrid>
+Open **Devario Report** from the application menu, or collect a local report
+in a terminal:
 
-## Path to pilot readiness
+```sh
+devario-report.sh --no-upload
+```
 
-### Complete the missing integration path
+The report includes hardware, scheduler information, kernel messages, boot
+warnings, and Shelly's package inventory. The command saves
+`devario-report.log` in the current directory; the menu launcher saves reports
+under `~/.local/state/devario/reports/` by default.
 
-- integrate AD enrollment and applicable GPO access configuration into the OS
-  installation flow;
-- complete domain login and group-to-access behavior;
-- define the supported Remora-to-Shelly machine interface; and
-- establish production repository signing and publication.
-
-### Harden and validate operations
-
-- test BIOS and UEFI installation on representative hardware;
-- validate Intel, AMD, and NVIDIA configurations appropriate to pilot cohorts;
-- test update interruption, retry, rollback, reimage, and break-glass recovery;
-- deploy Remora with monitoring, backup, certificate, and secret-management
-  procedures; and
-- complete security review and operational runbooks.
-
-### Prove repeatability
-
-- recruit compatible design partners;
-- run small mixed-fleet pilots with written scorecards;
-- measure support effort and outage behavior; and
-- turn pilot evidence into product, packaging, and qualification decisions.
-
-## Security principles
-
-Devario's production design follows these boundaries:
-
-- trust signed packages and repository metadata, not network location alone;
-- authenticate every endpoint to Remora and encrypt control traffic in transit;
-- use short-lived or delegated authority for domain joins rather than retaining
-  a reusable Domain Administrator password;
-- preserve a local break-glass administrator for directory outages and
-  recovery;
-- grant local administration through explicit directory groups;
-- record policy and package activity without recording credentials or
-  domain-join secrets; and
-- promote operating-system changes through controlled test, staged, and
-  production rings.
-
-## Known scope boundaries
-
-- Windows-connected identity is not automatic roaming of user files or
-  preferences.
-- GPO work is focused on applicable SSSD login rights, not complete Windows
-  Group Policy parity.
-- A user's first domain login normally requires access to a domain controller.
-- Windows-only applications, unsupported hardware, and specialized peripherals
-  require qualification by cohort.
-- Pricing, packaging, customer demand, and channel economics remain commercial
-  hypotheses until validated with design partners.
-
-For an operational evaluation, use the [pilot program](/devario/pilot/) to
-define a compatible cohort, deployment plan, and measurable success criteria.
+Reports redact common personal details, but review the saved file before
+sharing it. The interactive tool can offer a public upload; `--no-upload`
+keeps collection local. See the
+[report implementation](https://github.com/Seafoam-Labs/devario-os/blob/main/packages/devario-base/devario-report.sh)
+for the collected fields and upload behavior.

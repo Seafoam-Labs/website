@@ -1,4 +1,7 @@
 ---
+import { Image } from "astro:assets";
+import devarioLogo from "../assets/images/devario-logo.png";
+
 // TODO: Add the public S3 ISO download URL here when it is ready.
 const isoDownloadUrl = "";
 ---
@@ -9,14 +12,14 @@ const isoDownloadUrl = "";
       MEET DEVARIO <span>Free &amp; open source</span>
     </p>
     <h2 id="devario-title">
-      Easy to use.
+      A free Linux desktop.
       <br />
-      <em>Easy to understand.</em>
+      <em>See how it fits together.</em>
     </h2>
     <p class="dv-intro">
-      Devario brings free and open-source software together in a Linux desktop
-      designed to be easy to use and understand. Get started with guided setup,
-      manage apps with Shelly, and make your workspace your own.
+      Devario Community brings an Arch Linux-derived base, Aqueous, Pearl, and
+      Shelly together in one desktop. Install it with Calamares, make it your
+      own, and explore the open-source projects behind it.
     </p>
     <ul class="dv-features">
       <li>
@@ -24,8 +27,10 @@ const isoDownloadUrl = "";
           ✓
         </span>
         <div>
-          <strong>Guided setup</strong>
-          <span>A clear path from install to desktop.</span>
+          <strong>
+            <a href="/devario/setup/">Guided setup</a>
+          </strong>
+          <span>Offline installation with Calamares and a local account.</span>
         </div>
       </li>
       <li>
@@ -33,8 +38,10 @@ const isoDownloadUrl = "";
           ✓
         </span>
         <div>
-          <strong>Software, simplified</strong>
-          <span>Install and update apps with Shelly.</span>
+          <strong>
+            <a href="/shelly-alpm/docs/packages/">Shelly packages</a>
+          </strong>
+          <span>Install and update software with the native RLPM backend.</span>
         </div>
       </li>
       <li>
@@ -42,8 +49,12 @@ const isoDownloadUrl = "";
           ✓
         </span>
         <div>
-          <strong>A desktop that adapts</strong>
-          <span>Flexible layouts with Aqueous.</span>
+          <strong>
+            <a href="/aqueous/layouts/">Aqueous windows</a>
+          </strong>
+          <span>
+            Floating windows by default, with tiling and scrolling layouts.
+          </span>
         </div>
       </li>
       <li>
@@ -51,8 +62,10 @@ const isoDownloadUrl = "";
           ✓
         </span>
         <div>
-          <strong>Open by design</strong>
-          <span>Explore the code. Make it your own.</span>
+          <strong>
+            <a href="/pearl/overview/">Pearl desktop</a>
+          </strong>
+          <span>Your launcher, panels, settings, and login screen.</span>
         </div>
       </li>
       <li class="dv-kernel">
@@ -60,19 +73,23 @@ const isoDownloadUrl = "";
           ✓
         </span>
         <div>
-          <strong>A custom kernel, tuned for your desktop</strong>
+          <strong>
+            <a href="/devario/platform/#kernel-installation-and-boot">
+              The Devario kernel and boot setup
+            </a>
+          </strong>
           <span>
-            Built for stability and performance. Control your scheduler right
-            from your desktop with the power of our sched-ext integration.
+            Seafoam Labs' kernel for x86-64-v3 hardware, with dracut boot images
+            and systemd-boot. See the components and how they connect.
           </span>
         </div>
       </li>
     </ul>
     <div class="dv-actions">
       <a class="dv-primary" href="/devario/overview/">
-        Explore Devario <span aria-hidden="true">→</span>
+        See the overview <span aria-hidden="true">→</span>
       </a>
-      <a href="https://github.com/Seafoam-Labs">
+      <a href="https://github.com/Seafoam-Labs/devario-os">
         Explore the code <span aria-hidden="true">↗</span>
       </a>
     </div>
@@ -109,7 +126,12 @@ const isoDownloadUrl = "";
     <div class="dv-halo" aria-hidden="true"></div>
     <div class="dv-screen" aria-hidden="true">
       <div class="dv-toolbar">
-        <span class="dv-brand">✳ &nbsp;devario</span>
+        <span class="dv-brand">
+          <span class="dv-fish">
+            <Image src={devarioLogo} alt="" width={88} />
+          </span>
+          devario
+        </span>
         <span class="dv-workspaces">
           <i></i>
           <i></i>
@@ -125,7 +147,9 @@ const isoDownloadUrl = "";
             <span class="dv-windowdots">● ● ●</span>
           </div>
           <div class="dv-windowbody">
-            <span class="dv-app-icon">✳</span>
+            <span class="dv-fish dv-app-icon">
+              <Image src={devarioLogo} alt="" width={88} />
+            </span>
             <strong>
               Your desktop.
               <br />
@@ -254,6 +278,15 @@ const isoDownloadUrl = "";
     line-height: 1.4;
     color: var(--sl-color-white);
   }
+  .dv-features strong a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--sl-color-gray-4);
+    text-underline-offset: 0.2em;
+  }
+  .dv-features strong a:hover {
+    color: var(--sl-color-text-accent);
+  }
   .dv-features div > span {
     display: block;
     margin-top: 0.2rem;
@@ -345,9 +378,28 @@ const isoDownloadUrl = "";
     line-height: 1.3;
   }
   .dv-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-weight: 700;
     color: #5eead4;
     font-size: 9px;
+  }
+  .dv-fish {
+    /* Display the fish above the wordmark in the original Fastfetch asset. */
+    position: relative;
+    display: block;
+    width: 20px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .dv-fish img {
+    position: absolute;
+    top: -10%;
+    left: -5%;
+    width: 110%;
+    max-width: none;
+    height: auto;
   }
   .dv-workspaces {
     display: flex;
@@ -424,14 +476,8 @@ const isoDownloadUrl = "";
     line-height: 1.3;
   }
   .dv-app-icon {
-    display: grid;
-    place-content: center;
-    width: 25px;
-    height: 25px;
-    border-radius: 7px;
-    background: #2dd4a81f;
-    color: #5eead4;
-    font-size: 22px;
+    width: 40px;
+    height: 20px;
   }
   .dv-windowbody strong {
     color: #eef9fa;
@@ -588,6 +634,7 @@ const isoDownloadUrl = "";
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
+  .dv-features a:focus-visible,
   .dv-actions a:focus-visible,
   .dv-iso:focus-visible {
     outline: 2px solid var(--sl-color-text-accent);

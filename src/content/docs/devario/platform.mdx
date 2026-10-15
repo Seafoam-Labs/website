@@ -1,160 +1,98 @@
 ---
-title: Platform architecture
-description: How Remora, Shelly, Devario endpoints, and Active Directory work together.
+title: How Devario is built
+description: The desktop, package manager, boot setup, and source files behind Devario Community.
 sidebar:
-  label: Platform architecture
-  order: 1
+  label: How it is built
+  order: 2
 ---
 
-import { Aside, Card, CardGrid, Steps } from "@astrojs/starlight/components";
+Devario Community brings the desktop, installer, package recipes, and image
+build together in [devario-os](https://github.com/Seafoam-Labs/devario-os).
+Its default build is a complete, independently usable operating system.
 
-Devario keeps its core responsibilities deliberately separate:
+## Desktop and session
 
-> **Remora decides. Shelly executes. Active Directory authenticates.**
+**Aqueous** is the Wayland compositor: it controls windows, layouts, input,
+and displays. **Pearl** is its desktop shell: it provides panels, the launcher,
+notifications, and graphical settings. Pearl Greeter uses **greetd** to
+authenticate local users and launch the packaged **UWSM** session, which
+manages the desktop through systemd user services.
 
-This boundary lets software management, package trust, and employee identity
-continue operating independently. A directory outage should not corrupt
-package state, and a Remora outage should not invalidate a user's identity.
+Devario selects Pearl in `/etc/xdg/aqueous/session.toml`. System defaults live
+under `/etc/xdg/aqueous/`, with personal settings under `~/.config/aqueous/`.
+The default layout is `stacking`, Aqueous's floating-window layout.
 
-## The integrated workstation stack
+Read [desktop sessions](/aqueous/desktop-session/),
+[Aqueous configuration](/aqueous/configuration/), and the
+[Pearl overview](/pearl/overview/) for the component guides.
 
-<div
-  class="architecture"
-  role="img"
-  aria-label="Administrator policy flows through Remora to a Devario endpoint. Shelly applies signed packages, while Active Directory authenticates the user into an Aqueous session."
->
-  <div class="architecture-layer">
-    <span>Operator</span>
-    <strong>Administrator</strong>
-    <small>Catalogs · groups · rollouts</small>
-  </div>
-  <span class="architecture-arrow" aria-hidden="true">
-    →
-  </span>
-  <div class="architecture-layer architecture-control">
-    <span>Control + supply</span>
-    <strong>Remora</strong>
-    <small>Policy · channels · inventory</small>
-  </div>
-  <span class="architecture-arrow" aria-hidden="true">
-    →
-  </span>
-  <div class="architecture-layer architecture-endpoint">
-    <span>Devario endpoint</span>
-    <strong>Shelly</strong>
-    <small>Verify · resolve · transact</small>
-  </div>
-  <span class="architecture-arrow" aria-hidden="true">
-    ↔
-  </span>
-  <div class="architecture-layer">
-    <span>Identity</span>
-    <strong>Active Directory</strong>
-    <small>Users · groups · access</small>
-  </div>
-</div>
+## Shelly and software sources
 
-## Component responsibilities
+Devario ships **Shelly with its native RLPM backend**, without the `pacman`
+or `pacman-key` executables. Shelly handles repository synchronization,
+dependency resolution, signatures, installation, removal, and upgrades.
+Devario's configured repositories supply its packages; the default setup does
+not include Arch repositories or mirrorlists.
 
-| Component              | Owns                                                                                          | Does not own                                           |
-| ---------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| **Devario**            | Managed OS, installer, trusted runtime, approved applications, and Aqueous desktop            | Directory passwords or fleet policy authoring          |
-| **Remora**             | Catalogs, desired state, device groups, channels, rollout policy, inventory, and reporting    | Local package-database mutation or user authentication |
-| **Shelly**             | Signature verification, dependency resolution, install, removal, upgrade, and local inventory | Fleet-wide policy decisions                            |
-| **Active Directory**   | Users, groups, computer accounts, authentication, and domain access policy                    | Devario software state                                 |
-| **SSSD, PAM, and NSS** | Mapping directory identities into authorized Linux users and sessions                         | Package policy or repository publication               |
+| Configuration or data                    | Devario location                                    |
+| ---------------------------------------- | --------------------------------------------------- |
+| Repository configuration                 | `/etc/shelly.conf`                                  |
+| Local and synchronized package databases | `/var/lib/shelly/`                                  |
+| Downloaded package cache                 | `/var/cache/shelly/pkg/`                            |
+| Mutable signing keyring                  | `/etc/shelly.d/gnupg/`                              |
+| Packaged public keyring sources          | `/usr/share/shelly/keyrings/`                       |
+| Package hooks                            | `/usr/share/rlpm/hooks/` and `/etc/shelly.d/hooks/` |
 
-## Software control loop
+The core repository is configured first, followed by Devario's browser,
+development, entertainment, gaming, utilities, productivity, and library
+repositories. The
+[runtime repository template](https://github.com/Seafoam-Labs/devario-os/blob/main/iso/shelly.runtime.conf)
+defines the image configuration. First-boot initialization prepares the
+signing keyring before normal package operations.
 
-<Steps>
+See [RLPM and the Devario path profile](/shelly-alpm/docs/rlpm/#distribution-and-configuration-knobs)
+for implementation details. Shelly's general documentation also covers Arch
+installations and optional backends: its Pacman paths and libalpm defaults do
+not describe Devario. The default Devario image supports binary repositories
+and local package archives; the build toolchain for optional AUR use is not
+included.
 
-1. **Publish signed supply**
+## Kernel, installation, and boot
 
-   The build pipeline produces packages and repository metadata. Release
-   operations sign those artifacts before publication.
+Devario uses Seafoam Labs' **`linux-devario`** kernel for x86-64-v3 systems,
+with matching headers. Kernel development lives in the
+[Linux project](https://github.com/Seafoam-Labs/linux); the OS image consumes
+the built kernel packages.
 
-2. **Define desired state**
+Calamares unpacks the prepared SquashFS filesystem and configures the target
+disk and user account. It does not download and assemble the base system
+during installation. **systemd-boot** starts the installed system from a FAT
+EFI System Partition mounted at `/boot`.
 
-   Remora organizes approved content into channels such as test, staged, and
-   production. Administrators assign baselines and update policy to device
-   groups.
+**devario-dracut** generates the early boot filesystem. **devario-boot** owns
+the normal and fallback images, boot entries, and update hooks, so kernel,
+driver, and boot-related package changes refresh the boot artifacts together.
+Plymouth supplies the themed boot splash.
 
-3. **Converge the endpoint**
+## Find the implementation
 
-   The endpoint service receives its desired state and asks Shelly to perform
-   the approved install, update, or removal transaction.
+| Source in devario-os                                                                                                                                  | What it defines                                                 |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [Community edition](https://github.com/Seafoam-Labs/devario-os/tree/main/editions/community)                                                          | Default image composition                                       |
+| [ISO profile and package list](https://github.com/Seafoam-Labs/devario-os/tree/main/iso)                                                              | Image contents, boot media, and live filesystem                 |
+| [Late image defaults](https://github.com/Seafoam-Labs/devario-os/tree/main/iso/late-airootfs)                                                         | Live login, desktop appearance, firewall, and terminal defaults |
+| [Calamares configuration](https://github.com/Seafoam-Labs/devario-os/tree/main/iso/airootfs/etc/calamares)                                            | Installation sequence, partition choices, and hardware checks   |
+| [Desktop integration](https://github.com/Seafoam-Labs/devario-os/tree/main/packages/devario-aqueous-desktop)                                          | Desktop dependencies, greeter, session, and GPU setup           |
+| [Base package](https://github.com/Seafoam-Labs/devario-os/tree/main/packages/devario-base)                                                            | Base dependencies, Shelly storage, and diagnostics              |
+| [Boot integration](https://github.com/Seafoam-Labs/devario-os/tree/main/packages/devario-boot)                                                        | Initramfs generation and installed boot updates                 |
+| [Build scripts](https://github.com/Seafoam-Labs/devario-os/tree/main/scripts) and [tests](https://github.com/Seafoam-Labs/devario-os/tree/main/tests) | Image construction, package checks, and boot acceptance         |
 
-4. **Verify and report**
+Release builds enforce signed package inputs and repository validation.
+Development images have different trust settings; see the
+[OS build and validation notes](https://github.com/Seafoam-Labs/devario-os#readme).
+Original Devario code and configuration default to GPL-3.0-or-later, while
+original documentation and artwork default to CC-BY-SA-4.0; individual
+components retain their own [licenses](https://github.com/Seafoam-Labs/devario-os/blob/main/LICENSE.md).
 
-   Shelly checks repository and package signatures, resolves dependencies,
-   applies the transaction through `libalpm`, and returns the outcome. Remora
-   receives inventory, update state, failures, and restart requirements.
-
-</Steps>
-
-Policy can describe:
-
-- required and prohibited packages;
-- packages available through a curated self-service catalog;
-- pinned versions and approved repository channels;
-- staged rollout timing; and
-- device or group assignments.
-
-### Why Shelly is the transaction boundary
-
-Devario's patched Shelly foundation removes the remaining runtime dependency
-on the `pacman` and `pacman-key` executables. Shelly performs native keyring and
-ALPM operations and provides a defined place for transaction locking,
-machine-readable results, inventory, and auditable errors.
-
-Remora asks Shelly for an approved outcome. It does not edit the ALPM database
-or invoke lower-level package tools itself.
-
-## Windows-connected identity
-
-The intended sign-in path preserves the identity system a mixed Windows fleet
-already uses:
-
-<Steps>
-
-1. Installation establishes a device identity, checks domain DNS and time, and
-   enrolls the workstation with Active Directory.
-2. A user enters `user@example.com` or `DOMAIN\\user` without requiring a
-   directory-wide list of accounts on the login screen.
-3. PAM and NSS pass identity requests to SSSD, which uses Kerberos and LDAP to
-   map the domain user and groups into Linux.
-4. On first successful sign-in, PAM creates a local home directory and starts
-   the user's Aqueous session.
-5. Administrators can allow credential caching for temporary network outages
-   and map selected directory groups to local access or administration.
-
-</Steps>
-
-<Aside type="note" title="Identity is not profile roaming">
-  Windows-connected login does not automatically roam a user's files,
-  application settings, or complete Windows Group Policy behavior. Those
-  capabilities require separate storage, synchronization, and policy work.
-</Aside>
-
-<Aside type="caution" title="Current implementation boundary">
-  Local Active Directory enrollment has been validated. Completing the guided
-  installer flow, production domain login, and applicable SSSD GPO logon-right
-  enforcement remains part of the pilot-readiness work.
-</Aside>
-
-## Failure containment
-
-<CardGrid>
-  <Card title="Directory interruption" icon="padlock">
-    Package state remains intact. Previously authorized users may continue with
-    cached credentials when the administrator's policy allows it.
-  </Card>
-  <Card title="Remora interruption" icon="cloud-download">
-    The endpoint retains its last accepted policy and repository configuration;
-    domain identity remains a separate concern.
-  </Card>
-  <Card title="Repository interruption" icon="database">
-    Existing applications keep working. New transactions wait for approved,
-    signed metadata and packages rather than trusting network location alone.
-  </Card>
-</CardGrid>
+Fleet management and domain enrollment belong to separately maintained
+editions and services. They are not prerequisites for Community setup.

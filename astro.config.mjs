@@ -100,7 +100,17 @@ export default defineConfig({
         },
         {
           label: "Devario",
-          items: [{ autogenerate: { directory: "devario" } }],
+          items: [
+            "devario/overview",
+            "devario/setup",
+            "devario/platform",
+            "devario/readiness",
+            {
+              label: "For organizations",
+              collapsed: true,
+              items: ["devario/for-business", "devario/pilot"],
+            },
+          ],
         },
         {
           label: "Starfish",
