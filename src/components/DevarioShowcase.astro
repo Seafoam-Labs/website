@@ -1,461 +1,596 @@
 ---
-import { LinkButton } from "@astrojs/starlight/components";
+// TODO: Add the public S3 ISO download URL here when it is ready.
+const isoDownloadUrl = "";
 ---
 
 <section class="devario-showcase" aria-labelledby="devario-title">
-  <div class="devario-copy">
-    <p class="devario-eyebrow">
-      <span aria-hidden="true"></span>
-      Managed workstation platform
+  <div class="dv-copy">
+    <p class="dv-eyebrow">
+      MEET DEVARIO <span>Free &amp; open source</span>
     </p>
-
     <h2 id="devario-title">
-      Managed Linux.
+      Easy to use.
       <br />
-      <span>Without enterprise complexity.</span>
+      <em>Easy to understand.</em>
     </h2>
-
-    <p class="devario-intro">
-      Devario gives small businesses one way to govern Linux software fleets,
-      while keeping the familiar identity layer and mixed Windows environments
-      they already rely on.
+    <p class="dv-intro">
+      Devario brings free and open-source software together in a Linux desktop
+      designed to be easy to use and understand. Get started with guided setup,
+      manage apps with Shelly, and make your workspace your own.
     </p>
-
-    <div class="devario-actions">
-      <LinkButton
-        href="mailto:developers@seafoam-labs.org?subject=Devario%20pilot"
-        variant="primary"
-        icon="email"
-        iconPlacement="start"
+    <ul class="dv-features">
+      <li>
+        <span class="dv-check" aria-hidden="true">
+          ✓
+        </span>
+        <div>
+          <strong>Guided setup</strong>
+          <span>A clear path from install to desktop.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dv-check" aria-hidden="true">
+          ✓
+        </span>
+        <div>
+          <strong>Software, simplified</strong>
+          <span>Install and update apps with Shelly.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dv-check" aria-hidden="true">
+          ✓
+        </span>
+        <div>
+          <strong>A desktop that adapts</strong>
+          <span>Flexible layouts with Aqueous.</span>
+        </div>
+      </li>
+      <li>
+        <span class="dv-check" aria-hidden="true">
+          ✓
+        </span>
+        <div>
+          <strong>Open by design</strong>
+          <span>Explore the code. Make it your own.</span>
+        </div>
+      </li>
+      <li class="dv-kernel">
+        <span class="dv-check" aria-hidden="true">
+          ✓
+        </span>
+        <div>
+          <strong>A custom kernel, tuned for your desktop</strong>
+          <span>
+            Built for stability and performance. Control your scheduler right
+            from your desktop with the power of our sched-ext integration.
+          </span>
+        </div>
+      </li>
+    </ul>
+    <div class="dv-actions">
+      <a class="dv-primary" href="/devario/overview/">
+        Explore Devario <span aria-hidden="true">→</span>
+      </a>
+      <a href="https://github.com/Seafoam-Labs">
+        Explore the code <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <div class="dv-download">
+      <span class="dv-download-intro">Make yourself at home.</span>
+      <a
+        class="dv-iso"
+        href={isoDownloadUrl || undefined}
+        role="link"
+        aria-disabled={!isoDownloadUrl}
+        tabindex={isoDownloadUrl ? undefined : -1}
       >
-        Talk to us about a pilot
-      </LinkButton>
-      <LinkButton href="/devario/overview/" variant="minimal">
-        Explore Devario
-      </LinkButton>
+        Get the ISO
+        <svg
+          aria-hidden="true"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+        </svg>
+      </a>
     </div>
   </div>
-
-  <div class="devario-orbit" aria-label="The Devario workstation stack">
-    <div class="orbit-ring orbit-ring-one" aria-hidden="true"></div>
-    <div class="orbit-ring orbit-ring-two" aria-hidden="true"></div>
-    <div class="orbit-line orbit-line-one" aria-hidden="true"></div>
-    <div class="orbit-line orbit-line-two" aria-hidden="true"></div>
-
-    <div class="orbit-node orbit-node-remora">
-      <strong>Remora</strong>
-      <span>Control</span>
+  <figure
+    class="dv-visual"
+    aria-label="Concept illustration of a Devario desktop"
+  >
+    <div class="dv-halo" aria-hidden="true"></div>
+    <div class="dv-screen" aria-hidden="true">
+      <div class="dv-toolbar">
+        <span class="dv-brand">✳ &nbsp;devario</span>
+        <span class="dv-workspaces">
+          <i></i>
+          <i></i>
+          <i></i>
+        </span>
+        <span>09:41</span>
+      </div>
+      <div class="dv-desktop">
+        <div class="dv-wallpaper"></div>
+        <div class="dv-window">
+          <div class="dv-windowbar">
+            <span>Make yourself at home</span>
+            <span class="dv-windowdots">● ● ●</span>
+          </div>
+          <div class="dv-windowbody">
+            <span class="dv-app-icon">✳</span>
+            <strong>
+              Your desktop.
+              <br />
+              Your way.
+            </strong>
+            <span>A little less effort. A lot more flow.</span>
+            <div class="dv-layouts">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+        <div class="dv-dock">
+          <span>▦</span>
+          <span>▱</span>
+          <span>◎</span>
+          <span>⚙</span>
+        </div>
+      </div>
     </div>
-    <div class="orbit-node orbit-node-shelly">
-      <strong>Shelly</strong>
-      <span>Execute</span>
-    </div>
-    <div class="orbit-core">
-      <strong>Devario</strong>
-      <span>Managed Linux</span>
-    </div>
-    <div class="orbit-node orbit-node-aqueous">
-      <strong>Aqueous</strong>
-      <span>Experience</span>
-    </div>
-    <div class="orbit-node orbit-node-ad">
-      <strong>AD</strong>
-      <span>Identity</span>
-    </div>
-  </div>
-
-  <div class="devario-stack" id="devario-stack">
-    <div>
-      <span class="stack-number">01</span>
-      <h3>One policy surface</h3>
-      <p>
-        Remora defines catalogs, device groups, rollout channels, and the
-        desired software state for the fleet.
-      </p>
-    </div>
-    <div>
-      <span class="stack-number">02</span>
-      <h3>Trusted execution</h3>
-      <p>
-        Shelly verifies signed artifacts, resolves dependencies, applies package
-        transactions, and reports the result.
-      </p>
-    </div>
-    <div>
-      <span class="stack-number">03</span>
-      <h3>Familiar identity</h3>
-      <p>
-        Active Directory remains authoritative, so teams can introduce Linux by
-        role instead of planning a big-bang migration.
-      </p>
-    </div>
-  </div>
-
-  <div class="devario-status" aria-label="Devario development status">
-    <span>
-      <i></i> Core OS and installer implemented
-    </span>
-    <span>
-      <i></i> Remora development build ready
-    </span>
-    <span class="status-validation">
-      <i></i> AD enrollment validated locally
-    </span>
-  </div>
+    <div class="dv-stand" aria-hidden="true"></div>
+    <div class="dv-foot" aria-hidden="true"></div>
+    <figcaption>
+      Open software. A desktop that feels like yours.
+      <br />
+      <span>Concept illustration</span>
+    </figcaption>
+  </figure>
 </section>
 
 <style>
   .devario-showcase {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
-    gap: 2rem 2.5rem;
-    margin: 0 0 10rem;
-    padding: clamp(2rem, 5vw, 4.5rem);
-    overflow: hidden;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: 2.5rem;
+    align-items: center;
+    margin: 0 0 4rem;
+    padding: 2.5rem;
     border: 1px solid var(--sl-color-gray-5);
-    color: var(--sl-color-white);
+    border-radius: 1.25rem;
     background:
       radial-gradient(
-        circle at 85% 20%,
-        color-mix(in srgb, var(--color-seafoam) 12%, transparent),
-        transparent 30%
-      ),
-      radial-gradient(
-        circle at 5% 100%,
-        color-mix(in srgb, var(--color-purple) 10%, transparent),
-        transparent 35%
+        ellipse at 100% 40%,
+        color-mix(in srgb, var(--color-seafoam) 9%, transparent),
+        transparent 60%
       ),
       var(--sl-color-black);
+    color: var(--sl-color-white);
     isolation: isolate;
   }
-
-  .devario-showcase::before {
-    position: absolute;
-    z-index: -1;
-    inset: 0;
-    background-image:
-      linear-gradient(
-        color-mix(in srgb, var(--sl-color-white) 2%, transparent) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--sl-color-white) 2%, transparent) 1px,
-        transparent 1px
-      );
-    background-size: 44px 44px;
-    content: "";
-    mask-image: linear-gradient(to right, transparent, black 60%);
+  .devario-showcase * {
+    box-sizing: border-box;
   }
-
-  .devario-copy {
-    align-self: center;
-    min-width: 0;
-  }
-
-  .devario-eyebrow {
+  .devario-showcase .dv-eyebrow {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.8rem;
     margin: 0 0 1rem;
     color: var(--sl-color-text-accent);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    line-height: 1.4;
-    text-transform: uppercase;
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
   }
-
-  .devario-eyebrow span {
-    width: 1.2rem;
-    height: 2px;
-    border-radius: 999px;
-    background: currentColor;
+  .dv-eyebrow span {
+    padding-left: 0.8rem;
+    border-left: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-gray-3);
+    font-weight: 500;
+    letter-spacing: 0;
+    font-size: 0.75rem;
   }
-
   .devario-showcase h2 {
     margin: 0;
+    font-size: clamp(1.8rem, 3.1vw, 2.7rem);
+    letter-spacing: -0.045em;
+    line-height: 1.12;
     color: var(--sl-color-white);
-    font-size: clamp(2.45rem, 5vw, 4.4rem);
-    font-weight: 700;
-    letter-spacing: -0.055em;
-    line-height: 0.98;
   }
-
-  .devario-showcase h2 span {
+  .dv-copy h2 em {
+    font-style: normal;
     color: var(--sl-color-text-accent);
   }
-
-  .devario-intro {
-    max-width: 39rem;
-    margin: 1.5rem 0 0;
-    color: var(--sl-color-text);
-    font-size: clamp(1rem, 1.7vw, 1.15rem);
-    line-height: 1.65;
+  .devario-showcase .dv-intro {
+    margin: 1.1rem 0 1.4rem;
+    color: var(--sl-color-gray-2);
+    font-size: 0.94rem;
+    line-height: 1.7;
   }
-
-  .devario-actions {
+  .devario-showcase .dv-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 0.9rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .devario-showcase .dv-features li {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1.25rem;
-    margin-top: 1.75rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
   }
-
-  .devario-orbit {
-    position: relative;
-    align-self: center;
-    aspect-ratio: 1;
-    min-width: 18rem;
-    max-width: 26rem;
-    margin-inline: auto;
-  }
-
-  .orbit-ring,
-  .orbit-line,
-  .orbit-core,
-  .orbit-node {
-    position: absolute;
-  }
-
-  .orbit-ring {
-    border: 1px solid
-      color-mix(in srgb, var(--sl-color-gray-3) 35%, transparent);
-    border-radius: 50%;
-  }
-
-  .orbit-ring-one {
-    inset: 15%;
-    transform: rotate(22deg) scaleY(0.64);
-  }
-
-  .orbit-ring-two {
-    inset: 18% 8%;
-    border-color: color-mix(
-      in srgb,
-      var(--sl-color-text-accent) 55%,
-      transparent
-    );
-    border-style: dashed;
-    transform: rotate(-18deg) scaleY(0.58);
-  }
-
-  .orbit-line {
-    top: 50%;
-    left: 50%;
-    width: 70%;
-    height: 1px;
-    background: color-mix(in srgb, var(--sl-color-gray-3) 45%, transparent);
-    transform-origin: center;
-  }
-
-  .orbit-line-one {
-    transform: translate(-50%, -50%) rotate(46deg);
-  }
-
-  .orbit-line-two {
-    transform: translate(-50%, -50%) rotate(-47deg);
-  }
-
-  .orbit-core,
-  .orbit-node {
+  .dv-check {
     display: grid;
     place-content: center;
-    border: 1px solid var(--sl-color-gray-5);
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
     border-radius: 50%;
-    text-align: center;
-  }
-
-  .orbit-core strong,
-  .orbit-node strong {
-    color: var(--sl-color-white);
-    font-size: clamp(0.75rem, 1.55vw, 1rem);
-    line-height: 1.2;
-  }
-
-  .orbit-core span,
-  .orbit-node span {
-    margin-top: 0.35rem;
-    color: var(--sl-color-gray-3);
-    font-size: clamp(0.42rem, 0.8vw, 0.55rem);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-
-  .orbit-core {
-    top: 50%;
-    left: 50%;
-    width: 40%;
-    aspect-ratio: 1;
-    border-color: var(--sl-color-accent);
-    background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--sl-color-accent) 25%, transparent),
-      var(--sl-color-black)
+    background: color-mix(
+      in srgb,
+      var(--sl-color-text-accent) 13%,
+      transparent
     );
-    box-shadow: 0 0 0 0.55rem
-      color-mix(in srgb, var(--sl-color-accent) 7%, transparent);
-    transform: translate(-50%, -50%);
-  }
-
-  .orbit-core strong {
-    font-size: clamp(1rem, 2vw, 1.3rem);
-  }
-
-  .orbit-node {
-    width: 28%;
-    aspect-ratio: 1;
-    background: color-mix(in srgb, var(--sl-color-black) 90%, transparent);
-    backdrop-filter: blur(4px);
-  }
-
-  .orbit-node-remora {
-    top: 2%;
-    left: 4%;
-  }
-
-  .orbit-node-shelly {
-    top: 5%;
-    right: 0;
-  }
-
-  .orbit-node-aqueous {
-    bottom: 2%;
-    left: 5%;
-  }
-
-  .orbit-node-ad {
-    right: 2%;
-    bottom: 1%;
-  }
-
-  .devario-stack {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border-top: 1px solid var(--sl-color-gray-5);
-    border-bottom: 1px solid var(--sl-color-gray-5);
-  }
-
-  .devario-stack > div {
-    padding: 1.5rem 1.5rem 1.5rem 0;
-  }
-
-  .devario-stack > div + div {
-    padding-left: 1.5rem;
-    border-left: 1px solid var(--sl-color-gray-5);
-  }
-
-  .stack-number {
     color: var(--sl-color-text-accent);
     font-size: 0.7rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
   }
-
-  .devario-stack h3 {
-    margin: 0.45rem 0 0;
+  .dv-features strong {
+    display: block;
+    font-size: 0.81rem;
+    line-height: 1.4;
     color: var(--sl-color-white);
-    font-size: 1rem;
   }
-
-  .devario-stack p {
-    margin: 0.55rem 0 0;
+  .dv-features div > span {
+    display: block;
+    margin-top: 0.2rem;
     color: var(--sl-color-gray-3);
-    font-size: 0.85rem;
-    line-height: 1.55;
+    font-size: 0.73rem;
+    line-height: 1.5;
   }
-
-  .devario-status {
-    grid-column: 1 / -1;
+  .devario-showcase .dv-actions {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 0.65rem;
+    gap: 1.25rem;
+    margin-top: 1.6rem;
   }
-
-  .devario-status span {
+  .dv-actions a {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.38rem 0.7rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 999px;
+    gap: 0.75rem;
+    color: var(--sl-color-text-accent);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+  .dv-actions a.dv-primary {
+    padding: 0.7rem 1rem;
+    background: var(--sl-color-text-accent);
+    color: var(--sl-color-black);
+    border-radius: 0.5rem;
+  }
+  .devario-showcase .dv-download {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.2rem;
+  }
+  .dv-download-intro {
     color: var(--sl-color-gray-2);
-    background: color-mix(in srgb, var(--sl-color-gray-5) 30%, transparent);
-    font-size: 0.69rem;
-    font-weight: 600;
-    line-height: 1.25;
+    font-size: 0.8rem;
   }
-
-  .devario-status i {
-    width: 0.42rem;
-    height: 0.42rem;
-    flex: 0 0 auto;
-    border-radius: 50%;
-    background: var(--sl-color-accent);
-    box-shadow: 0 0 0.7rem
-      color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
-  }
-
-  .devario-status .status-validation i {
+  .dv-iso {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 1rem;
+    border-radius: 0.5rem;
     background: var(--color-purple-light);
-    box-shadow: 0 0 0.7rem
-      color-mix(in srgb, var(--color-purple-light) 50%, transparent);
+    color: var(--color-bg-primary);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
   }
-
-  @media (min-width: 72rem) {
-    .devario-showcase {
-      width: calc(100% + var(--sl-content-pad-x) + var(--sl-content-pad-x));
-      margin-left: calc(-1 * var(--sl-content-pad-x));
-      margin-right: calc(-1 * var(--sl-content-pad-x));
-    }
+  .dv-iso:not([aria-disabled="true"]):hover {
+    filter: brightness(1.08);
   }
-
-  @media (max-width: 50rem) {
+  .devario-showcase .dv-visual {
+    position: relative;
+    min-width: 0;
+    margin: 0;
+    padding: 1rem 0 0;
+    text-align: center;
+  }
+  .dv-halo {
+    position: absolute;
+    inset: 0 -1rem 2rem;
+    border: 1px solid
+      color-mix(in srgb, var(--sl-color-text-accent) 10%, transparent);
+    border-radius: 50%;
+    transform: scaleY(0.85);
+    z-index: -1;
+  }
+  .dv-screen {
+    position: relative;
+    margin: 1.3rem 0 0;
+    padding: 6px;
+    border: 1px solid #52647c;
+    border-radius: 12px;
+    background: #172237;
+    box-shadow: 0 18px 44px #0003;
+    transform: rotate(-3deg);
+  }
+  .dv-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 7px 8px;
+    color: #cbd5e1;
+    font-size: 7px;
+    line-height: 1.3;
+  }
+  .dv-brand {
+    font-weight: 700;
+    color: #5eead4;
+    font-size: 9px;
+  }
+  .dv-workspaces {
+    display: flex;
+    gap: 4px;
+  }
+  .dv-workspaces i {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #52647c;
+  }
+  .dv-workspaces i:first-child {
+    width: 12px;
+    background: #5eead4;
+  }
+  .dv-desktop {
+    position: relative;
+    aspect-ratio: 1.48;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #0d2937;
+  }
+  .dv-wallpaper {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 0% 100%, #9251b7 0%, transparent 65%),
+      radial-gradient(ellipse at 100% 20%, #29b49c 0%, transparent 70%), #153844;
+  }
+  .dv-wallpaper:after {
+    position: absolute;
+    width: 110%;
+    height: 90%;
+    left: -35%;
+    bottom: -60%;
+    border-radius: 50%;
+    border: 24px solid #65dec02b;
+    box-shadow: 0 0 0 25px #65dec010;
+    content: "";
+    transform: rotate(-30deg);
+  }
+  .dv-window {
+    position: absolute;
+    inset: 14% 12% 18%;
+    overflow: hidden;
+    border: 1px solid #ffffff22;
+    border-radius: 7px;
+    background: #182536ec;
+    box-shadow: 0 12px 20px #07182766;
+  }
+  .dv-windowbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-bottom: 1px solid #ffffff10;
+    color: #cbd5e1;
+    font-size: 6px;
+    line-height: 1.2;
+  }
+  .dv-windowdots {
+    font-size: 5px;
+    letter-spacing: 2px;
+    color: #7e8d9b;
+  }
+  .dv-windowbody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 5px;
+    gap: 6px;
+    color: #a6b6c6;
+    font-size: 6px;
+    line-height: 1.3;
+  }
+  .dv-app-icon {
+    display: grid;
+    place-content: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 7px;
+    background: #2dd4a81f;
+    color: #5eead4;
+    font-size: 22px;
+  }
+  .dv-windowbody strong {
+    color: #eef9fa;
+    font-size: 16px;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+  .dv-layouts {
+    display: flex;
+    gap: 4px;
+    margin-top: 2px;
+  }
+  .dv-layouts span {
+    width: 13px;
+    height: 9px;
+    border: 1px solid #7e99a9;
+    border-radius: 2px;
+    background: linear-gradient(
+      to right,
+      transparent 45%,
+      #7e99a9 45%,
+      #7e99a9 55%,
+      transparent 55%
+    );
+  }
+  .dv-layouts span:first-child {
+    border-color: #5eead4;
+    background: linear-gradient(
+      to right,
+      transparent 60%,
+      #5eead4 60%,
+      #5eead4 70%,
+      transparent 70%
+    );
+  }
+  .dv-dock {
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    display: flex;
+    gap: 5px;
+    transform: translateX(-50%);
+    padding: 4px 6px;
+    border: 1px solid #ffffff22;
+    border-radius: 7px;
+    background: #19233f99;
+    line-height: 1;
+  }
+  .dv-dock span {
+    display: grid;
+    place-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #d5f9f3;
+    background: #67bbae33;
+  }
+  .dv-dock span:nth-child(2) {
+    color: #fde09b;
+    background: #e1b34c33;
+  }
+  .dv-dock span:nth-child(3) {
+    color: #cbb8fd;
+    background: #8b5cf633;
+  }
+  .dv-stand {
+    width: 39px;
+    height: 28px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, #334155, #64748b, #334155);
+    clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+  }
+  .dv-foot {
+    width: 100px;
+    height: 5px;
+    margin: 0 auto;
+    border-radius: 50% 50% 2px 2px;
+    background: #64748b;
+  }
+  .dv-visual figcaption {
+    margin-top: 1.3rem;
+    color: var(--sl-color-gray-2);
+    font-size: 0.76rem;
+    line-height: 1.5;
+  }
+  .dv-visual figcaption span {
+    font-size: 0.62rem;
+    color: var(--sl-color-gray-3);
+  }
+  @media (max-width: 55rem) {
     .devario-showcase {
+      padding: 2rem;
+      gap: 1.5rem;
       grid-template-columns: 1fr;
     }
-
-    .devario-orbit {
-      width: min(24rem, 100%);
+    .devario-showcase .dv-visual {
+      width: min(100%, 22rem);
+      margin: 0 auto;
     }
-  }
-
-  @media (max-width: 36rem) {
-    .devario-showcase {
-      margin-inline: -1rem;
-      border-left: none;
-      border-right: none;
-      padding: 1rem;
-      margin-top: 5rem;
-      margin-bottom: 5rem;
-      padding-top: 3rem;
-      padding-bottom: 3rem;
-    }
-
     .devario-showcase h2 {
-      font-size: clamp(2.15rem, 12vw, 3.1rem);
+      font-size: 2.1rem;
     }
-
-    .devario-orbit {
-      min-width: 0;
+  }
+  @media (max-width: 30rem) {
+    .devario-showcase {
+      padding: 1.5rem;
+      gap: 1.2rem;
+      border-radius: 1rem;
     }
-
-    .devario-stack {
+    .devario-showcase h2 {
+      font-size: 1.85rem;
+    }
+    .devario-showcase .dv-intro {
+      font-size: 0.9rem;
+    }
+    .devario-showcase .dv-features {
       grid-template-columns: 1fr;
+      gap: 0.8rem;
     }
+    .dv-features strong {
+      font-size: 0.85rem;
+    }
+    .dv-features div > span {
+      font-size: 0.78rem;
+    }
+    .dv-eyebrow span {
+      font-size: 0.65rem;
+    }
+    .devario-showcase .dv-visual {
+      margin-top: 0.5rem;
+    }
+  }
+  .devario-showcase .dv-features li > div,
+  .devario-showcase .dv-features li + li,
+  .devario-showcase .dv-features .dv-check {
+    margin-top: 0;
+  }
+  .devario-showcase .dv-visual * {
+    margin-block: 0;
+  }
+  .devario-showcase .dv-visual figcaption {
+    margin-top: 1.3rem;
+  }
+  .devario-showcase .dv-visual {
+    font-family: system-ui, sans-serif;
+  }
 
-    .devario-stack > div {
-      padding: 1.1rem 0;
-    }
+  .devario-showcase .dv-features .dv-kernel {
+    grid-column: 1 / -1;
+  }
 
-    .devario-stack > div + div {
-      padding-left: 0;
-      border-top: 1px solid var(--sl-color-gray-5);
-      border-left: 0;
-    }
+  .dv-actions a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .dv-actions a:focus-visible,
+  .dv-iso:focus-visible {
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 4px;
   }
 </style>
