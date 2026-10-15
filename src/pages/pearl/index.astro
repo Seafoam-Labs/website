@@ -1,0 +1,110 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import AnchorHeading from "@astrojs/starlight/components/AnchorHeading.astro";
+import {
+  Card,
+  CardGrid,
+  Code,
+  LinkCard,
+  TabItem,
+  Tabs,
+} from "@astrojs/starlight/components";
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Pearl",
+    description:
+      "A native desktop shell for the Aqueous compositor, written in Zig with GTK 4 and a Material Design look.",
+    template: "splash",
+    next: false,
+    hero: {
+      title: "The Desktop Shell for Aqueous",
+      tagline:
+        "Pearl is a native desktop shell for the Aqueous compositor, written in Zig with GTK 4. Bar, dock, launcher, control center, settings and session tools in one Material Design shell.",
+      actions: [
+        {
+          text: "Get Started",
+          link: "/pearl/overview",
+        },
+        {
+          text: "View on GitHub",
+          link: "https://github.com/Seafoam-Labs/pearl",
+          icon: "external",
+          variant: "minimal",
+        },
+      ],
+    },
+  }}
+  hasSidebar={false}
+>
+  <AnchorHeading level="2" id="installation">
+    Installation
+  </AnchorHeading>
+
+  <p>
+    Pearl runs on <a href="/aqueous/overview/">Aqueous</a>. Add the
+    <a href="https://repo.seafoam-labs.org/setup">Seafoam Labs repository</a>,
+    then install the shell:
+  </p>
+
+  <Tabs>
+    <TabItem label="Seafoam Labs repository">
+      <Code code="sudo pacman -S pearl-git" lang="sh" />
+    </TabItem>
+    <TabItem label="Build from source">
+      <Code
+        code={`git clone https://github.com/Seafoam-Labs/pearl.git
+cd pearl/packaging/arch-git
+makepkg -s
+sudo pacman -U ./pearl-git-*.pkg.tar.zst ./pearl-greeter-git-*.pkg.tar.zst`}
+        lang="sh"
+      />
+    </TabItem>
+  </Tabs>
+
+  <p>
+    Building from a checkout requires Zig 0.16.0 exactly. See the
+    <a href="/pearl/installation/">installation guide</a> for the package list,
+    the login greeter and optional runtime dependencies.
+  </p>
+
+  <AnchorHeading level="2" id="why-pearl">
+    Why Pearl?
+  </AnchorHeading>
+
+  <CardGrid stagger>
+    <Card title="Material Design" icon="desktop">
+      Dynamic palettes generated from your wallpaper, compact bar flyouts, and a
+      full settings application.
+    </Card>
+    <Card title="Native Performance" icon="rocket">
+      Written in Zig with GTK 4, so the shell and its tools are native
+      applications.
+    </Card>
+    <Card title="Built for Aqueous" icon="laptop">
+      Runs exclusively on the Aqueous compositor and supplies the Aqueous
+      settings UI.
+    </Card>
+    <Card title="Themes & Plugins" icon="puzzle">
+      Create a theme from three colors, import community theme repositories, and
+      extend the shell with WebAssembly plugins.
+    </Card>
+  </CardGrid>
+
+  <LinkCard
+    title="View on GitHub"
+    description="Browse the Pearl source code on GitHub."
+    href="https://github.com/Seafoam-Labs/pearl"
+  />
+
+  <LinkCard
+    title="Donate"
+    description="Support the development of Pearl."
+    href="https://www.patreon.com/cw/SeafoamLabs"
+  />
+
+  <p class="mt-16 text-center">
+    <small>Pearl is a Seafoam Labs project for the Aqueous compositor.</small>
+  </p>
+</StarlightPage>
