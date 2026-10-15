@@ -1,0 +1,250 @@
+---
+title: Settings
+description: The Pearl Settings application, its shared draft and Apply & save workflow, conflict review and recovery, and the Aqueous configuration pages.
+sidebar:
+  label: Settings
+  order: 1
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Pearl Settings is a standalone application that edits Pearl's preferences and,
+on its Aqueous pages, the compositor's configuration. It never writes
+preferences directly and never starts Pearl; it edits a draft that the running
+shell owns.
+
+## Opening Settings
+
+Run `pearl-settings`, or open it from the launcher, the dock, or **Open full
+settings** in the control center. A generic launch opens Overview, and repeated
+launches activate the existing window in the same Aqueous session rather than
+opening a second one. Editing requires a running Pearl session, and settings
+surfaces obey the session lock.
+
+Open a specific page with `pearl-settings --page PAGE`, adding
+`--section SECTION` for an Aqueous subsection. `pearl-settings --help` lists the
+accepted page ids and Aqueous sections.
+
+The package installs the executable, desktop entry and icon as
+`org.aqueous.Pearl.Settings`. Git packages use `pearl-settings-git` and
+`org.aqueous.Pearl.Git.Settings`.
+
+## Pages and the shared draft
+
+The Appearance, Bar & dock, Plugins and Advanced pages all edit **one shared
+Pearl draft**, so changes made on several pages are saved together or discarded
+together.
+
+In **Bar & dock**, widget selection is ordered. **Add widget** opens a searchable
+picker, and each widget's actions menu supports reordering, moving between groups
+and removal. Every widget is optional, including Launcher. A widget already in use
+cannot be added twice, and Clock supports multiple independent instances. On left
+and right bar edges the groups are shown as Top, Center and Bottom, while the
+saved field names remain `left`, `center` and `right`. The preview is a schematic
+of the draft; the desktop changes only after Apply & save. Dock and Flyouts
+controls sit in expandable sections.
+
+**Advanced** exposes the full preferences JSON, including per-connector overrides,
+pinned applications and export templates. Per-connector overrides take priority
+over this form, which edits the default bar. Invalid Advanced text disables
+structured editing and offers a repair link, and invalid JSON stays available
+there for repair rather than being discarded.
+
+The Aqueous page keeps its edits separate from Pearl preferences; see
+[Aqueous configuration](#aqueous-configuration) below.
+
+## Apply & save and Discard
+
+**Apply & save** saves every Pearl change in the shared draft. **Discard** throws
+the draft away and leaves the live desktop unchanged. Nothing saves implicitly:
+navigating between pages, closing the window and reopening it all retain an
+acknowledged draft while the backend keeps running.
+
+Drafts survive closing the view but not a whole Pearl process restart. Unsaved
+editor text is memory-only.
+
+## Conflicts and merging
+
+When Pearl's saved preferences change underneath you, the affected page offers
+conflict review rather than overwriting either side.
+
+- **Merge changes** combines independent fields automatically.
+- **View saved JSON** in Advanced helps you review overlapping edits by hand.
+- Conflicting fields, changed raw files and changed index-based collections need
+  manual resolution.
+
+Wallpaper selection uses a normal transient dialog with an asynchronous draft
+preview, and the application changes its own theme only after a confirmed commit.
+
+## Recovery when the backend is lost
+
+Settings talks to the running shell, so losing that backend is handled explicitly
+rather than silently.
+
+- A lost backend requires explicit recovery of the local candidate. **Retry**
+  reconnects.
+- Closing before retention succeeds offers **Keep open**, or discards only the
+  changes that were not transferred.
+- With the backend absent, launch `pearl-settings` directly to get the Retry
+  window. `pearlctl` requires a running session backend and cannot help here.
+- Closing Pearl itself loses its in-memory drafts, but a still-open Settings
+  window retains its local copy for review.
+
+## Where preferences live
+
+Preferences are stored in `$XDG_CONFIG_HOME/pearl/preferences.json`, falling back
+to `~/.config/pearl/preferences.json`. Opening Settings does not create this
+file. The first shell session creates it when neither preferences nor a recovery
+snapshot exists, enabling the managed GTK profile to follow Pearl's colors.
+Existing configurations and saved opt-outs retain their selections.
+
+The validated recovery snapshot is `pearl/last-good.json` in the same directory.
+
+## Aqueous configuration
+
+Select **Aqueous** in Settings to reveal Appearance, Layouts, Input, Shortcuts,
+Rules, Displays and Advanced beneath it. This is the settings UI for Aqueous; the
+compositor's own configuration backend and file formats are described in
+[Aqueous settings and configuration](/aqueous/settings/).
+
+<Aside type="note">
+  Install the `aqueous-config` helper alongside Pearl. Pearl selects the helper
+  beside the executable of the connected, same-user compositor, identified
+  through Unix socket peer credentials, and runs it with that compositor's
+  working directory and configuration environment. This keeps co-installed
+  Aqueous packages and custom configuration paths separate even when Pearl's own
+  launch environment belongs to another installation. If that helper or the
+  compositor's process information cannot be read, editing reports an error
+  instead of falling back to a different installation.
+</Aside>
+
+A compact editor for the same configuration remains available at **Control center
+→ Aqueous settings**.
+
+### Navigating the Aqueous pages
+
+The selected child section is highlighted and the header shows its title with
+Aqueous context. Narrow windows use the same sublist under **Sections**: choosing
+Aqueous reveals its children, and choosing a child closes the popover.
+
+Returning through the Aqueous parent restores the last section visited in this
+window. Each section retains its scroll position and valid control focus; if
+refreshing replaces those controls, focus falls back to the section heading. An
+Aqueous launch without a section opens Appearance, and the Shortcuts page keeps
+the stable section id `keybinds`. Navigation transfers pending draft edits without
+applying or discarding them.
+
+### Editing Aqueous configuration
+
+The Appearance, Layouts, Input, Keybindings, Rules and Displays pages are
+generated from the helper's current fields, so descriptions, select choices,
+numeric limits, colors and default values all come from the helper rather than
+being hardcoded in Pearl. **Advanced** exposes the raw TOML files and the complete
+helper request JSON. Unknown TOML settings and comments are left to the canonical
+backend untouched.
+
+Aqueous drafts belong to the service and survive closing and reopening the view.
+Invalid JSON and invalid values remain editable so you can repair them.
+
+- **Validate** prepares a candidate without writing anything.
+- **Apply & save** validates again and sends the candidate.
+- **Refresh** reads the current files without discarding your draft.
+- **Rebase draft** merges independent structured fields into the newer base.
+
+Refreshing and rebasing are always explicit, so a newer saved version cannot
+silently replace the base of an older edit. A draft edited while an operation runs
+stays retained.
+
+A raw file and structured changes to that same file conflict and cannot be applied
+together. Remove one of the two representations in Advanced to resolve it.
+
+### Outcomes and uncertainty
+
+Apply reports several things independently rather than as one success or failure:
+the canonical save, the operation receipt, the reload and display commit, and
+toolkit synchronization. A saved configuration can still have a failed reload or
+partial toolkit synchronization, so read the individual states.
+
+A lost apply reply causes a status query, not another apply, and Pearl never
+repeats a side effect merely because a response was lost. Unknown or conflicting
+outcomes keep writes and reload retries blocked until resolved. Discarding or
+rebasing a draft does **not** clear that durable uncertainty; only a definitive
+outcome does. Do not delete the pending operation record to manufacture permission
+to replay a save. An early rejection with a complete failure receipt resolves the
+operation immediately, because no write, reload or display change was requested;
+Pearl retains that draft and permits an explicit retry but never retries
+automatically.
+
+Display previews keep **Keep** and **Revert** available across page changes.
+Close, lock or a frontend crash requests rollback through the native lease.
+
+Multi-file backups are written by the helper below
+`$XDG_STATE_HOME/pearl/aqueous-backups/<original-generation>/`, and Advanced
+cannot redirect that directory. Changing system configuration requires an explicit
+`"create_user_override": true` in the draft.
+
+### Recording a shortcut
+
+Record a binding on the Keybindings page. Pearl waits for the toolkit's
+`shortcuts-inhibited` acknowledgement before accepting a chord, so compositor
+shortcuts do not fire while you record. Escape, a page change, loss of inhibition,
+compositor unavailability, closing the view and a 30-second deadline all restore
+normal shortcut handling. Modifier-only presses are ignored.
+
+## Command line
+
+```sh
+pearlctl settings show [--page PAGE] [--section SECTION]
+pearlctl preferences status
+pearlctl preferences apply --revision 4 --text '{"theme":{"mode":"gtk"}}'
+pearlctl preferences reload
+```
+
+`pearlctl settings show` opens Overview by default. `control-center show` and
+`control-center toggle` continue to open the compact flyouts instead.
+
+```sh
+pearlctl aqueous show [--section SECTION]
+pearlctl aqueous status [--text PATH]
+pearlctl aqueous draft --text '{"protocol":1,"changes":[...]}'
+pearlctl aqueous validate
+pearlctl aqueous apply
+pearlctl aqueous keep       # only during a pending preview
+pearlctl aqueous revert
+pearlctl aqueous refresh
+pearlctl aqueous reload
+pearlctl aqueous rebase
+pearlctl aqueous discard
+```
+
+`pearlctl aqueous status` reads the whole configuration; `--text` narrows it to
+one field such as `layout.gaps_outer`, a raw file such as `raw:layout`, or a
+report. `--text operation` shows the bounded stage report and `--text review`
+shows authoritative candidate impact. The older `--text SECTION` spelling of
+`aqueous show` still selects the same section.
+
+<Aside type="caution">
+  `pearlctl preferences apply` submits a **full configuration, not a patch**.
+  Every field you omit resets to its default. Read the current revision from
+  `pearlctl preferences status` first, and inspect `busy` and `err` after the
+  queued reply. Use the Settings application when you only want to change one
+  value.
+</Aside>
+
+## Limits
+
+- Configuration is capped at 64 KiB and eight JSON nesting levels, with at most 16
+  connector overrides and eight export templates of 8192 bytes each.
+- Font and theme names are limited to 96 bytes, image and slideshow folder paths to
+  1024, and connector names and each widget group to 128.
+- Font size runs from 10 to 24, slideshow intervals from 10 to 86400 seconds, and
+  animation lengths from 100 to 5000 ms. Popup maxima are 320 to 1280 wide and 320
+  to 1600 high, always clamped to the actual output.
+- The control protocol is limited to 8192-byte frames, so `preferences apply` and
+  `aqueous draft` JSON text is limited to 6500 bytes and must also fit its escaped
+  wire frame. Use Advanced for larger configurations; its editor accepts up to 4 MiB
+  of UTF-8 at a depth of 32.
+- `pearlctl preferences status` sets `preferences_truncated` and omits the
+  preferences object above 5500 serialized bytes, while revisions, errors and the
+  file path remain available. This does not truncate the stored configuration or
+  the settings editor.
