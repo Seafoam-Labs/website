@@ -1,0 +1,565 @@
+---
+title: Desktop
+description: The Pearl bar, desktop icons, launcher, dock, calendar and control center, covering what each surface does, how to open it, and how to configure it.
+sidebar:
+  label: Desktop
+  order: 0
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Pearl puts five surfaces on your desktop: the bar, desktop icons, the launcher,
+the dock, and the calendar and control center flyouts. This page covers what
+each one does, how to open it, and how to configure it. Bar, dock and flyout
+settings live in **Settings → Bar & dock**; open Settings from the launcher, the
+dock, or by running `pearl-settings`.
+
+## The bar
+
+The bar is a strip pinned to one edge of each display.
+
+- **Bar edge**: top, bottom, left or right.
+- **Bar size**: 32 to 160 logical pixels.
+- **Bar visibility**: `always`, or `autohide`. With autohide, move the pointer to
+  the screen edge to reveal the bar. It hides 450 ms after the pointer leaves,
+  unless a Pearl flyout or bar gesture keeps it open. Autohide works on every
+  edge and overlays applications instead of resizing them, and launcher and
+  flyout commands keep working while the bar is hidden.
+- **Background opacity**: Automatic or Custom. Automatic is the default: Pearl
+  palettes use 86% opacity when the compositor provides native blur and 100%
+  when it does not. Custom offers a synchronized slider and numeric field from
+  0% (transparent) to 100% (opaque), and the bar stays interactive at 0%. GTK
+  themes keep their own backgrounds under Automatic; Custom replaces the bar
+  background with a flat container color and leaves other shell surfaces alone.
+  Blur itself is controlled by the compositor.
+
+### Groups
+
+The bar is divided into three groups, called start, center and end in Settings
+and `left`, `center` and `right` on the command line. Available items are
+`launcher`, `workspaces`, `title`, `clock`, `keyboard`, `overview` and
+`control`, plus `clock:<id>` for each additional clock you have defined.
+
+The center group centers the clock when the surrounding groups permit it.
+Narrow outputs hide the optional window title and the bar overview button;
+overview stays available in the control center. Vertical edges change group
+orientation.
+
+### Workspaces
+
+The workspace strip shows the workspaces of its own display. The active
+workspace carries a filled pill and urgent workspaces an outline. Choose the
+density in **Settings → Bar & dock → Workspaces → ⋯ → Display mode**:
+
+- **Large** (default): every available workspace on that output.
+- **Medium**: the active workspace plus two neighbors on each side.
+- **Small**: the active workspace plus one neighbor on each side.
+
+At workspace 5 of 1 through 9, Small shows 4, **5**, 6 and Medium shows 3, 4,
+**5**, 6, 7. At workspace 1, Small shows only **1**, 2. Neighbors follow the
+sorted existing list even when numbers have gaps.
+
+Workspaces are identified by their Aqueous runtime IDs, so the same number on
+another display is a different target. Focused window titles ellipsize and keep
+their full text in a tooltip. The keyboard control shows the active seat's
+effective layout name, a compact two-character form on vertical bars, and
+clicking it cycles that keyboard group; with no keyboard or an ambiguous seat
+the control is unavailable.
+
+### Wrapping and scrolling
+
+Horizontal bars wrap buttons into rows when space is tight. Vertical bars keep
+their configured thickness: icons and status values stack, the clock stacks
+weekday, day and month above separate hour and minute lines, and workspaces stay
+in one column. If the output is too short for all controls, a vertical bar
+scrolls along its length instead of growing wider.
+
+### Clocks
+
+Each clock instance has its own time zone, label, format and date setting, added
+and configured in Settings → Bar & dock. Every clock button opens the calendar
+and anchors it to the clicked button.
+
+## Bar widgets
+
+Add widgets in **Settings → Bar & dock → Add widget**. Existing layouts are
+unchanged until you add one.
+
+<Aside type="caution">
+  Before downgrading to a Pearl version that lacks a widget, remove its layout
+  token from your saved layouts. Older versions reject unknown widget tokens.
+</Aside>
+
+### Running applications
+
+Token `running_apps`. Groups open windows across **all workspaces and
+displays**, including minimized ones. Windows marked `skip_taskbar` are
+excluded; `skip_switcher` alone has no effect. Applications without windows are
+not listed.
+
+Click a single-window application to activate it. Click an application with
+several windows, or secondary-click any application, to choose a window by
+title, workspace and display. Activation restores a minimized window and
+switches to its workspace and display without relocating it. The focused group
+is highlighted, multi-window groups show a count, and a hollow marker means
+every window in the group is minimized.
+
+The strip fits the remaining bar length on any edge and its overflow button
+opens the rest, so every window stays reachable. Long chooser lists load in
+batches of 50 through **Show more**. The strip disappears when no taskbar
+windows exist.
+
+Enable **One taskbar button per window** (`bar.running_apps_per_window`, default
+`false`) for one button per window rather than per application. Each button
+activates that window and uses its supplied icon pixels when available, falling
+back to the application icon. Output-specific bar settings can override it.
+
+For keyboard access, bind `pearlctl running-apps show [--output ID]`. The chooser
+owns keyboard input while open: arrows or Tab navigate, Enter activates, Escape
+dismisses. The command works even when the widget is not in that output's bar.
+
+### Wallpaper
+
+Token `wallpaper`. Clicking it opens a thumbnail browser for the folder
+configured under **Appearance → Wallpaper → Slideshow → Image folder**. Clicking
+a thumbnail applies that image immediately with no Apply step and outlines it as
+current. The folder itself is chosen in Settings, not here.
+
+The pane shows six landscape thumbnails per page in a three-by-two grid, with
+previous and next buttons and a page counter, plus a refresh button in the header
+to rescan after you add or remove files. Only PNG and JPEG are listed, matching
+what the wallpaper pipeline accepts. With no folder set the pane shows a hint
+instead of a grid. Previews are decoded off the main thread and cached on disk
+under `$XDG_CACHE_HOME/pearl/wallpaper-thumbs`, so pages you have seen before
+paint without touching the source image again.
+
+Applying a wallpaper goes through the normal preferences commit, so the
+wallpaper watch, wallpaper-derived colors and every output surface stay
+consistent. If your theme follows the image, each pick regenerates its palette.
+
+### Resource monitor
+
+Token `resources`. A button that opens a popup with one large graph per enabled
+series, four across and two deep: the graph on the top row and a readout card
+underneath carrying the series name and its live value. Every graph is plotted as
+a share of its own ceiling with quarter guides at 25, 50 and 75%, and keeps the
+last 60 one-second samples, so the newest reading is at the right edge and the
+line grows leftwards while the window fills.
+
+The placed widget's **⋯** menu carries both of its settings:
+
+- **Bar appearance** chooses **Icon**, the same compact button as every other
+  widget, or **Mini graphs**, which replaces the icon with a 2x2 grid of
+  sparklines (smaller cells on side bars) so trends are readable without opening
+  anything. Both modes open the same popup.
+- **Graphs shown when opened** picks which of CPU, GPU, Memory and Network the
+  popup renders. With none selected the popup says so instead of showing an empty
+  grid.
+
+Both live in `bar.resource_mode` and `bar.resource_series` and accept per-output
+overrides. Changing the appearance rebuilds that output's bar; changing the graph
+selection re-lays the open popup in place, so several graphs can be picked in a
+row.
+
+GPU usage takes the busiest card over two independent sources: `gpu_busy_percent`
+under `/sys/class/drm/card0` through `card7` for AMD and Intel, and NVML for
+NVIDIA. A machine with no supported counter keeps the GPU graph visibly absent
+and reads **Unavailable** rather than showing a flat line that would read as an
+idle card. Network is drawn as two lines on one shared scale, inbound solid and
+outbound dashed; the readout carries both on one line in compact units such as
+`I:1.2M O:340K`. Memory is total minus available, so caches and reclaimable slab
+read as free. Network sums every interface except loopback, in both directions at
+once. Sampling ignores the graph selection, so the bar button's tooltip and
+accessible name always report all four figures.
+
+### Cycle windows
+
+Token `window_switcher`. Each click advances through eligible windows on every
+workspace and enabled display. Windows keep a stable order, the last window wraps
+to the first, and the stack dismisses after 1.5 seconds without input. Obscured
+windows and separate windows of one application are included. Minimized windows,
+`skip_switcher` windows, and parents blocked by a modal dialog are excluded. An
+empty set disables the button; a sole window can still be activated on its own
+workspace and display.
+
+The compositor shows a temporary stack of live window textures and focuses each
+selection immediately, preserving actual window geometry and layout. Escape or
+typing dismisses the stack and the selected focus remains. Pearl's Reduced motion
+preference skips motion for requests Pearl makes. The stack stays on its
+initiating display and its label names the destination workspace and display;
+selecting activates that destination without moving the window.
+
+Global cycling requires both an updated Pearl and an Aqueous that advertises
+`global_window_switcher_v1`. With only `workspace_switcher_v1`, Pearl retains
+workspace-only cycling and the corresponding labels. With neither, the button
+explains that Aqueous needs an update.
+
+```sh
+pearlctl window-switcher next [--output ID]
+pearlctl window-switcher previous [--output ID]
+pearlctl window-switcher dismiss [--output ID]
+```
+
+`--output` chooses where the switcher is presented, not which windows it
+includes. The Aqueous settings helper exposes unbound `window_switcher_next`,
+`window_switcher_previous` and `window_switcher_dismiss` shortcut actions.
+`Super+Tab` remains assigned to ordinary focus cycling by default; to use it for
+this switcher, clear that binding and assign it to `window_switcher_next`, with
+`Super+Shift+Tab` for reverse cycling.
+
+## Desktop icons
+
+New Pearl installations enable desktop icons automatically. Existing preference
+documents keep them disabled until you enable them in **Settings → Appearance →
+Desktop icons**. Explicit choices survive upgrades.
+
+The grid uses the Desktop directory configured in `user-dirs.dirs`, including
+localized paths. An unset or home-valued directory does not expose your home
+folder, and an unavailable directory shows a message with Retry and Create
+Desktop folder in the background menu where appropriate. Pearl does not install
+sample files.
+
+The grid appears on one display and across all workspaces. Choose a connector in
+Appearance; an empty choice or a disconnected display uses the first connected
+connector in lexical order. Icons stay behind application windows and leave
+clearance for bars and docks.
+
+Working with icons:
+
+- Click to select, double-click or press Enter to open.
+- Ctrl and Shift extend the selection, arrows navigate, Ctrl+A selects all,
+  Escape clears it.
+- F2 renames and Delete moves the selection to Trash.
+- Drag empty space for a selection rectangle.
+- In **Manual** arrangement, drag an icon to a grid position. Positions survive
+  restarts, and temporary display changes preserve their preferred coordinates.
+- Secondary-click an item for Open, Rename and Move to Trash.
+- The background menu offers New folder, Add application shortcut, Arrange by
+  name, Open Desktop folder, Retry and Desktop settings.
+
+Large directories scroll and create widgets only for visible rows. Labels wrap
+and retain their full names in tooltips. File operations report failures and
+Trash never falls back to permanent deletion. Advanced transfers and clipboard
+operations remain in the file manager.
+
+<Aside type="caution">
+  Application shortcuts require **Allow launching**, which previews the command
+  before you accept. Approval covers the exact file contents and location, so
+  changing or replacing the entry requires approval again, and approving does
+  not launch it. Shortcuts created through the installed application picker are
+  approved as part of creation. Launcher symlinks and malformed entries cannot
+  execute through the grid.
+</Aside>
+
+`pearlctl desktop focus [--output ID]` requests nonexclusive keyboard focus for
+the grid from a compositor binding. A supplied output must host the grid, and the
+command does not minimize windows. Lock, inactive sessions and shell popups
+inhibit desktop actions; a popup's dismissal click is consumed before reaching an
+icon.
+
+## Launcher
+
+The launcher button opens a shared search surface on its output. Type to search,
+use Up and Down to select, Enter to open and Escape to dismiss. Pointer
+activation also works. Opening another principal flyout replaces the previous
+one, and backdrop clicks dismiss without activating an application underneath.
+
+Search covers installed applications and open windows through GIO, so XDG
+precedence, `Hidden`, `NoDisplay`, `OnlyShowIn`, `NotShowIn`, `TryExec`,
+translated names, keywords and desktop actions all behave as your desktop entries
+define them. Ranking casefolds Unicode text, requires every query word to match,
+and favors exact names, then prefixes, substrings and metadata. An empty query
+favors running windows and the applications you last opened.
+
+Window results carry their display, workspace and current state, and windows on
+hidden workspaces or minimized windows stay searchable with explicit state
+subtitles. Activating a window revalidates it against the current session and
+switches to its workspace and display. At most 200 results are shown at a time;
+when only part of a larger match set fits, the footer says so and asks you to
+refine the query.
+
+Pearl never parses an `Exec` line itself or interpolates it into a shell. Launch
+goes through GIO, which handles field codes, `Path`, `Terminal`, D-Bus activation
+and desktop actions. A rejected, dropped or unknown compositor action shows a
+non-focusable on-screen message.
+
+### Changing the launcher icon
+
+In **Settings → Bar & dock**, open the Launcher's actions menu, then **Change
+icon…**. Choose one of the bundled Applications, Grid or System icons, enter an
+installed icon-theme name, or use **Choose PNG…**. The preview reflects the
+draft, **Apply & save** updates the bar without restarting, **Discard** restores
+the saved choice, and **Reset to default** restores the original Applications
+artwork when applied.
+
+Local PNGs must be static, at most 2 MiB, and at most 2048 by 2048 pixels, and
+must stay at the absolute path you selected. Pearl preserves aspect ratio, colors
+and transparency; symbolic theme icons use the current theme colors. A missing or
+invalid image falls back to the bundled Applications icon and shows a warning in
+Settings, with **Retry** reloading the preview and any live bar already using
+that saved selection. Files are not watched automatically.
+
+### Calculator
+
+Type an expression such as `12*(3+4)` into the launcher to see `84` before any
+matching applications. Enter, or clicking the calculation, copies the displayed
+number to the regular clipboard and closes the launcher; paste it in the
+destination application normally. A failed copy leaves the result open for retry.
+Bare numbers and ordinary names remain application and window searches.
+
+A leading `=` selects calculator-only mode: `=42`, `=sqrt(81)`, `=cos(pi)`.
+Typing or pasting a trailing `=` continues the calculation in the entry, so
+`12*7=` becomes `84`, ready for `+6`. Continuation does not copy. Editing or
+moving the caret while a calculation is pending cancels it.
+
+Supported syntax:
+
+- Decimal numbers with `.`, scientific notation such as `1e3`, parentheses, unary
+  signs, and `+`, `-`, `*`, `/`, `^`. Powers associate to the right, so `2^3^2`
+  is `512`, `-2^2` is `-4`, and `2^-2` is `0.25`.
+- In explicit mode only, the constants `pi` and `e`, and the functions `abs`,
+  `sqrt`, `exp`, `ln`, `log` (base 10), `log2`, `sin`, `cos`, `tan`, `asin`,
+  `acos`, `atan`, `ceil`, `floor`, `round`, `trunc` and `mod(a,b)`. Names are
+  case-insensitive and trigonometry uses radians. `round` breaks ties away from
+  zero and `mod` returns the remainder with the dividend's sign.
+
+Use decimal points without thousands separators or currency symbols; commas only
+separate `mod` arguments. Percentages, `%`, implicit multiplication such as
+`2(3)`, units, conversion, variables and persistent history are not supported.
+Explicit mode explains invalid syntax, division by zero, domain errors and
+overflow.
+
+Arithmetic uses approximate `f64` values with up to 15 significant display
+digits, so very large or small results use scientific notation, negative zero
+shows as `0`, and large integers can lose precision. This is not an
+arbitrary-precision or financial decimal calculator. Copying and continuation use
+exactly the displayed, rounded text.
+
+Expressions are not logged or persisted. Only a result you explicitly copy enters
+the memory-only clipboard history.
+
+## Dock and bar islands
+
+By default the bar is drawn as separate rounded start, center and end sections,
+called islands. Turn off **Separate bar islands** (`bar.islands=false`) for a
+continuous floating bar. Both modes use one window and one measured reservation
+on the selected edge. Empty sections, rounded corners and gaps accept no input
+and receive no blur.
+
+The dock floats without reserving desktop space. If its configured edge matches
+the bar edge, it moves to the opposite edge. Each output has its own running
+application groups and shares one ordered list of pins. Windows belong to their
+authoritative Aqueous output; minimized windows and windows on inactive
+workspaces remain available.
+
+Click an icon to activate its window or cycle through the group's windows. An
+installed pin with no windows launches through GIO. Right-click the icon for its
+action menu: open a new window, run desktop actions, pin or unpin, and per-window
+activate, minimize or restore, maximize or restore, and close. Dots indicate
+running windows, and a filled dot with a highlighted button indicates focus.
+Accessible labels and tooltips include the application name, running count,
+focus, minimized state and pin status.
+
+Visibility modes:
+
+- `always`: visible except while locked, empty, disabled or covered by
+  fullscreen.
+- `intelligent` (default): also hides when a visible, non-minimized window
+  overlaps the dock. Hidden-workspace windows do not obstruct it, and even
+  taskbar-excluded windows can.
+- `autohide`: hidden until pointer or keyboard interaction.
+
+In the hidden modes, a centered two-logical-pixel strip at the chosen edge reveals
+the dock, with a 450 ms grace period for crossing the margin. The strip occupies
+only the dock's bounded length and reserves no space. Because Aqueous places
+fullscreen windows above top-layer surfaces, the strip uses the overlay layer and
+a revealed dock rises above fullscreen until dismissed. Lock requests, locked or
+inactive sessions, sleep preparation and authentication prompts hide the dock and
+release keyboard input. Large application lists scroll along the edge; there is no
+magnification.
+
+Limits are 16 global pins, 32 groups per output, 64 windows per group and eight
+desktop actions per menu. `pearlctl status` reports group truncation.
+
+Settings → Bar & dock selects islands, dock visibility, edge, icon size (24 to 64
+logical pixels) and margin (4 to 32).
+
+## Calendar
+
+Any clock button opens a local calendar anchored to the button you clicked.
+Calendar browsing uses local time only: there is no account synchronization and
+no event list. Surface labels follow GLib's language preferences.
+
+## Control center
+
+The control center is a compact flyout on one output. Speaker, Network, Bluetooth
+and Battery open **Sound**, **Network**, **Bluetooth** and **Power & battery**
+directly; the gear opens **Overview**. A fixed heading and section chooser select
+one compact page at a time, and each page scrolls independently. Overview links to
+all four pages, media controls, window overview and the Pearl and Aqueous
+editors, and retains session and workspace-layout actions.
+
+Clicking a different service icon switches the existing flyout on that output,
+clicking the same icon again closes it, and clicking on another output replaces
+the flyout there. Escape, Close and permitted backdrop clicks dismiss it. External
+links start at the heading; internal navigation restores page-local scroll and
+focus. **Open full settings** carries the current route, and a successful launch
+dismisses the flyout to release keyboard input. A missing installation disables
+the link with an explanation, and a dispatch failure keeps the flyout open with
+feedback.
+
+```sh
+pearlctl control-center show --page sound
+pearlctl control-center toggle --page network --output OUTPUT_ID
+```
+
+Page IDs are `overview` (default), `sound`, `network`, `bluetooth` and `power`.
+Invalid IDs are rejected before the flyout changes. `pearlctl status` reports the
+selected route as `popup.page`; task popups use `null`.
+
+Bar service buttons expose an action name and a current-status description to
+assistive technology, selected headings are announced, and inactive page controls
+are absent from focus traversal. The flyout follows Pearl's font, theme and
+reduced-motion preferences. The bar keeps layer-shell keyboard mode `none`, so
+keyboard navigation happens inside the flyout with no on-demand bar focus.
+
+## Opening surfaces from the command line
+
+```sh
+pearlctl launcher toggle
+pearlctl launcher show --output OUTPUT_ID
+pearlctl launcher hide
+pearlctl calendar toggle --output OUTPUT_ID
+pearlctl control-center toggle --output OUTPUT_ID
+pearlctl overview toggle --output ID
+pearlctl dock show --output OUTPUT_ID
+pearlctl dock hide --output OUTPUT_ID
+pearlctl desktop focus [--output ID]
+pearlctl running-apps show [--output ID]
+pearlctl status
+```
+
+Get runtime output IDs from `pearlctl status`. `dock show` gives the first icon
+keyboard focus: Tab or Shift-Tab and the arrow keys navigate, Space or Enter
+activates, Menu or Shift+F10 opens the focused icon's action menu, and Escape
+dismisses menus and releases the dock's keyboard mode. `dock hide` ends forced
+interaction, though an unobscured `always` or `intelligent` dock can remain
+visible. Bind `pearlctl dock show` using the Aqueous settings application's
+keybinding editor.
+
+Flyout placement is shared across surfaces: **Dismiss flyouts when clicking
+outside** (`popup.dismiss_outside`), **Flyout placement** (`popup.placement`,
+`anchored` or `centered`), and maximum flyout width and height (320 to 1280 and
+320 to 1600 logical pixels).
+
+## Advanced
+
+### Per-output bar policies
+
+Every bar preference accepts a per-connector override, and an output's `bar`
+object is a **complete override**: a field you omit there falls back to its
+default, not to the value in your default bar configuration. Omitting
+`background_opacity` in an output entry therefore selects Automatic even if the
+default bar uses Custom. A connector entry with no `bar` at all uses the default
+bar configuration. The same applies to the dock: a missing or null output dock
+inherits the global dock.
+
+```json
+{
+  "bar": { "islands": true },
+  "dock": {
+    "enabled": true,
+    "edge": "bottom",
+    "mode": "intelligent",
+    "icon_size": 40,
+    "margin": 8
+  },
+  "pinned_apps": ["org.example.Editor.desktop"],
+  "outputs": [
+    {
+      "connector": "DP-1",
+      "bar": {
+        "edge": "top",
+        "size": 48,
+        "islands": true,
+        "workspace_mode": "large",
+        "groups": {
+          "left": "launcher,workspaces,title",
+          "center": "clock",
+          "right": "control"
+        },
+        "launcher_icon": {
+          "kind": "file",
+          "value": "/home/user/Pictures/l.png"
+        }
+      },
+      "dock": { "edge": "right", "mode": "autohide" }
+    }
+  ]
+}
+```
+
+This is a partial example; the normal preference parser supplies missing
+defaults. Edit these in **Settings → Advanced**, whose full preferences JSON also
+carries connector overrides, center widgets, popup limits and opt-in exports.
+Apply validates every field.
+
+Bar **groups** set with `pearlctl bar groups` are runtime preferences: a restart
+or output removal resets them. Use Settings → Bar & dock to change them
+persistently.
+
+```sh
+pearlctl bar groups --output OUTPUT_ID \
+  --left launcher,workspaces,title --center clock --right keyboard,overview,control
+```
+
+All three groups are supplied together. An empty group is allowed; duplicate
+items, unknown items and configurations without a launcher are rejected.
+
+### Custom application launchers
+
+The dock and the Running applications widget share preferred-launcher matching:
+an explicit choice wins, then a uniquely matching pin, then a uniquely matching
+launcher in your XDG applications directory, then a unique remaining system
+match. Ties at the highest matching priority remain separate running groups, and
+no command line is ever guessed from a window title.
+
+When a custom `.desktop` file has a different filename from the packaged entry but
+its desktop ID or `StartupWMClass` matches, Pearl automatically prefers it over
+system entries. A matching custom pin receives its running windows instead of
+leaving a second running group.
+
+For entries with no matching identity, or with several matching pins or user
+launchers, open the running application's dock menu, choose **Use launcher…**,
+search for the entry and select **Use launcher**. Pearl remembers that choice for
+windows with the same Wayland app ID or XWayland class, and both surfaces then use
+the selected entry's icon, name, launch arguments and desktop actions. Changing an
+already pinned group also replaces that pin in the same save; if the chosen entry
+is already pinned, Pearl keeps its existing position and removes the replaced
+source pin. Choosing a launcher for an unpinned group does not pin it.
+
+Use **Reset to automatic** in the picker, or remove the choice under **Settings →
+Bar & dock → Application launchers**, to restore automatic matching. Reset
+preserves saved pins, and removals in Settings use the normal Apply and Discard
+draft workflow. A missing or hidden selected launcher stays unavailable until you
+restore or change it; Pearl never silently launches the packaged entry instead.
+
+The choice applies to every window reporting that application identity, including
+profiles that share it. Pearl selects a preferred launcher rather than tracking
+which launch produced each window, and a user override with the same desktop-file
+ID follows GIO's XDG precedence with no extra choice. Desktop IDs containing
+spaces or Unicode are supported in pins and in the chooser. Existing pins are not
+rewritten automatically, so to correct a previously saved packaged pin, use **Use
+launcher…** on its running group.
+
+### Pinning from the command line
+
+```sh
+pearlctl dock pin --text org.example.Editor.desktop
+pearlctl dock unpin --text org.example.Editor.desktop
+```
+
+`pearlctl status` reports `islands`, window-local `island_rects`, and a `dock`
+record per output with visibility reason, group count, truncation, effective edge
+and global logical bounds. These report actual state rather than a second window
+database.
