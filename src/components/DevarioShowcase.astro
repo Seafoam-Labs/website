@@ -1,9 +1,7 @@
 ---
 import { Image } from "astro:assets";
+import { isoChecksumUrl, isoDownloadUrl } from "../consts";
 import devarioLogo from "../assets/images/devario-logo.png";
-
-// TODO: Add the public S3 ISO download URL here when it is ready.
-const isoDownloadUrl = "";
 ---
 
 <section class="devario-showcase" aria-labelledby="devario-title">
@@ -95,13 +93,7 @@ const isoDownloadUrl = "";
     </div>
     <div class="dv-download">
       <span class="dv-download-intro">Make yourself at home.</span>
-      <a
-        class="dv-iso"
-        href={isoDownloadUrl || undefined}
-        role="link"
-        aria-disabled={!isoDownloadUrl}
-        tabindex={isoDownloadUrl ? undefined : -1}
-      >
+      <a class="dv-iso" href={isoDownloadUrl}>
         Get the ISO
         <svg
           aria-hidden="true"
@@ -116,6 +108,9 @@ const isoDownloadUrl = "";
         >
           <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
         </svg>
+      </a>
+      <a class="dv-checksum" download href={isoChecksumUrl}>
+        SHA-256
       </a>
     </div>
   </div>
@@ -339,8 +334,17 @@ const isoDownloadUrl = "";
     font-weight: 700;
     text-decoration: none;
   }
-  .dv-iso:not([aria-disabled="true"]):hover {
+  .dv-iso:hover {
     filter: brightness(1.08);
+  }
+  .dv-checksum {
+    color: var(--sl-color-gray-3);
+    font-size: 0.73rem;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .dv-checksum:hover {
+    color: var(--sl-color-text-accent);
   }
   .devario-showcase .dv-visual {
     position: relative;
@@ -636,6 +640,7 @@ const isoDownloadUrl = "";
   }
   .dv-features a:focus-visible,
   .dv-actions a:focus-visible,
+  .dv-checksum:focus-visible,
   .dv-iso:focus-visible {
     outline: 2px solid var(--sl-color-text-accent);
     outline-offset: 4px;
