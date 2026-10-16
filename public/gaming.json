@@ -9,6 +9,11 @@
       "name": "Faugus Launcher",
       "pkg": "faugus-launcher",
       "description": "A simple and lightweight app for running Windows games"
+    },
+    {
+      "name": "Devario Gaming Meta",
+      "pkg": "devario-gaming-meta ",
+      "description": "Everything you need to start gaming in one install. Launchers are not included."
     }
   ]
 }
