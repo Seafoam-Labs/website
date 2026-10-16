@@ -1,0 +1,155 @@
+---
+title: Session security
+description: Session actions, automatic idle and sleep, the native lock screen, the polkit authentication agent and fingerprint login.
+sidebar:
+  label: Session security
+  order: 8
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Pearl provides the session actions (lock, suspend, hibernate and log out), the
+automatic idle policy, a native lock screen and a polkit authentication agent.
+The actions live in the control center's **Session & security** card, the
+configuration in **Settings → Session & lock**, and everything is reachable
+from `pearlctl` as well.
+
+## Session actions
+
+Lock is immediate. Suspend, hibernate and log out ask for a confirmation that
+expires after 20 seconds, and power off and restart use the double
+confirmation described on the
+[audio and power page](/pearl/docs/audio-power/#power-off-and-restart).
+
+The CLI carries the same confirmation boundary: request an action, read the
+pending action and its confirmation generation from `lifecycle status`, then
+confirm that generation. `lifecycle status` also reports availability, the
+active login session, agent registration, lock state, the current idle policy,
+inhibitor ownership and failures, and it never exposes credentials or prompt
+responses.
+
+## Automatic idle and sleep
+
+**Settings → Session & lock** edits separate AC and battery timers for
+locking, turning the screen off and suspending, where zero disables a timeout.
+All automatic timeouts are zero by default: idle behavior is an explicit
+opt-in. Each timeout is bounded to 24 hours, suspend requires an earlier
+nonzero lock timeout, and switching between AC and battery rearms the
+matching policy. Screen dimming, screen-off behavior and the automatic power
+saver are covered on the
+[audio and power page](/pearl/docs/audio-power/#idle-sleep-and-automatic-power-saver).
+
+Automatic idle respects the standard inhibitor mechanism: applications that
+block idle or sleep, such as a video player or a presentation tool, are
+honored, and Pearl checks for blocking inhibitors before every automatic
+action. Ambiguous multi-seat setups disable automatic idle rather than
+guessing.
+
+Pearl-initiated suspend always locks first: it acquires the lock screen,
+confirms the compositor's locked state, rechecks inhibitors and only then
+requests sleep. If the lock cannot be acquired, no automatic suspend
+proceeds. Resuming re-arms the idle policy but never unlocks the screen.
+Sleep initiated externally, by a lid switch or another program, is subject to
+the system's own delay limits: logind may proceed after its configured
+maximum delay even if locking failed, and Pearl reports that failure rather
+than claiming the screen locked.
+
+Pausing automatic idle is available in the control center and through
+`pearlctl lifecycle action --text inhibit`. That pauses Pearl's own policy
+until you resume it or Pearl exits; it is not a global inhibitor for other
+programs, and manual locking keeps working.
+
+## Lock screen
+
+`pearl-lock` is Pearl's own lock screen. It is not an overlay window and not
+an external locker: it uses the compositor's session-lock protocol, so every
+output is covered by a lock surface or blanked by the compositor while one is
+prepared, and an ordinary fullscreen window is never mistaken for a lock.
+
+The screen follows your wallpaper and Pearl's Material or GTK theme, with a
+clock, the date and an account card. The layout responds to the output:
+compact layouts use a smaller clock, very short outputs hide decorative
+content to keep the authentication card usable, and large text or long
+messages scroll with keyboard focus kept visible. Prompts and status changes
+are announced to screen readers, hidden responses are never spoken as plain
+text, a Caps Lock indicator follows the keyboard state, and Tab navigation
+works throughout.
+
+Authentication runs through PAM in a separate helper process, using both
+authentication and account validation: an expired password or a denied
+account fails closed instead of unlocking. Escape cancels the current
+conversation and clears the entry but never unlocks; Enter retries after a
+failure once a short cooldown ends, and an attempt has a 90-second deadline.
+Password fields use protected entry buffers, responses are never logged, and
+there is no password or unlock endpoint in `pearlctl`.
+
+The locker has its own lifetime: restarting or closing Pearl leaves it in
+place, and killing the locker leaves the session locked. A working PAM policy
+for the locker's PAM service is required; a missing or invalid policy
+prevents unlocking, and there is no bypass or permissive fallback.
+
+<Aside type="note">
+  If the locker process is ever abandoned, the current pinned Aqueous build lets
+  a new lock client take over: launch `pearl-lock` again from the same session
+  environment to recover. Do not restart the compositor as a way to claim a
+  secure unlock; that path has a different security boundary.
+</Aside>
+
+## Polkit agent
+
+Pearl registers a polkit authentication agent for its login session, so
+privileged actions from `pkexec`, package managers and similar tools show
+their authorization prompt inside your desktop. The prompt panel names the
+action and its message, lists the offered identities, and lets you pick one
+and authenticate; informational cues, such as touching a security key,
+appear without pressing Enter, a failed attempt offers a retry, and the whole
+request has a 120-second deadline. Cancel, Escape, closing the panel or
+locking the session ends the request and denies it.
+
+Authentication itself runs through polkit's trusted system helper and its own
+PAM service; Pearl never forwards your password to an arbitrary executable or
+grants privileges itself, and which factors are required stays with the
+administrator's PAM policy. Only one agent should serve a session: Pearl
+reports a registration conflict when another agent is already registered and
+never forcibly replaces it, and it does not show prompts over the lock screen
+or in an inactive session.
+
+If prompts never appear, `pearlctl lifecycle status` shows the resolved
+`session_id`, `authentication.registered` and any `session_error`. The most
+common cause is a Pearl process that was not launched from an authenticated
+desktop login; Pearl retries automatically when logind announces a new
+session.
+
+## Fingerprint login
+
+Where the administrator's PAM configuration includes fingerprint
+authentication, both the lock screen and the
+[login greeter](/pearl/docs/greeter/) handle it as a passive conversation:
+scan instructions and retry messages advance on their own without pressing
+Continue, while a password question still requires an explicit answer. With
+the reviewed policy, unsuccessful scanning proceeds to password entry after a
+finite interval; there is no method-switch button, and account checks or
+additional required factors remain authoritative, so a successful scan never
+unlocks a denied account.
+
+Pearl does not access fingerprint readers, templates or enrollment data;
+enrolling fingers uses your distribution's normal fprintd tooling, and the
+fallback-to-password behavior is entirely a property of the installed PAM
+policy.
+
+## Command line
+
+```sh
+pearlctl lock
+pearlctl lifecycle status
+pearlctl lifecycle action --text suspend
+pearlctl lifecycle action --text confirm --generation NUMBER
+pearlctl lifecycle action --text cancel
+pearlctl lifecycle action --text inhibit
+pearlctl lifecycle action --text uninhibit
+```
+
+Suspend, hibernate and log out need the two-step request-then-confirm flow,
+with the generation taken from a current `lifecycle status`. `lock` is
+immediate, and an accepted lock request is reported as accepted rather than
+as a completed acquisition; the status call reports the actual lock state.
