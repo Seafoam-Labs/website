@@ -1,0 +1,149 @@
+---
+title: Audio and power
+description: Sound devices and application streams, battery status, brightness, power profiles, idle timers and on-screen feedback.
+sidebar:
+  label: Audio and power
+  order: 5
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Pearl's sound controls talk to PulseAudio or PipeWire's PulseAudio-compatible
+service, and its power controls talk to UPower, logind and, when installed,
+power-profiles-daemon. The bar's audio and battery widgets open the compact
+**Sound** and **Power & battery** pages in the control center, and Settings
+carries the same pages in full. The battery widget hides itself when no
+battery is reported, and a missing service leaves the shell and its panels
+usable with an explicit unavailable state.
+
+## Sound
+
+The Sound page lists output and input devices with their volume, mute and
+default selection, plus a row per application stream:
+
+- Device volume covers 0 to 100% without amplification above nominal. The
+  slider shows the loudest channel and scaling preserves the channel balance;
+  mute is independent.
+- Application playback and recording streams can be moved to the current
+  default output, and their volumes adjust live. Read-only stream controls
+  are disabled rather than misleading.
+- Changes made by other applications, and your existing media keys, update the
+  same rows; Pearl does not own the sound server.
+- With no devices or a disconnected sound server the rows are replaced by a
+  status message, and Pearl reconnects automatically when the service
+  returns, without ever starting a daemon itself.
+
+## Battery
+
+The Power & battery page shows the aggregate battery percentage, charging
+state and estimated time to empty or full, and whether the machine is on AC.
+On a desktop without a system battery the battery card, source selector and
+automatic power-saver row are hidden, the timers edit AC settings, and your
+battery settings remain saved for later.
+
+The page also keeps a session-only charge history of up to six hours, which
+resets when the battery identity or service changes. An unknown charge or
+health value is never displayed as zero or as "Good", and UPS or peripheral
+batteries do not appear as laptop batteries.
+
+## Brightness
+
+The brightness slider reads and writes the machine's backlight. Zero maps to
+the smallest nonzero hardware value so the panel stays lit, and a permission
+denial leaves the observed state unchanged. Writes from other tools, such as
+`brightnessctl` or a brightness daemon, are detected and reflected in the
+page and the on-screen display. A machine without a backlight device shows an
+explicit unavailable state.
+
+## Power profiles
+
+Where power-profiles-daemon is installed, the page offers its power-saver,
+balanced and performance profiles. Only the choices the daemon actually
+advertises are enabled, a degraded-performance reason is shown when the
+daemon reports one, and the displayed profile always follows the daemon's
+authoritative state rather than the last click.
+
+## Idle, sleep and automatic power saver
+
+The Power & battery page edits separate AC and battery idle timers: lock,
+screen off and suspend, each in seconds, where zero disables a timeout. Its
+controls behave differently from the rest of Settings: brightness and power
+mode apply immediately, and sleep, dimming and automatic power-saver settings
+save immediately on their own, without applying unrelated pending preferences
+from the shared draft.
+
+The timers are constrained so the sequence stays sane: suspend requires an
+earlier nonzero lock timeout, and screen off cannot be later than an enabled
+suspend timeout. When dimming is on, brightness drops to 20% for up to 30
+seconds before screen off and is restored on activity unless you changed it
+yourself; dimming does nothing when screen off is disabled or brightness is
+already at or below 20%. Screen off needs the compositor's output power
+support, and automatic suspend locks the screen first and waits for the lock
+to be verified; see [Session security](/pearl/docs/security/) for lock, sleep
+and inhibition behavior.
+
+**Automatic power saver** accepts off or a battery threshold of 10, 20 or 30
+percent. While discharging below the threshold it selects the power-saver
+profile, and exits after a five-point recovery margin or when AC returns. It
+restores only a profile it still owns: if you changed the profile manually or
+another tool changed it, automation stays out of the way until the low-battery
+episode ends. It keeps running while Settings is closed and never rewrites
+your saved threshold.
+
+## Power off and restart
+
+Power off and restart are deliberate: the same button must be activated twice
+within ten seconds, and the confirmation resets when you cancel, close the
+popup or let it expire. The request goes through the system's normal
+authorization, denials are shown rather than silently escalated, and an
+accepted request is reported as acceptance by the session manager. No
+power-off or restart command is exposed through the CLI.
+
+## On-screen feedback
+
+Volume and brightness changes show a brief card centered near the bottom of
+the display that triggered them: an icon, the device name or caption, a
+percentage and a level meter. The card appears for changes to the default
+output from any source, including media keys and external clients, and for
+any successful brightness write, but not for rejected writes or unchanged
+values. Rapid changes coalesce into one card, a newer request replaces an
+older one, and the card expires shortly after its last update. It is
+click-through, never takes focus, and is dismissed by locking the session.
+
+## System and scheduling
+
+**Settings → System** can select and apply installed sched-ext CPU schedulers
+through `scxctl`. This needs a sched-ext-capable kernel, `scxctl`, a running
+`scx_loader` daemon and the scheduler executables in Pearl's PATH. Changes are
+runtime-only: Pearl does not use sudo or pkexec, install packages, launch
+scheduler binaries directly or edit boot configuration, and errors are
+reported on the page with bounded diagnostics.
+
+## Command line
+
+```sh
+pearlctl control-center show --page sound
+pearlctl control-center show --page power
+pearlctl services status [--offset N]
+pearlctl audio set --kind sink --volume 45
+pearlctl audio set --kind source --mute true
+pearlctl audio set --kind sink --generation GENERATION --device INDEX --default true
+pearlctl audio set --kind playback --generation GENERATION --device INDEX --target SINK_INDEX
+pearlctl brightness set --percent 65
+pearlctl profile set --profile balanced
+```
+
+`services status` pages through audio devices, streams, battery, profile and
+brightness state four entries at a time, following `next_offset`. Simple
+volume and mute changes target the current default device; targeting a
+specific device or moving a stream needs the `--generation` and `--device`
+values from a current status call. Accepted mutations return `queued:true`,
+and the real outcome appears in a later status call, the panel or the
+on-screen display. Audio, brightness and profile mutations are rejected while
+the session is locked.
+
+<Aside type="caution">
+  The idle timers live in an `idle` block inside the preferences file. Older
+  Pearl versions parse preferences strictly and reject it, so remove the block
+  before downgrading.
+</Aside>
