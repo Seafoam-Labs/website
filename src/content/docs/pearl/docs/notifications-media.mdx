@@ -1,0 +1,124 @@
+---
+title: Notifications and media
+description: Notification popups, history, Do Not Disturb and filters, the StatusNotifier tray and MPRIS media controls.
+sidebar:
+  label: Notifications and media
+  order: 6
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+The bar's `notifications`, `tray` and `media` widgets provide Pearl's session
+services: desktop notifications with a grouped history, application tray icons
+with their menus, and player controls for your music and video applications.
+All three are optional bar widgets, added and arranged in **Settings → Bar &
+dock**, and each opens its own popup from the bar.
+
+## Notifications
+
+New notifications appear as toast cards on the focused output, up to three at
+a time and fewer on short displays. Toasts take no keyboard focus and never
+reserve screen space; they accept clicks, move aside while another Pearl popup
+is open, and disappear after at most eight seconds. A notification may carry
+action buttons, and a card whose sender registered a default action runs it
+when you press the card itself.
+
+The notifications button in the bar opens the history, grouped by application
+and ordered by newest delivery, with **Do Not Disturb** and **Clear History**
+at the top. History lives in memory for the current Pearl process only; it is
+never written to disk, holds at most 64 records, and evicts the oldest
+inactive records first. Clear History keeps still-active notifications. An
+application that updates a notification replaces its card and history entry
+in place.
+
+- **Do Not Disturb** suppresses toasts for every urgency while retaining
+  eligible notifications in history. Turning it off does not replay old
+  deliveries.
+- Locking the session suppresses presentation and redacts notification
+  summaries from status output; unlocking does not replay what arrived while
+  locked.
+- An expired or dismissed notification closes with the normal protocol
+  reasons, and a sender's critical-urgency notifications persist until
+  dismissed unless the sender asked otherwise.
+
+### Filters
+
+**Settings → Notifications** edits blocking rules through the shared Pearl
+draft, so they activate on **Apply & save** without a restart. Each rule
+matches on application name, desktop entry, title, body or urgency with
+All/Any conditions, and either blocks a notification entirely or keeps it out
+of popups while retaining it in history. A master switch pauses filtering
+while keeping your rules, **Test filters** evaluates a manually entered
+sample against the current draft without sending anything, and blocked
+content never appears in counts, flyouts or status output. Filter edits are
+not retroactive: rules apply to future arrivals, not to existing history. The
+draft workflow is described on the [Settings page](/pearl/docs/settings/).
+
+## Tray
+
+The tray widget shows StatusNotifier items from your applications. The bar
+displays at most four icons, two on compact or vertical bars, and an overflow
+button opens the rest in an expanded tray. Items render their themed or
+supplied icons, attention and passive states, and tooltips.
+
+- Left click activates an item, or opens its menu for menu-only items.
+- Right click opens the context menu; middle click sends the secondary
+  activation. Scroll events reach the application too.
+- In the expanded tray, Space or Enter activates the focused item and Menu or
+  Shift+F10 opens its context menu.
+- Menus support nested submenus, separators, disabled and hidden entries and
+  check/radio toggle state, and Back returns from a submenu to its parent.
+
+Pearl cooperates with other desktop components here: it queues for the tray
+watcher name without replacing an existing owner, registering as a host and
+tracking items when another watcher runs. Likewise, when another notification
+daemon owns the bus, Pearl reports notifications as unavailable until the name
+becomes free.
+
+## Media
+
+The media button, or **Media controls** in the compact Overview, opens the
+media panel. It tracks up to eight players at once, with a chooser to select
+one and real previous/next, play/pause, stop, progress and Seek controls;
+anything a player does not support is disabled rather than hidden. The
+progress bar extrapolates from the player's reported position and refreshes
+once per second while the panel is open and playing, and an edited slider
+position survives moving focus to the Seek button until the track changes.
+
+Album artwork is loaded from local PNG and JPEG files only. Network artwork,
+other formats and oversized or invalid images fall back to a media icon; Pearl
+never fetches network resources for artwork.
+
+## Command line
+
+```sh
+pearlctl notifications toggle
+pearlctl media toggle
+pearlctl tray toggle
+pearlctl session status
+pearlctl session action --command dnd_on
+pearlctl session action --command dnd_off
+pearlctl session action --command clear_history
+pearlctl session action --command dismiss --notification 42
+pearlctl session action --command invoke --notification 42 --text default
+pearlctl session action --command select --generation 7
+pearlctl session action --command play_pause --generation 7
+pearlctl session action --command seek --generation 7 --position 60000000
+pearlctl session action --command tray_menu --generation 9 --menu-id 0
+```
+
+`session status` pages through notifications, players and tray items four
+entries at a time; follow `next_offset` for more. Media commands also include
+`play`, `pause`, `stop`, `next` and `previous`, and tray commands include
+`tray_activate` and `tray_secondary`. Targets are identified by the
+`--generation` (and for menus, `--revision` or `--menu-id`) values from a
+current status call, never by labels or list positions, and seek positions are
+in microseconds. Accepted mutations return a dispatch acknowledgement; later
+status calls report the actual outcome. All session actions keep Pearl's
+same-display, same-user checks and are rejected while the session is locked.
+
+<Aside type="note">
+  These services live on the session bus. If it restarts, Pearl reconnects
+  automatically, but the in-memory notification history belongs to the running
+  process and does not come back.
+</Aside>
