@@ -1,0 +1,315 @@
+---
+title: Theme creation
+description: How to author Pearl themes, from a three-color local palette to publishable community packages.
+sidebar:
+  label: Theme creation
+  order: 3
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Pearl themes come in two sizes. A **local palette** is one JSON file with as
+few as three colors: no package manifest, release version, stylesheet or source
+checkout is needed. A **community package** adds dark and light palettes,
+widget styling and publication metadata so other people can install it. Start
+with a palette; export it to a package when you want to share.
+
+Local palette authoring uses either **Settings → Appearance** or the installed
+`pearl-themes` command, and both work on the same files under
+`$XDG_CONFIG_HOME/pearl/palettes/`, normally `~/.config/pearl/palettes/`.
+
+## Create a palette in Settings
+
+<Steps>
+
+1. Open **Palette and widget style** and expand **Create and edit palettes**.
+
+2. Set **Filename** to something like `meadow` and **Palette display name** to
+   `Meadow`. Filenames use lowercase letters, digits, dots, underscores and
+   hyphens, start with a letter or digit, and keep the stem at most 80
+   characters.
+
+3. Enter your **Background**, **Text** and **Accent** as `#RRGGBB` values, or
+   keep the starter colors. The sample updates as you type; invalid colors or
+   insufficient contrast produce a diagnostic and the sample keeps its previous
+   valid appearance.
+
+4. Click **Create**. This writes a new file and refuses to replace an existing
+   palette with that filename.
+
+5. Find the palette in the installed list, click **Use theme**, then **Apply &
+   save**.
+
+</Steps>
+
+Later edits use **Edit colors** on that palette. **Save palette** writes the
+file, and saving the currently selected palette updates Pearl and its enabled
+application themes automatically. **Discard palette edits** restores the last
+loaded source. These buttons act on the palette file directly, independently of
+the shared preferences draft. If the file changed externally since loading,
+saving reports a conflict: reopen **Edit colors** and reconcile first.
+**Duplicate** copies a palette under a new filename and **Open file** edits it
+in your own editor.
+
+## Create the same palette from a terminal
+
+```sh
+pearl-themes init meadow
+palette="${XDG_CONFIG_HOME:-$HOME/.config}/pearl/palettes/meadow.json"
+pearl-themes validate "$palette"
+pearl-themes preview "$palette" --watch
+```
+
+Successful commands print JSON; validation errors print structured diagnostics
+and exit nonzero. `preview --watch` opens a graphical preview that refreshes
+after saved edits and needs a graphical session; creating, validating,
+importing and exporting all work without a display. Matugen is not required
+for a static shell palette.
+
+The starter file is the entire authoring format:
+
+```json
+{
+  "name": "Meadow",
+  "dark": {
+    "surface": "#101c19",
+    "on_surface": "#e8f4e9",
+    "primary": "#a4dfb0"
+  }
+}
+```
+
+`name` is optional; without it Pearl uses the filename stem. At least one
+variant is required, and each supplied variant needs `surface`, `on_surface`
+and `primary`, written as exactly six hexadecimal digits after `#`. JSON
+comments, unknown keys and duplicate keys are rejected, and the source is
+limited to 64 KiB. Dropping a valid JSON file into the palettes directory adds
+it to the Settings list automatically.
+
+With only a `dark` variant, both dark and light modes use that exact palette;
+with only `light`, both use the light one. Pearl reports this fallback and
+never manufactures an opposite variant, so author both when they should
+differ:
+
+```json
+{
+  "name": "Meadow",
+  "dark": {
+    "surface": "#101c19",
+    "on_surface": "#e8f4e9",
+    "primary": "#a4dfb0"
+  },
+  "light": {
+    "surface": "#f5fbf6",
+    "on_surface": "#17231a",
+    "primary": "#28633b"
+  }
+}
+```
+
+## Refine derived colors
+
+Every other color role is optional. Omitted roles are compiled from your three
+colors: surface containers mix `surface` toward `on_surface` in steps,
+`secondary` and `tertiary` default to `primary`, accent containers mix surface
+toward their accent, and foregrounds on accents pick black or white by
+contrast. Error and terminal colors fall back to Pearl's built-in Material
+defaults. Supply any role explicitly to keep its exact value:
+
+```json
+{
+  "dark": {
+    "surface": "#101c19",
+    "on_surface": "#e8f4e9",
+    "primary": "#a4dfb0",
+    "secondary": "#91cef4",
+    "hover": "#244136",
+    "on_hover": "#e8f4e9"
+  }
+}
+```
+
+Expand **Advanced colors and terminal palette · JSON** in Settings to edit the
+full role set. Pearl checks a 4.5:1 contrast ratio for the main text, accent
+and error pairs and rejects unreadable explicit values instead of changing
+them; diagnostics name the JSON path and suggest a readable foreground.
+
+Each variant can also carry an optional `terminal` object with background,
+foreground, cursor, selection and ANSI `normal`/`bright` colors. Terminal
+application templates (Ghostty, Kitty, Foot, Alacritty, WezTerm) consume these
+values; missing slots use Material defaults derived from your palette.
+
+## Theme applications with the same palette
+
+Under **Appearance → Application themes**, enable management, choose **Use
+Material defaults** and **Apply & save**, and keep application colors on
+**Follow Pearl**. Local palettes supply complete render input to the built-in
+application templates, so you do not need a copy of each template in your
+palette. Matugen 4.x is required for application rendering. See
+[Appearance](/pearl/docs/appearance/#application-themes) for activation and
+recovery details.
+
+## Import Noctalia colors
+
+```sh
+pearl-themes import "/path/to/Noctalia Palette.json" --name noctalia-meadow
+```
+
+In Settings, expand **Import and export**, enter the absolute input path, set a
+new **Filename** and click **Import palette**. Import validates colors, maps
+Noctalia's `mPrimary`, `mSurface`, `mOnSurface` and similar aliases onto
+Pearl's roles, and refuses to overwrite an existing local file. Select the
+result separately to activate it. An alias and its canonical role carrying
+different values produce `ConflictingPaletteAlias`; remove one and validate
+again. Import covers palette colors only: Noctalia templates, hooks and shell
+configuration are separate.
+
+## Export a community package
+
+When the palette is ready to distribute, write a `metadata.json` with a stable
+identity, version and your actual licensing text:
+
+```json
+{
+  "id": "org.example.meadow",
+  "author": "Your name",
+  "license": "MIT",
+  "source": "https://github.com/your-name/pearl-palettes",
+  "version": "1.0.0",
+  "license_text": "The complete license and copyright notice for your palette.",
+  "attribution": "Describe the original palette and credit borrowed colors or assets."
+}
+```
+
+Use your own ID outside the reserved `pearl.*` and `local.palette.*`
+namespaces, three numeric version components, and replace every placeholder:
+license and attribution text are required for publication. Then:
+
+```sh
+pearl-themes export "$palette" --output ./meadow-package --metadata ./metadata.json
+pearl-themes validate ./meadow-package
+pearl-themes '{"action":"pack","path":"./meadow-package","output":"./meadow-1.0.0.tar.gz"}'
+```
+
+Export writes a validated package directory containing the palettes, render
+data, `LICENSE` and `ATTRIBUTION.md`; pack turns it into an archive and prints
+its SHA-256 and size. Test the result with
+**Community repositories and local archives** in Settings, or:
+
+```sh
+pearl-themes '{"action":"import_archive","path":"./meadow-1.0.0.tar.gz"}'
+```
+
+Importing installs the package without changing the active appearance. In
+Settings under Appearance → **Community themes**, choose **Installed**, then
+**Preview**, **Use theme** and **Apply & save**. Installed releases are
+separate from your editable local palette and keep their committed appearance
+until you adopt a new version.
+
+## Publish a palette in a GitHub repository
+
+A public GitHub repository can host compact palette sources directly:
+
+```text
+palettes/
+  meadow.json
+```
+
+Put the metadata object from the export step under a top-level `publication`
+key in the palette file, beside `name`, `dark` and `light`. Only flat
+`palettes/*.json` entries are discovered. Commit the file, add the repository
+to Pearl's community browser (below), and refresh.
+
+Pearl pins published sources to a Git commit and blob hash, so changing source
+bytes under the same ID and version is rejected as `MutableThemeRelease`:
+increment `publication.version` whenever you change a published palette.
+
+## Community repositories
+
+Pearl includes the
+[Seafoam Labs community repository](https://github.com/Seafoam-Labs/pearl-community-themes)
+by default. Any other public GitHub repository can be added by its
+`https://github.com/OWNER/REPO` URL under **Appearance → Community repositories
+and local archives**. On **Community · refresh**, Pearl resolves the default
+branch to a commit and discovers `themes/*/theme.json` packages and
+`palettes/*.json` compact sources, sixteen entries per page. Installation
+fetches raw files at that pinned commit and verifies every file against its
+Git blob hash and size before the normal validation and atomic install.
+Metadata is cached for offline browsing, but installing still requires the
+files to be reachable, and GitHub's public API rate limits apply.
+
+Full packages committed one directory below `themes/` need no index, archive
+upload or GitHub release. To contribute to the built-in repository, open a pull
+request adding your theme folder there, following that repository's
+contribution instructions; the theme becomes discoverable once it reaches the
+default branch.
+
+### Custom HTTPS index repositories
+
+Independently hosted catalogs remain supported: an HTTPS `index.json` listing
+immutable `tar.gz` archives with exact SHA-256 hashes and byte sizes, paged in
+groups of at most sixteen releases through `next` URLs. Validate a page before
+publishing:
+
+```sh
+pearl-themes '{"action":"validate_index","path":"index.json","id":"my-community"}'
+```
+
+Upload archives first, then publish the index, and never change the bytes of
+an existing `(repository URL, package ID, version)` triple: publish a new
+version instead. Sources are configured in Settings and stored in
+`$XDG_CONFIG_HOME/pearl/theme-repositories.json`, with at most sixteen
+sources. The full index schema, publication workflow and limits are documented
+in the [Pearl
+repository](https://github.com/Seafoam-Labs/pearl/blob/main/docs/THEME_REPOSITORIES.md).
+
+## Richer packages: widget styling and images
+
+For custom widget geometry, component CSS, images or bundled application
+profiles, author a full package instead of a compact palette. Its manifest
+(`theme.json`) points at dark and light palettes of thirteen colors each,
+optional shape and motion tokens, and an optional small component stylesheet:
+
+```json
+{
+  "schema_version": 1,
+  "id": "org.example.my-theme",
+  "name": "My Theme",
+  "author": "Your name",
+  "license": "CC0-1.0",
+  "source": "https://github.com/YOUR-NAME/pearl-themes",
+  "asset_version": "1.0.0",
+  "requires": { "palette_api": 1, "style_api": 1 },
+  "palettes": { "dark": "dark.json", "light": "light.json" },
+  "style": { "tokens": "tokens.json", "css": "components.css" }
+}
+```
+
+The workflow mirrors palette publishing: start from the included example in
+the Pearl source tree, validate and pack with `pearl-themes`, import the
+archive locally to preview, then commit the folder under `themes/` in a public
+GitHub repository or ship archives through a custom index. Increase
+`asset_version` for every published change. The step-by-step guide, the
+supported CSS grammar, token ranges and error reference live in the [Pearl
+repository](https://github.com/Seafoam-Labs/pearl/blob/main/docs/CREATE_COMMUNITY_THEME.md).
+
+## Troubleshooting
+
+| Symptom                                | Next action                                                                                     |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Palette absent from the list           | Check the directory, filename and `.json` extension, then run `pearl-themes validate FILE`      |
+| `InvalidColor` or `MissingPaletteRole` | Supply each required role as `#RRGGBB` in every authored variant                                |
+| `InsufficientContrast`                 | Fix the reported pair; the diagnostic suggests a readable foreground                            |
+| `Conflict` while saving                | Reopen **Edit colors** and reconcile the external change                                        |
+| `PaletteAlreadyExists`                 | Choose a new filename or edit the existing palette                                              |
+| Edits have no effect                   | Select the palette and **Apply & save**, then **Save palette** or save the file                 |
+| Both modes look identical              | Author both variants instead of relying on single-variant fallback                              |
+| Application colors do not follow       | Enable management, choose defaults or a profile, select Follow Pearl, and read the row's status |
+| `MutableThemeRelease`                  | Increment the published version for changed source                                              |
+
+<Aside type="note">
+  A malformed, unreadable or deleted active palette file preserves the last
+  valid appearance and reports an error; fix and save the source to resume live
+  updates. Renaming a palette file creates a new identity, so select the renamed
+  palette explicitly.
+</Aside>
