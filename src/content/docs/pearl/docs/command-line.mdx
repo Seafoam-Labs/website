@@ -1,0 +1,243 @@
+---
+title: Command-line tools
+description: The pearlctl control tool, the installed Pearl executables, log locations, verbosity flags and failure runbooks.
+sidebar:
+  label: Command-line tools
+  order: 11
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+`pearlctl` controls a running Pearl shell. Run it inside the same Aqueous
+session as the shell you want to reach; it finds the session's private control
+socket on its own and prints the shell's JSON reply. There is no endpoint
+override and no cross-session control.
+
+Exit codes are consistent across every command: **0** success, **2** usage
+error, **3** connection or environment failure, and **4** when the shell
+answered with an error. If a request may have been sent but its reply was
+lost, the CLI reports an unknown completion and never retries the mutation
+itself. Mutations are rejected while the session is locked, most status
+commands page four entries at a time through `next_offset`, and commands that
+act on a listed object need an ID or generation from a current status call.
+
+## Installed executables
+
+| Executable          | Purpose                                                                                                                                         |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pearl`             | The desktop shell itself                                                                                                                        |
+| `pearlctl`          | Control CLI for the running shell                                                                                                               |
+| `pearl-settings`    | The Settings application                                                                                                                        |
+| `pearl-themes`      | Theme authoring, validation, import and packing                                                                                                 |
+| `pearl-lock`        | The lock screen and its PAM authentication                                                                                                      |
+| `pearl-agent`       | The experimental launcher assistant, opt-in and disabled by default ([docs](https://github.com/Seafoam-Labs/pearl/blob/main/docs/ASSISTANT.md)) |
+| `pearl-plugin-host` | Optional WebAssembly host, one process per enabled plugin                                                                                       |
+
+Git packages append `-git` to the executable names. The Qt probes used by the
+Qt integration live under `/usr/lib/pearl/` and are not user commands.
+
+## Shell state and surfaces
+
+```sh
+pearlctl status
+pearlctl quit
+pearlctl popup show [--output OUTPUT_ID]
+pearlctl popup toggle
+pearlctl popup hide
+pearlctl bar set --output OUTPUT_ID --edge bottom --size 64
+pearlctl bar groups --output OUTPUT_ID --left launcher,workspaces --center clock --right control
+pearlctl frame set --output OUTPUT_ID --edge top --size 8
+pearlctl osd show --text 'Sound muted' --duration 1200
+```
+
+`status` is the entry point to everything else: it reports the session,
+mapped outputs with their connectors, scales and bounds, bar mode and
+visibility, popup and on-screen-display state, the window switcher, and a
+summary of the service states. Output IDs are opaque runtime values from
+`status.outputs[].id`; do not persist them between sessions. Bar sizes are 32
+to 160 logical pixels, frame sizes 0 to 160, OSD text 1 to 512 bytes and OSD
+durations 100 to 10000 ms. `bar groups` is a runtime control: the next
+preferences application restores the persisted layout.
+
+## Desktop surfaces
+
+```sh
+pearlctl launcher toggle
+pearlctl calendar toggle [--output OUTPUT_ID]
+pearlctl control-center show [--page PAGE]
+pearlctl control-center toggle [--output OUTPUT_ID]
+pearlctl overview toggle [--output OUTPUT_ID]
+pearlctl dock show|hide [--output OUTPUT_ID]
+pearlctl desktop focus [--output OUTPUT_ID]
+pearlctl running-apps show [--output OUTPUT_ID]
+pearlctl window-switcher next|previous|dismiss [--output OUTPUT_ID]
+```
+
+These are the bindable entry points for every shell surface, described with
+their keyboard behavior on the [desktop page](/pearl/docs/desktop/).
+`control-center show` accepts the page IDs `overview`, `sound`, `network`,
+`bluetooth` and `power`.
+
+## Session and security
+
+```sh
+pearlctl lock
+pearlctl lifecycle status
+pearlctl lifecycle action --text suspend|hibernate|logout
+pearlctl lifecycle action --text confirm --generation NUMBER
+pearlctl lifecycle action --text cancel
+pearlctl lifecycle action --text inhibit|uninhibit
+```
+
+Destructive actions use the two-step request-then-confirm flow; see
+[session security](/pearl/docs/security/).
+
+## Settings and preferences
+
+```sh
+pearlctl settings show [--page PAGE] [--section SECTION]
+pearlctl preferences status
+pearlctl preferences apply --revision N --text '{"theme":{"mode":"static"}}'
+pearlctl preferences reload
+pearlctl aqueous show [--section SECTION]
+pearlctl aqueous status|validate|apply|refresh|reload|rebase|discard
+```
+
+`settings show` and `aqueous show` open the standalone Settings application on
+a page, not the compact flyouts. `preferences apply` submits a full
+configuration rather than a patch and is covered with its cautions on the
+[Settings page](/pearl/docs/settings/#command-line).
+
+## Services
+
+```sh
+pearlctl services status [--offset N]
+pearlctl audio set --kind sink|source|playback|recording ...
+pearlctl brightness set --percent 65
+pearlctl profile set --profile balanced
+pearlctl night-light status|on|off|toggle|resume|retry
+pearlctl connectivity status [--offset N]
+pearlctl connectivity action --service network|bluetooth --action ACTION --generation N [--path OBJECT_PATH]
+```
+
+Audio, brightness, profile and connectivity commands are documented on the
+[audio and power](/pearl/docs/audio-power/#command-line) and
+[connectivity](/pearl/docs/connectivity/#command-line) pages, and Night Light
+on the [appearance page](/pearl/docs/appearance/#night-light).
+
+## Session services
+
+```sh
+pearlctl notifications toggle
+pearlctl media toggle
+pearlctl tray toggle
+pearlctl session status [--offset N]
+pearlctl session action --command COMMAND [...]
+```
+
+`session action` covers Do Not Disturb, history, notification dismissal and
+invocation, media transport and tray activation; see the [notifications and
+media page](/pearl/docs/notifications-media/#command-line).
+
+## Clipboard and capture
+
+```sh
+pearlctl clipboard status|show|toggle|clear
+pearlctl clipboard select|delete --generation ENTRY_ID
+pearlctl capture output --output OUTPUT_ID
+pearlctl capture region --output OUTPUT_ID --text x,y,width,height
+pearlctl capture windows [--offset N]
+pearlctl capture window --text FOREIGN_TOPLEVEL_ID
+pearlctl capture status|show|cancel
+pearlctl capture copy|save --generation SCREENSHOT_GENERATION [--path /absolute/new.png]
+```
+
+See the [clipboard and screenshots
+page](/pearl/docs/clipboard-screenshots/#command-line) for the
+request-then-status flow.
+
+## Plugins
+
+```sh
+pearlctl plugins refresh
+pearlctl plugins list [--offset N]
+pearlctl plugins inspect --path PACKAGE_ID
+pearlctl plugins enable --path PACKAGE_ID --text PACKAGE_SHA256 --revision N
+pearlctl plugins disable --path PACKAGE_ID --revision N
+pearlctl plugins reload --path PACKAGE_ID
+```
+
+See the [plugins page](/pearl/docs/plugins/#command-line).
+
+## Logs
+
+Pearl has no log file: production logging goes to journald, and the only
+diagnostic file Pearl writes is the `pearlctl report` bundle below.
+
+| Context                                   | Command                                                                                                                           |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Shell started by Pearl's own user service | `journalctl --user -u pearl.service` (`pearl-git.service` for Git packages), equivalently `journalctl --user -t pearl`            |
+| Shell started by Aqueous                  | The compositor's integration unit, for example `journalctl --user -u aqueous-git-pearl.service`; `-t pearl` matches nothing there |
+| Any install, unit name unknown            | `journalctl --user _EXE=/usr/bin/pearl`                                                                                           |
+| Greeter and greeter-launched sessions     | `sudo journalctl -b -u pearl-greeter.service`                                                                                     |
+
+Crash traces land in the same journal stream. A journald "Suppressed N
+messages" note is itself a signal that something flooded the log.
+
+Verbosity is a runtime choice, with no rebuild needed:
+
+```sh
+pearl --log-level error|warning|info|debug
+pearl --log-scopes aqueous,~gallery
+```
+
+Release builds default to `info`. `--log-scopes` takes a comma-separated list,
+`all` for every scope and `~scope` to exclude one, and `pearlctl` accepts both
+flags on any command. Make it permanent with a systemd user drop-in
+(`systemctl --user edit pearl.service`):
+
+```ini
+[Service]
+ExecStart=
+ExecStart=/usr/bin/pearl --log-level debug
+```
+
+On an Aqueous-started shell the drop-in belongs to the compositor's unit
+instead; `pearlctl report` prints the journal query it used, which names the
+right unit. The unit-launched helpers (greeter, lock, settings, themes, plugin
+host) take no flags and log at their build default.
+
+## When something fails
+
+`pearl --check-environment` diagnoses a shell that will not start and works
+without a display. Beyond that, the journal carries greppable `event=` names:
+
+| Symptom                            | First checks                                                                                                                                    |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shell does not start, black screen | `pearl --check-environment`, then `event=startup-failed` and `event=session-error` in the journal, then `systemctl --user status pearl.service` |
+| Greeter does not appear            | `sudo journalctl -b -u pearl-greeter.service`, then `coredumpctl info /usr/lib/pearl/pearl-greeter-host`                                        |
+| Lock does not engage               | `pearlctl lifecycle status`, then `event=lock-` journal lines                                                                                   |
+| Theme fails to load                | `event=css-error` and `event=resource-error` journal lines; `pearlctl preferences status`; the shell falls back to its bundled palette          |
+| No audio                           | `pearlctl services status` reports per-service reasons                                                                                          |
+| Network applet empty               | `pearlctl connectivity status`, then `event=network-failed` or `event=bluetooth-failed`                                                         |
+| Compositor disconnect warning      | `event=aqueous-disconnected` and `event=aqueous-availability`; the shell keeps its last state and reconnects                                    |
+
+The complete runbook, including file-preview diagnostics, lives in the [Pearl
+repository's logging
+guide](https://github.com/Seafoam-Labs/pearl/blob/main/docs/LOGGING.md).
+
+## Reporting a bug
+
+While the shell is running, execute:
+
+```sh
+pearlctl report
+```
+
+The reply names a bounded text file under `~/.local/state/pearl/`: the launch
+arguments, version and log filters, `--check-environment` output, the live
+`status` JSON and the last 500 lines of the shell's journal stream. Attach it,
+with a description of what you did and what happened, to a [GitHub
+issue](https://github.com/Seafoam-Labs/pearl/issues). The last three reports
+are kept, and a report never contains typed content, passwords, clipboard
+payloads or session tokens.
