@@ -17,8 +17,9 @@ import {
 A package backend is the engine Shelly uses to read repositories, resolve dependencies and apply
 package transactions. Shelly ships two of them and builds both by default: `libalpm`, the C library
 behind `pacman`, is the default, so nothing changes unless you opt in. The alternative is RLPM, the
-Rolling Linux Package Manager, Shelly's own native package engine written entirely in Zig. Choosing
-between the two is a single, reversible configuration setting.
+Rolling Linux Package Manager, Shelly's own native package engine written in Zig. Builds that
+include both engines can select either through a configuration setting. Dedicated RLPM-only
+builds, including the Arch and Devario recipes, default to RLPM and cannot select libalpm.
 
 ---
 
@@ -78,7 +79,7 @@ The active engine is the `NativePackageBackend` entry in your CLI configuration
 
 ### Reverting and repairing
 
-Switch back the same way:
+On a build that includes libalpm, switch back the same way:
 
 ```sh
 shelly config set NativePackageBackend libalpm
@@ -109,8 +110,9 @@ stay usable while the setting is invalid.
 
 ## What Does Not Change
 
-Switching engines is intentionally boring. On a standard Arch Linux system, your package state and
-workflow are identical either way:
+On the standard Arch path profile, switching engines preserves the configured package locations
+and uses a compatible installed database format. This does not imply identical behavior in every
+transaction or failure case:
 
 - **Configuration source:** `pacman.conf` is still read for repositories and paths, and path
   defaults stay on the standard `pacman` profile: `/etc/pacman.conf`, `/var/lib/pacman`,
@@ -121,8 +123,8 @@ workflow are identical either way:
   cannot run transactions at the same time.
 - **Existing data:** switching does not touch downloaded archives, mirror definitions, the keyring
   or your installed state.
-- **Other package sources:** AUR, Flatpak and AppImage workflows are unaffected. The setting only
-  selects the engine for native repository packages.
+- **Other package sources:** Flatpak and AppImage use their own implementations. AUR builds use
+  the selected native engine for dependency installation and installing built package archives.
 - **No migration step:** there is nothing to convert, reinstall or clean up when switching.
   RLPM update previews automatically copy local metadata into a separate database and replace
   legacy cache links.
@@ -138,9 +140,10 @@ For how this native configuration relates to Shelly's CLI settings and the separ
 Where `libalpm` calls into Arch's C library, RLPM re-implements the engine natively. The
 differences you can observe:
 
-- **No libalpm linkage:** RLPM does not load or call `libalpm`. Repository handling, dependency
-  resolution and transactions are Shelly's own Zig implementation, and RLPM-only builds ship
-  without any `libalpm` dependency.
+- **Independent implementation:** RLPM does not delegate operations to `libalpm`. Repository
+  handling, dependency resolution and transactions are Shelly's own Zig implementation.
+  RLPM-only builds omit libalpm linkage; dual-backend binaries still load their compiled dynamic
+  dependencies even when RLPM is selected.
 - **SQLite repository databases:** a repository database containing a `pacman.db` member is read as
   SQLite directly in memory (`sqlite3_deserialize`), with no member extracted to disk, alongside
   ordinary tar repositories.
@@ -153,9 +156,9 @@ differences you can observe:
 - **Sealed verification:** archives are copied into an anonymous sealed in-memory file
   (`memfd_create`) before verification, preventing time-of-check to time-of-use (TOCTOU)
   modifications so the bytes GPG and the archive reader inspect cannot change afterwards. Checksums
-  prefer SHA-256 over MD5, and an embedded signature supersedes repository digests.
-- **Isolated hooks:** hooks and scriptlets execute inside an unprivileged network namespace with
-  loopback only. A hook opts in with `NetworkAccess=allowed`, and administrators can lift isolation
+  prefer SHA-256 over MD5, and an enabled embedded signature supersedes repository digests.
+- **Isolated hooks:** hooks and scriptlets require a network namespace by default, with
+  loopback brought up best effort. A hook opts in with `NetworkAccess=allowed`, and administrators can lift isolation
   with `DisableSandboxNetwork` (or `DisableSandbox`) in the native package configuration
   (`pacman.conf` or `shelly.conf`, depending on the path profile); the programmatic API exposes this
   as `sandbox.disable_network`.
@@ -206,13 +209,16 @@ The plan is reviewed before anything runs: dependency resolution, provider quest
 list of additions and removals are settled while you are still being prompted, and the commit step
 only executes the reviewed plan.
 
-There is no rollback. If a mutation fails, RLPM stops at the failed step and keeps the work it has
-already done, reporting which packages completed and which remain. Installed records stay coherent
-through the journal described above, so recovery means fixing the underlying condition and running
-the transaction again, not undoing.
+There is no full filesystem rollback. If a mutation fails, RLPM stops at that step and reports
+completed and remaining work. An interrupted record-publication journal can require explicit
+recovery before RLPM will read the database again. Journal recovery restores coherent records;
+it does not undo payload changes or scriptlet effects. See
+[execution and recovery](/shelly-alpm/docs/rlpm/execution/) for the distinction.
 
-Version comparison follows `libalpm`'s ordering: RLPM's comparison results were recorded from
-`alpm_pkg_vercmp` in the C locale, so upgrade and downgrade decisions match `pacman`'s.
+Version comparison targets `libalpm`'s C-locale ordering and is checked against fixed expectations
+recorded from a pinned reference build. Repository priority and other resolution policy also
+affect upgrade and downgrade selection. See [version comparison](/shelly-alpm/docs/rlpm/versions/)
+and [dependency resolution](/shelly-alpm/docs/rlpm/resolution/).
 
 ---
 
@@ -233,13 +239,14 @@ Engine selection is also a build-time choice for packagers and embedders:
 
   </TabItem>
   <TabItem label="Recipe builds">
-    `PKGBUILD` recipes honor `SHELLY_LIBALPM`. Setting the variable to `false` builds the RLPM-only
+    Configurable upstream `PKGBUILD` recipes honor `SHELLY_LIBALPM`. Setting it to `false` builds the RLPM-only
     variant; omitting the variable builds both engines:
 
     <Code code="SHELLY_LIBALPM=false makepkg" lang="sh" />
 
     RLPM-only recipes omit `pacman` and `libalpm` dependencies and verify that the resulting
-    binary contains no dynamic `libalpm` linkage.
+    binary contains no dynamic `libalpm` linkage. The dedicated `packaging/arch/shelly-git`
+    and Devario recipes select RLPM explicitly rather than inheriting that dual-backend default.
 
   </TabItem>
   <TabItem label="Embedding & workers">
@@ -284,13 +291,32 @@ Engine selection is also a build-time choice for packagers and embedders:
 
 ## Status and Limitations
 
-`libalpm` is the default engine, and RLPM is an opt-in alternative selected per machine with the
-setting above. RLPM's compatibility with `libalpm` is tracked row by row in an in-repo ledger, no
-row claims verified full parity yet, and release acceptance gates remain open for privileged
-sandboxes, independent reference behavior, parser fuzzing, large-repository performance and full
-frontend workflows. Practically, recovery is always one command away,
-`shelly config set NativePackageBackend libalpm`, because neither engine falls back to the other
-automatically.
+`libalpm` is the initial default in dual-backend builds; RLPM-only builds default to RLPM.
+Compatibility is tracked in an in-repository ledger, and complete libalpm parity remains
+unfinished. Focused reference, GPG, namespace, and interoperability tests cover particular
+contracts; they do not certify every production workflow or performance case.
+
+Changing the backend affects subsequent operations only. It neither undoes a partial transaction
+nor recovers an interrupted journal, and it cannot select an engine omitted from the binary.
+Neither engine is selected automatically as a fallback after failure.
+
+---
+
+## Detailed RLPM Guides
+
+These guides explain the engine's behavior and library contracts beyond the overview:
+
+| Guide                                                            | What it covers                                                                              |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [Databases and caches](/shelly-alpm/docs/rlpm/databases/)        | Local records, tar and SQLite repositories, query policy, reloads, and reference lifetimes. |
+| [Version comparison](/shelly-alpm/docs/rlpm/versions/)           | Epochs, releases, permissive metadata, ordering, and comparison limits.                     |
+| [Dependency resolution](/shelly-alpm/docs/rlpm/resolution/)      | Repository priority, providers, conflicts, removal, upgrades, and reviewable plans.         |
+| [Transactions and locks](/shelly-alpm/docs/rlpm/transactions/)   | Transaction states, shared locking, stale-state checks, questions, and cancellation.        |
+| [Integrity and signatures](/shelly-alpm/docs/rlpm/verification/) | Signing policy, checksums, key trust, consented import, and sealed archive bytes.           |
+| [Downloads and refresh](/shelly-alpm/docs/rlpm/downloads/)       | Verified caches, concurrency, mirror retries, publication, and worker privileges.           |
+| [Filesystem preflight](/shelly-alpm/docs/rlpm/preflight/)        | Archive validation, file ownership, conflicts, backups, path confinement, and space.        |
+| [Hooks and scriptlets](/shelly-alpm/docs/rlpm/actions/)          | Discovery, matching, action order, network controls, and failure outcomes.                  |
+| [Execution and recovery](/shelly-alpm/docs/rlpm/execution/)      | Payload writes, durability barriers, local-record journals, and partial failures.           |
 
 ---
 
