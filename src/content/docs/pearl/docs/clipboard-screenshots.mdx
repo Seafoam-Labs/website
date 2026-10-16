@@ -1,0 +1,120 @@
+---
+title: Clipboard and screenshots
+description: The clipboard history panel, its privacy and lock behavior, and taking, saving and copying screenshots.
+sidebar:
+  label: Clipboard and screenshots
+  order: 7
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+The **Clipboard & capture** panel combines a clipboard history and screenshot
+tools in one screen-centered window with two tabs. Open it from the
+`clipboard` bar widget, with `pearlctl clipboard toggle`, or directly on the
+screenshot tab with `pearlctl capture show`. New default bar layouts include
+the widget; an existing configured bar can add the `clipboard` token in
+**Settings → Bar & dock**.
+
+The panel always opens centered, regardless of the flyout placement
+preference, with focus in the history filter. Escape or a backdrop click
+closes it, and opening it while another Pearl popup is shown replaces that
+popup. Pearl never grabs key combinations itself: a clipboard shortcut is an
+Aqueous keybinding that runs `pearlctl clipboard toggle`.
+
+## Clipboard history
+
+History holds up to 20 entries in memory, text and PNG images alike, with
+duplicates kept once and the least recently used entry evicted first. When an
+application offers both an image and text, the image is stored. Previews in
+the list are short plain-text excerpts; the stored payload keeps its full
+content. The [launcher calculator](/pearl/docs/desktop/#calculator) publishes
+its results through the same service, so copied results appear here too.
+
+| Input                       | Effect                                                           |
+| --------------------------- | ---------------------------------------------------------------- |
+| Typing                      | Case-insensitive substring filter; Enter acts on the first match |
+| Up / Down                   | Move the selection                                               |
+| Enter or one click on a row | Select the entry, move it to the top, close the panel            |
+| Delete                      | Remove the selected entry without selecting it                   |
+| Escape                      | Close the panel                                                  |
+| Row **Copy** / **Delete**   | Pointer equivalents of Enter and Delete                          |
+
+Selecting an entry makes it Pearl's current clipboard selection; pasting stays
+an action in the destination application, and a copied entry is promoted to
+most-recent so a value still in use is the last one eligible for eviction.
+**Clear history** releases Pearl's selection as well; it never touches a
+selection owned by another application.
+
+### Privacy and locking
+
+History is memory-only and is never written to disk. Selections that
+advertise a password-manager hint, such as `x-kde-passwordManagerHint` or
+`application/x-keepassxc`, are excluded from history regardless of the hint's
+contents. Hints are advisory: an application that copies a secret without
+marking it cannot be distinguished from ordinary text.
+
+Locking the session suspends both services: Pearl cancels transfers and
+capture work, clears the history and any screenshot preview, releases its
+selection and stops collecting. Text copied while locked is not imported on
+unlock, a pending copy is never replayed after unlock, and status replies
+contain no clipboard content while suspended.
+
+## Screenshots
+
+The Capture tab takes a screenshot of one whole output or of a region. The
+panel hides itself before the frame is captured and reports completion
+through the on-screen display; reopen it with `pearlctl capture show` to
+preview, save or copy the result. Whole-output screenshots exclude the
+pointer cursor and keep the display's native resolution and rotation.
+
+**Region capture crops the output**, including any overlapping windows,
+rather than selecting their contents. Enter the rectangle as
+`x,y,width,height` in output-local logical pixels; negative coordinates,
+empty rectangles and regions outside the selected output are rejected. There
+is no pointer-drag region selector yet.
+
+An isolated-window capture asks the compositor for a single window even when
+unrelated windows overlap it. Whether one can be exported depends on the
+color information the compositor reports for that source; when it is
+insufficient, Pearl withholds the PNG and explains why instead of exporting
+wrong colors.
+
+Saving writes a uniquely timestamped PNG into
+`$XDG_PICTURES_DIR/Pearl Screenshots/` (falling back to your Pictures
+directory or home), created privately and never overwriting an existing file
+or symlink. The CLI accepts an explicit absolute path instead. A failed save
+preserves the preview for retry. Copying puts the image on the clipboard,
+subject to the clipboard's size limits, so a very large screenshot can still
+be saved even when it cannot be copied.
+
+One capture runs at a time. Removing an output or changing its geometry,
+scale or mode cancels a capture aimed at it, and HDR or wide-gamut content
+produces an explanation rather than a PNG.
+
+## Command line
+
+```sh
+pearlctl clipboard status
+pearlctl clipboard show [--output OUTPUT_ID]
+pearlctl clipboard toggle [--output OUTPUT_ID]
+pearlctl clipboard select --generation ENTRY_ID
+pearlctl clipboard delete --generation ENTRY_ID
+pearlctl clipboard clear
+
+pearlctl capture output --output OUTPUT_ID
+pearlctl capture region --output OUTPUT_ID --text 31,41,203,117
+pearlctl capture windows [--offset N]
+pearlctl capture window --text FOREIGN_TOPLEVEL_ID
+pearlctl capture status
+pearlctl capture show
+pearlctl capture copy --generation SCREENSHOT_GENERATION
+pearlctl capture save --generation SCREENSHOT_GENERATION [--path /absolute/new.png]
+pearlctl capture cancel
+```
+
+Entry IDs and screenshot generations come from the matching status command.
+Capture requests acknowledge queueing rather than completion: wait for
+`pending: false` and an increased `generation` in `capture status`, and read
+the message if it did not increase. Copy and save reject stale generations,
+no command carries clipboard payload text, and status responses never
+include bulk image data.
