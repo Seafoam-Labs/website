@@ -194,6 +194,7 @@ shelly build [<pkgbuild>] [options]
 | `--sign`                      |       | Generate a detached OpenPGP signature (`.sig`) next to each built package archive.                                   |
 | `--nosign`                    |       | Skip package signing, overriding `shellybuild.conf`.                                                                 |
 | `--key <key>`                 |       | Specify the GPG key ID or 40-character fingerprint to use for package signing.                                       |
+| `--compression-level <1-5>`   |       | Select an archive compression preset from 1 (conservative) to 5 (maximum), overriding `package.compression_level`.   |
 | `--package-destination <dir>` |       | Save package archives to a specified absolute directory instead of the default location.                             |
 | `--reviewed`                  | `-r`  | Mark the recipe as reviewed and bypass the interactive prompt (use only for automated workflows or trusted recipes). |
 | `--makesrcinfo`               |       | Statically parse the recipe, generate `.SRCINFO` to standard output, and exit without building.                      |
@@ -347,6 +348,9 @@ or undeclared dependencies influence the compilation, mirroring official Arch pa
 Adding `-l` (`--install`) is safe here: the guest exports the archives and the host coordinator installs them, so the
 container never writes into the host system database.
 
+Resolved output settings carry into the guest too: the `--compression-level` / `package.compression_level` preset is
+applied to every selected split package, and a configured `package.carch` label is carried in the same way.
+
 ---
 
 ## Configuration Reference (`shellybuild.conf`)
@@ -394,6 +398,12 @@ distcc_hosts = []
 packager = "Unknown Packager"
 extension = ".pkg.tar.zst"
 
+# Optional; omission labels packages with build.carch
+# carch = "x86_64_v3"
+
+# Optional; omission preserves the compression library's defaults
+# compression_level = 3
+
 # Build options and tidy behavior
 options = ["strip", "docs", "emptydirs", "zipman", "purge", "lto"]
 strip_binaries = ["--strip-all"]
@@ -422,6 +432,8 @@ extra_write = []
 
 #### `[build]`
 
+- `carch` / `chost`: The build-time target architecture and host triplet, exported as `$CARCH` and `$CHOST`. To label
+  the finished archive with a different architecture, see [Package Architecture](#package-architecture).
 - `makeflags`: Concurrency and build options passed to `make` (e.g. `["-j$(nproc)"]`).
 - `cflags` / `cxxflags` / `ldflags` / `ltoflags`: Optimization and hardening flags exported to build child processes.
 - `ccache`: When `true`, prepends `/usr/lib/ccache/bin` to `PATH`.
@@ -430,6 +442,10 @@ extra_write = []
 #### `[package]`
 
 - `packager`: Identifies the builder in `.PKGINFO` (e.g. `"Jane Doe <jane@example.com>"`).
+- `carch`: Optional architecture label for built archives, replacing `build.carch` only in the finished package. See
+  [Package Architecture](#package-architecture).
+- `compression_level`: Optional archive compression preset from 1 to 5; omission preserves the compression library's
+  defaults. See [Package Compression](#package-compression).
 - `options`: Controls package tidy operations. Supported options include `strip`, `docs`, `emptydirs`, `zipman`,
   `purge`, `lto`, `debug`, `libtool`, and `staticlibs`. Recipes can override them using `options=('!strip' '!purge')`.
 - `purge`: Automatically removes `usr/share/info/dir`, `.packlist` files, and `*.pod` files from `$pkgdir` before
@@ -449,6 +465,62 @@ extra_write = []
 - `extra_read`: List of absolute directory paths outside the standard system hierarchy granted read access (e.g.
   `["/home/user/.cargo/registry"]`).
 - `extra_write`: List of absolute directory paths granted read-write access (e.g. `["/home/user/.cache/ccache"]`).
+
+### Package Architecture
+
+Two settings name an architecture, and they split the work:
+
+- **`[build] carch`** (default `"x86_64"`) is the build-time architecture. It exports `$CARCH` into the recipe, selects
+  the architecture-suffixed arrays (`source_x86_64`, `depends_x86_64`, and friends), drives the `arch=()` support
+  check, and keeps governing everything up to packaging, including `.SRCINFO` metadata.
+- **`[package] carch`** is optional and is Shelly's equivalent of makepkg's `PACKAGECARCH` (as carried by CachyOS's
+  pacman). It changes only the label of the assembled package: the `.PKGINFO` `arch` field, the `.BUILDINFO` `pkgarch`
+  field, and the `name-version-release-arch` file name. It has no CLI flag.
+
+A recipe declaring `arch=('x86_64')` is therefore evaluated and built as plain `x86_64` and, with
+`[package] carch = "x86_64_v3"`, produces `my-package-1.0.0-1-x86_64_v3.pkg.tar.zst`. Packages declaring
+`arch=('any')` remain `any`, and omitting the key everywhere labels packages with `build.carch`, which is the previous
+behavior.
+
+The label must match `[A-Za-z0-9_]+` and must not be `any`, because it becomes part of the file name. User
+configuration overrides system configuration, and the resolved value is carried into `--isolated` builds.
+
+:::note[Installing relabeled packages]
+The package manager must accept the architecture. Shelly's own backends and extended-architecture-aware pacman builds
+expand `Architecture = auto` to the supported x86-64-v2/v3/v4 levels. Stock Arch pacman resolves `auto` to `uname -m`
+only, so there the level has to be listed explicitly, for example `Architecture = x86_64 x86_64_v3` in `pacman.conf`.
+:::
+
+### Package Compression
+
+The package `extension` selects the archive format, and `package.compression_level` selects how hard to compress it.
+Set the level to an integer from 1 to 5, or override it for one invocation with `--compression-level`: the CLI wins
+over the user configuration, which wins over the system configuration. Omitting the setting everywhere preserves the
+compression library's own defaults, so level 3 is a recommended explicit starting point, not a new default. Each
+preset maps to a backend level per format:
+
+| Level | Preset       | zstd | gzip |  xz | bzip2 | Intended tradeoff                    |
+| :---- | :----------- | ---: | ---: | --: | ----: | :----------------------------------- |
+| 1     | Conservative |    1 |    1 |   0 |     1 | Low resource use; larger packages    |
+| 2     | Fast         |    3 |    3 |   3 |     3 | Quick builds; reasonable compression |
+| 3     | Balanced     |    6 |    6 |   6 |     5 | Recommended starting point           |
+| 4     | Compact      |   12 |    8 |   7 |     7 | Favor smaller packages               |
+| 5     | Maximum      |   19 |    9 |   9 |     9 | Highest compression effort offered   |
+
+All presets are lossless. Higher levels generally spend more CPU time and memory to reduce size, but smaller output is
+not guaranteed for every input. Shelly's benchmark of the preset/format matrix put zstd preset 3 about 22% below
+preset 1, with preset 5 buying further size at a much larger cost in compression time and peak memory. zstd presets
+use standard levels through 19, without long-distance matching or ultra modes, and explicit presets ask xz and zstd
+for a single compression worker.
+
+- Presets support `.pkg.tar.zst`, `.pkg.tar.gz`, `.pkg.tar.xz`, and `.pkg.tar.bz2`. Invalid levels, incompatible
+  extensions, and unsupported native filter options fail before the `PKGBUILD` executes. Shelly does not silently
+  substitute another preset or fall back to an external compression program.
+- The resolved preset applies to every selected split package, elevated build children, native AUR builds, and
+  `--isolated` builds, where the value is carried into the guest configuration.
+- The build log records the preset, the format, and the backend level.
+- Compression changes the outer archive only: package contents, `.MTREE` generation, and signing behavior are
+  untouched, and signatures still cover the completed archive.
 
 ---
 
