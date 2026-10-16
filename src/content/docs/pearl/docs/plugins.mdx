@@ -1,0 +1,149 @@
+---
+title: Plugins
+description: Experimental WebAssembly plugins, installing and approving packages, live updates, settings controls and input-activity permissions.
+sidebar:
+  label: Plugins
+  order: 10
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Pearl can run small add-ons as WebAssembly components: a plugin package
+contains a manifest, a Wasm component and optional image assets, and each
+enabled plugin runs in its own isolated helper process. Plugins have no
+network access, no filesystem access and no access to other applications;
+the exact package bytes are fingerprinted and verified before execution. The
+feature is experimental and opt-in.
+
+Plugin management lives in **Settings → Plugins**, in the main Settings
+application only: the compact control-center flyout has no plugin controls.
+Open the page with `pearl-settings --page plugins` or
+`pearlctl settings show --page plugins`.
+
+Writing plugins yourself is covered by the [plugin development
+guide](https://github.com/Seafoam-Labs/pearl/blob/main/docs/PLUGIN_DEVELOPMENT.md)
+in the Pearl repository.
+
+## Installing plugins
+
+The Pearl packages ship a few example plugins, including a timer, counters
+and the Pearl Cat companion. They appear automatically in Settings → Plugins
+after installation or upgrade, and stay disabled until you approve and enable
+them: installing never changes your preferences or adds bar widgets.
+
+To install a plugin package yourself, copy its directory into
+`~/.local/share/pearl/plugins/`. Pearl discovers it automatically, and the
+Plugins page also offers **Refresh plugins**. Your user directory takes
+priority over system-installed packages with the same ID, and two packages
+with one ID in the same location are a conflict: the page shows the selected
+source and the candidate paths, and removing the extra copy resolves it.
+Discovery never executes a plugin.
+
+## Approving and enabling
+
+Enabling a plugin is a deliberate, two-part decision that joins the shared
+Settings draft:
+
+1. Choose **Review package**, check the exact fingerprint and the optional
+   permissions the package requests, then **Save review to draft**. Saving a
+   review does not enable anything, and Cancel leaves the draft unchanged.
+2. Enable the plugin and **Apply & save**.
+
+If the package changes or disappears during review, the dialog closes and the
+new package needs a fresh review. Changed package bytes can never reuse an
+old approval: an updated fingerprint retires the running instance and starts
+its optional permissions from off, so you review them again.
+
+Enabling a plugin in Bar mode adds it to the bar's end group, including in
+per-output overrides; an existing placement in another group is preserved.
+**Desktop overlay** mode, which also grants the overlay permission, floats the
+plugin above the wallpaper; turning that permission off returns an enabled
+plugin to the bar. Bar layout references have the form
+`plugin:pearl.timer-c/main` and can also be entered directly in **Bar &
+dock** or in per-output preferences. Unknown references stay harmless until a
+matching plugin runs.
+
+Each plugin card shows live status and marks unsaved preference changes
+separately. **Settings and placement** exposes the plugin's own controls
+(text, bounded numbers and switches, saved through the shared draft) plus
+immediate **Retry** and **Preview** actions. **Package details and
+diagnostics** contains source paths, the fingerprint, input-activity
+availability and runtime errors. Search and the All / Enabled in draft /
+Needs attention filters work on the current page without touching
+preferences.
+
+## Live updates
+
+Plugins install, update, enable, disable and remove while Pearl runs, with no
+restart:
+
+- An unchanged package at the same path keeps its running instance and state.
+- Changing the package's selected path restarts just that plugin, even for
+  identical bytes; an identical fingerprint keeps its approval.
+- A removed package retains its settings and bar references. Restoring the
+  exact approved package resumes it if it is still enabled.
+- A failed plugin waits for an explicit **Retry**; there is no automatic
+  restart loop, and one failing plugin never takes the others or the shell
+  down.
+- Incomplete or invalid updates stay unavailable rather than falling back to
+  an older copy. Stage a complete package directory outside the plugins
+  folder and rename it into place.
+
+## Overlays and the Pearl Cat companion
+
+The Pearl Cat companion animates in the bar or, with the overlay grant, as a
+desktop overlay. Overlay placement supports choosing the output, size and
+position, locking the position, click-through and hiding during fullscreen.
+Overlays reserve no screen space, never take keyboard focus, and disappear
+before the lock screen or an authentication prompt. Dragging an unlocked
+overlay saves its position when no Settings draft is pending. Reduced motion
+stops animation playback.
+
+### Input activity
+
+Pearl Cat can react to typing and mouse-button presses in other applications.
+This is a separate opt-in permission on top of approval:
+
+1. Approve and enable the package.
+2. Turn on **Allow keyboard and mouse activity** in Settings → Plugins and
+   apply.
+3. Set up the matching Aqueous integration service, described in the [Pearl
+   repository](https://github.com/Seafoam-Labs/pearl/blob/main/docs/AQUEOUS_PLUGIN_ACTIVITY.md).
+
+What a plugin actually receives is deliberately minimal: a coalesced
+"something happened" count, at most ten callbacks per second. No keys, text,
+button identities, device or window identities or timestamps ever reach a
+plugin; held-key repeats, releases, pointer motion, scrolling and touch do not
+count at all. Activity suspends during Pearl-managed authentication, session
+lock and inactive sessions, and Settings and `pearlctl plugins list` report
+the current availability and its reason.
+
+<Aside type="note">
+  Activity availability depends on the compositor integration being present and
+  authorized. Without it, plugins keep working from local clicks and the
+  Settings Preview action, and the page reports why activity is unavailable.
+</Aside>
+
+## Command line
+
+```sh
+pearlctl plugins refresh
+pearlctl plugins list [--offset N]
+pearlctl plugins inspect --path pearl.timer-c
+pearlctl plugins enable --path pearl.timer-c --text PACKAGE_SHA256 --revision N
+pearlctl plugins disable --path pearl.timer-c --revision N
+pearlctl plugins reload --path pearl.timer-c
+```
+
+`refresh` returns a ticket immediately; in `plugins list`, wait for
+`completed` to reach `requested` and `pending: false`, then read the error
+code and package status. Enable and disable need the current preferences
+revision from `pearlctl preferences status` and the package's SHA-256
+fingerprint from `inspect`, and they are rejected while a Settings draft is
+retained or the revision is stale. Enabling a new fingerprint clears
+previously granted optional permissions; review and grant them in Settings.
+`reload` is an explicit retry of a running plugin, not a rescan.
+
+The inventory is bounded: at most 32 discovered packages and eight enabled
+instances. List and inspect responses page four entries at a time through
+`next_offset`.
