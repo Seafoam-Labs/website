@@ -1,0 +1,114 @@
+---
+title: Connectivity
+description: Wi-Fi and Bluetooth controls in the control center and Settings, including saved profiles, credentials handling, pairing and discovery.
+sidebar:
+  label: Connectivity
+  order: 4
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Pearl manages networks through NetworkManager and Bluetooth devices through
+BlueZ. Both live in the control center flyout and as full **Network** and
+**Bluetooth** pages in Settings. The bar's network widget and the optional
+Bluetooth widget (which shows the connected-device count) each open the
+matching compact page directly. Opening a page never starts a scan or a
+discovery on its own.
+
+## Wi-Fi
+
+The Network view shows the Wi-Fi switch, the current connection, nearby
+networks and an explicit **Refresh** button without expanding any adapter
+list; a selector appears when several wireless adapters are present. Internet
+status is separate from Wi-Fi power, so an active wired connection stays
+visible while Wi-Fi is off. Connection and scan controls are disabled while
+the radio is off or hardware-blocked, and the Wi-Fi gate never disables wired
+adapters.
+
+The flyout shows up to three nearby networks and links to the full Settings
+list. Settings additionally shows Ethernet and your saved profiles. Nearby
+entries are grouped per network, and saved networks are recognized by their
+SSID and security even when they do not appear in the current scan.
+
+Open, WPA/WPA2 personal and WPA3 SAE networks are supported. Selecting a new
+network asks for its password inline in the flyout, or in a dialog in the full
+Settings page, and connects. NetworkManager creates a persistent profile for
+the connection and stores the password itself; the profile then appears as a
+saved row you can activate later.
+
+### Credentials handling
+
+Pearl never writes credentials to its own configuration, and never reads
+stored secrets back out of NetworkManager: it only supplies the password you
+typed when NetworkManager asks during a connection you started.
+
+- Password fields are masked, have no peek button, and are cleared on submit,
+  cancel, popup close, loss of the NetworkManager service and session locking.
+- A rejected password opens a fresh masked entry instead of reusing the
+  previous one.
+- Secrets never appear in logs, diagnostics, the on-screen display, the
+  preferences file or CLI output.
+- If you abandon an attempt, cancel it, or the activation fails, the
+  half-created profile is removed again, so a mistyped password does not
+  survive as an autoconnecting profile.
+
+### Saved profiles and unsupported types
+
+Saved profiles, including wired ones, are listed in Settings and can be
+activated, edited or removed there. Creating new wired profiles, VPN, WEP,
+enterprise/802.1X and hidden networks is handed to the standard
+`nm-connection-editor` application; if it is not installed, the card names it
+so you can install it. A secured network is never treated as open as a
+fallback.
+
+## Bluetooth
+
+The Bluetooth page lists adapters and devices with power, discovery, pair,
+connect/disconnect and trust controls. Device aliases are shown together with
+their addresses so identical names stay distinguishable, and the Paired,
+Connected, Trusted and Blocked states drive which actions are available.
+Device actions are disabled while the adapter is off.
+
+- **Discovery** starts only on an explicit request and ends after 30 seconds,
+  on **Stop discovery**, or when you close the panel. Discovery owned by other
+  applications is left alone.
+- **Pairing** prompts for PINs and passkey confirmation in the panel itself;
+  codes never appear in status output or logs. Pairing has a 90-second
+  deadline, and cancelling it sends a proper cancellation to BlueZ. A pairing
+  BlueZ already completed cannot be undone by cancelling; use Remove instead.
+- **Trust** is separate from pairing: pairing never silently trusts a device.
+- Cancelling a connect sends a disconnect, so a late successful reply cannot
+  leave the device connected against your intent.
+
+Locking the session revokes interactive operations such as prompts and
+discovery, but established network and device connections survive ordinary
+navigation, page closes and locking.
+
+## Command line
+
+```sh
+pearlctl connectivity status [--offset N]
+pearlctl connectivity action --service network --action scan --generation N
+pearlctl connectivity action --service bluetooth --action pair \
+  --generation N --path /org/bluez/hci0/dev_XX_XX_XX_XX_XX_XX
+```
+
+Status pages through devices, access points, saved profiles and adapters four
+entries at a time, following `next_offset`. Actions need the `--generation`
+value from a current status call, and device actions need its `--path` object
+path.
+
+Network actions are `scan`, `connect`, `connect_saved`, `disconnect`,
+`enable`, `disable` and `cancel`. Bluetooth actions are `discover`,
+`stop_discovery`, `pair`, `connect`, `disconnect`, `trust`, `untrust`,
+`enable`, `disable` and `cancel`. Accepted mutations return `queued:true`;
+read the actual outcome from a later status call.
+
+<Aside type="note">
+  Scans, connections and pairings require the matching compact page to be open,
+  for example after `pearlctl control-center show --page network` or `--page
+  bluetooth`, and the CLI cannot answer or cancel another frontend's prompt.
+  Password entry and passkey confirmation are deliberately available only
+  through the graphical interface, and all connectivity commands are rejected
+  while the session is locked.
+</Aside>
