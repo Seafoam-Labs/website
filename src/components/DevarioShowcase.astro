@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { Badge } from "@astrojs/starlight/components";
 import { isoChecksumUrl, isoDownloadUrl } from "../consts";
 import devarioLogo from "../assets/images/devario-logo.png";
 ---
@@ -109,6 +110,7 @@ import devarioLogo from "../assets/images/devario-logo.png";
           <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
         </svg>
       </a>
+      <Badge text="Beta" variant="note" size="small" />
       <a class="dv-checksum" download href={isoChecksumUrl}>
         SHA-256
       </a>

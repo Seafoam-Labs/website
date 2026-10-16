@@ -6,12 +6,13 @@ sidebar:
   order: 1
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import { isoChecksumUrl, isoDownloadUrl } from "../../../consts";
 
 Devario's live image includes the desktop and installer together. Check the [hardware requirements](/devario/readiness/) for your image before
 starting.
 
-Download the <a href={isoDownloadUrl}>x86_64 ISO</a> and verify it against
+Download the <a href={isoDownloadUrl}>x86_64 ISO</a> <Badge text="Beta" variant="note" size="small" /> and verify it against
 the <a download href={isoChecksumUrl}>SHA-256 checksum</a>.
 
 ## Install the desktop
