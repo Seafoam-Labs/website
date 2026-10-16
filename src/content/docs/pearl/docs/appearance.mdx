@@ -1,0 +1,314 @@
+---
+title: Appearance
+description: Wallpaper and slideshows, Material theme modes, GTK themes, application theming, Night Light and Qt application integration.
+sidebar:
+  label: Appearance
+  order: 2
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+**Settings → Appearance** edits how Pearl looks: the wallpaper, the color
+theme, fonts, the colors of other applications, Night Light and Qt integration.
+Every control on the page joins the shared Pearl draft, so nothing changes on
+the desktop until you choose **Apply & save**. See
+[Settings](/pearl/docs/settings/) for how drafts, conflicts and recovery work.
+
+## Wallpaper
+
+In the Wallpaper card, **Choose image…** browses for a PNG or JPEG file.
+Selecting an image sets Wallpaper fit to Cover; you can switch to Contain
+afterwards. The wallpaper also offers gradient and solid background modes with a
+color choice, and gradient is the default for fresh configurations.
+
+The wallpaper is global: one image is shared across every display and fitted
+independently to each output's geometry. Per-output settings control bars and
+docks, not different images.
+
+Double-click the desktop background, or a thumbnail in the bar's **Wallpaper**
+pane, to open the crop editor. Its frame is locked to the output's aspect ratio,
+drag places the frame and the scroll wheel zooms it. Crops are stored as
+fractions of the source image, so a placement survives the file being resized,
+and every surface reuses the same placement across rotations and restarts.
+Wallpaper-derived palettes keep reading the whole image, so cropping does not
+shift dynamic colors. **Reset** restores the full frame.
+
+The active image file is watched: in-place edits, atomic replacements and
+deletion followed by recreation refresh the wallpaper automatically.
+
+### Slideshow
+
+**Slideshow** is a section of the same Wallpaper card. **Choose folder…** picks a
+directory; only PNG and JPEG files in it are eligible. The folder is rescanned on
+each rotation, so adding or removing images takes effect without reloading
+preferences, and an empty or unreadable folder keeps the current wallpaper and
+retries at the next interval.
+
+- **Change every**: 10 seconds to 24 hours, 15 minutes by default.
+- **Order**: sequential or random.
+- **Transition**: none, fade, slide, rotate, cover or random, with an adjustable
+  animation length. The reduced motion preference suppresses transitions.
+
+Enabling the slideshow requires an image fit (Cover or Contain) and a folder.
+Each rotation goes through the normal apply path, so wallpaper-derived colors
+follow the new image when your theme uses it.
+
+## Theme modes
+
+Pearl draws its shell with one of three theme modes.
+
+- **Static Material**: Pearl's built-in dark or light Material Design palette.
+  No generator is required.
+- **Dynamic Material**: derives a dark or light palette from a hex seed color or
+  from the selected wallpaper. This mode requires [matugen
+  4.x](https://github.com/InioX/matugen); a generator failure keeps the current
+  appearance and reports the error. Generated palettes are cached on disk under
+  `$XDG_CACHE_HOME/pearl/themes`, so repeating a seed or wallpaper is cheap.
+- **GTK theme**: styles Pearl with an installed GTK theme instead of Material
+  colors. Leave **GTK theme name** empty to follow the normal GTK settings of
+  the session, including `GTK_THEME` and your own `gtk.css`. Enter an installed
+  theme name to use it for Pearl alone; the color variant selects its dark or
+  default stylesheet. This never changes another application's settings.
+
+<Aside type="note">
+  GTK mode needs GTK4-compatible themes, found through GTK's normal XDG theme
+  search paths and `~/.themes`. GTK3-only themes cannot style GTK4, and a
+  theme's name alone does not determine its compatibility. Your own GTK CSS
+  keeps its normal highest priority, and because a GTK theme determines its
+  surface opacity, an opaque theme hides the compositor's blur behind it.
+</Aside>
+
+**Window borders follow Pearl theme** synchronizes Aqueous border colors after
+saving the theme: focused borders use the palette's primary color, normal
+borders the outline color and urgent borders the error color. It defaults off,
+and GTK mode pauses synchronization so you can edit border colors yourself under
+**Aqueous → Appearance**.
+
+Font and motion settings live on the same page: a font family (empty uses the
+Material fallback in Material modes and native GTK typography in GTK mode), a
+font size from 10 to 24 pixels, normal or compact density, and reduced motion.
+Density and reduced motion apply live.
+
+## Application themes
+
+Beyond the shell itself, Pearl can generate matching color themes for other
+applications using Matugen. Management is opt-in and lives under **Appearance →
+Application themes**.
+
+Enable management, then choose per application: follow the active theme's
+assignment, pick an explicit profile, or turn that application Off. **Use
+Material defaults** adopts the built-in assignments for the whole catalog in the
+shared draft. Application colors can follow Pearl, use an independent seed, or
+use the current wallpaper; wallpaper-derived colors update automatically when
+the committed image changes.
+
+On the first Pearl session for a new user configuration, GTK 3 and GTK 4
+automatically use the managed Material profile and follow Pearl's colors. Pearl
+saves this selection once; existing preferences and later Off choices are
+preserved. Every other target stays opt-in.
+
+The built-in catalog covers toolkits (GTK, qt5ct, qt6ct, KDE color schemes),
+terminals, editors, browsers, chat clients and a few others. The current list
+and per-application notes live in [the Pearl
+repository](https://github.com/Seafoam-Labs/pearl/blob/main/docs/BASE_MATERIAL_PROFILES.md).
+
+Generating files is separate from activating them. Each row in Settings shows
+the effective profile, status, output location and setup instructions:
+
+- GTK receives a scoped import in your `gtk-3.0/gtk.css` and `gtk-4.0/gtk.css`
+  that retains prior contents. Applications that cache CSS may need a restart.
+- Terminals get Pearl-named theme or include files; follow the row's
+  configuration instructions once.
+- Editors and chat clients, such as Zed, need the theme selected inside the
+  application. The VS Code family installs a generated `pearl-material.vsix`
+  through **Install from VSIX**, reinstalled after palette updates.
+- Browsers receive CSS for an explicitly chosen browser profile; Pearl never
+  guesses which profile to edit.
+
+Generated previews live under `$XDG_CONFIG_HOME/pearl/matugen/outputs/`, and
+files installed into application directories are tracked by ownership journals.
+
+### Recovery
+
+Application files edited outside Pearl are protected: conflicts are reported
+per application and never undo a successful shell update. Turning an application
+Off restores only Pearl-owned files that are unchanged; your own edits are
+retained and reported as a conflict to resolve first. Do not delete ownership
+journals to bypass a conflict.
+
+Missing or invalid images and generator failures retain existing outputs, and a
+later valid image event retries automatically. `pearlctl preferences reload`
+rechecks the image and reattaches an unavailable directory watch, and **Retry**
+in Application themes reconciles the latest prepared snapshot.
+
+## Night Light
+
+**Appearance → Night Light** warms the screen on a schedule. It is disabled by
+default and saves through the shared draft like everything else on the page.
+
+- **Temperature**: 2500 to 6500 K, 4500 K by default.
+- **Manual**: follows the enabled switch all day.
+- **Custom schedule**: local-time start and end, with the start inclusive and
+  the end exclusive. Overnight intervals work; equal start and end are invalid.
+  Daylight-saving transitions are accounted for at the boundaries.
+
+Night Light needs Aqueous's output warming support. When no output can apply it,
+Pearl reports warming as unavailable rather than pretending to write to the
+display, and rejected requests change nothing.
+
+```sh
+pearlctl night-light status
+pearlctl night-light off
+pearlctl night-light resume
+```
+
+`off` creates a temporary override without writing preferences: with a custom
+schedule it expires at the next local-time boundary, otherwise it lasts until
+Pearl restarts. `resume` clears the override. `status` separates the requested
+policy from actual availability and per-output state. The session lock preserves
+the requested state and rejects interactive changes.
+
+## Qt applications
+
+**Appearance → Qt applications · QtEngine + Darkly** optionally manages the
+appearance of Qt 5 and Qt 6 applications through the QtEngine platform plugin
+and the Darkly application style. Management defaults off, joins the shared
+draft, and previews never write external settings.
+
+Install the `qtengine` and `pearl-darkly-style` packages first; both are listed
+as optional dependencies of the Pearl packages, and `pearl-darkly-style` is
+published in the [seafoam-labs repository](https://repo.seafoam-labs.org/setup).
+After installation, use **Retry saved Qt settings** in Appearance, then sign out
+and back in when the environment status requests it, so applications start with
+the QtEngine platform theme.
+
+<Aside type="caution">
+  These changes affect the shared, account-wide Qt configuration, including
+  applications launched outside Pearl. Before downgrading Pearl or removing the
+  Qt packages, disable management, resolve any restoration conflicts and sign
+  out. Older Pearl versions reject the `qt` preference field, so remove it only
+  after restoring through the current version. Package removal does not erase
+  recovery data or the backups of replaced files.
+</Aside>
+
+What management covers:
+
+- **Follow Pearl** uses the committed Material colors and follows seed and
+  wallpaper changes; in GTK shell mode it uses a labelled static dark or light
+  fallback. **Static dark/light** fixes Qt to Pearl's selected static palette.
+- **Synchronize font** maps Pearl's logical pixel size to Qt's integer point
+  size at 96 DPI (14 pixels maps to 11 points). An empty Pearl font family
+  leaves Qt's existing family alone.
+- Icon theme, Darkly corner radius, compact density, selected animation keys and
+  four optional KDE focus, hover, negative and background colors follow Pearl.
+  Radius 0 releases ownership of that field.
+
+QtEngine uses one shared configuration for both Qt versions. The **Check Qt 5**
+and **Check Qt 6** switches select which installed runtimes Pearl verifies with
+its probes; they cannot give the two versions different configurations. Running
+applications receive live palette updates through QtEngine's file watcher,
+although base style, font and per-application overrides may need an app restart,
+which Settings reports conservatively.
+
+Material palette exports for qt5ct, qt6ct and KDE under
+[Application themes](#application-themes) are separate selectable files and
+never change the managed Qt platform configuration.
+
+If Qt configuration changes outside Pearl, **Review external Qt changes** shows
+current, previous Pearl and original values, and replacement requires that exact
+review to remain current. Ordinary retries never overwrite a conflicting
+external edit, and disabling restores original values only where the current
+value still matches Pearl's last write.
+
+## Advanced
+
+Preferences are stored in `$XDG_CONFIG_HOME/pearl/preferences.json`, falling
+back to `~/.config/pearl/preferences.json`, with a validated recovery snapshot
+at `pearl/last-good.json` beside it. The appearance-relevant fields:
+
+```json
+{
+  "theme": {
+    "mode": "dynamic",
+    "variant": "dark",
+    "seed": "#6750a4",
+    "source": "wallpaper",
+    "gtk_name": "",
+    "sync_borders": false
+  },
+  "wallpaper": {
+    "mode": "cover",
+    "path": "/home/user/Pictures/wall.png",
+    "color": "#141218",
+    "crops": [],
+    "slideshow": {
+      "enabled": true,
+      "folder": "/home/user/Pictures/walls",
+      "interval_seconds": 900,
+      "order": "sequential",
+      "transition": "fade",
+      "transition_ms": 420
+    }
+  },
+  "font": "",
+  "font_size": 14,
+  "density": "normal",
+  "reduced_motion": false,
+  "night_light": {
+    "enabled": false,
+    "temperature_kelvin": 4500,
+    "schedule": "manual",
+    "start_minute": 1200,
+    "end_minute": 420
+  }
+}
+```
+
+`theme.mode` is `static`, `dynamic` or `gtk`; `variant` is `dark` or `light`;
+`source` is `seed` or `wallpaper`; colors are `#RRGGBB`. Wallpaper modes are
+`gradient`, `solid`, `cover` and `contain`. Schedule minutes run 0 to 1439 in
+local time. Application theming lives in a top-level `matugen` object and Qt
+management in a top-level `qt` object; both are documented in the [Pearl
+repository](https://github.com/Seafoam-Labs/pearl/blob/main/docs/PREFERENCES.md).
+
+### Color exports
+
+Exports generate palette-colored files from templates, for example:
+
+```json
+{
+  "exports": [
+    {
+      "name": "terminal.conf",
+      "template": "background={{surface}}\nforeground={{text}}\n"
+    }
+  ]
+}
+```
+
+Files are written only under `$XDG_CONFIG_HOME/pearl/exports`, and you point the
+consumer application at them; Pearl never rewrites GTK, Qt, terminal or Aqueous
+configuration implicitly, and no shell hooks or commands are accepted. Supported
+tokens include `surface`, `text`, `primary`, `outline` and `error_color`,
+enclosed in `{{...}}`. A sidecar file records what Pearl last wrote, so a file
+you edited yourself is protected and the first replacement keeps a `.bak`. GTK
+theme mode has no Material palette to export and reports that condition.
+
+### Command line
+
+```sh
+pearlctl settings show --page appearance
+pearlctl preferences status
+pearlctl preferences reload
+```
+
+`pearlctl preferences apply` submits a full configuration rather than a patch
+and is covered with its cautions on the
+[Settings page](/pearl/docs/settings/#command-line).
+
+<Aside type="caution">
+  Pearl parses preferences strictly. Before downgrading to an older Pearl
+  version, remove preference fields that version does not know, such as
+  `night_light`, `matugen`, `qt` or slideshow and crop entries, or it will
+  reject the file.
+</Aside>
