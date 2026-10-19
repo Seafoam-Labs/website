@@ -84,7 +84,7 @@ system's capabilities and ask for confirmation.
 ## Configuration
 
 The greeter reads `/etc/pearl/greeter.json`, owned by root. The package
-installs it, pacman preserves your changes through its backup and `.pacnew`
+installs it, shelly preserves your changes through its backup and `.pacnew`
 handling, and an invalid security-critical configuration stops startup rather
 than falling back silently. After an upgrade, review any `.pacnew` file and
 merge what you want with `sudoedit /etc/pearl/greeter.json`; one upgrade note
@@ -123,14 +123,13 @@ the connector name, and the setting applies when the greeter next starts.
 
 ## Syncing appearance from Settings
 
-**Settings → Appearance → Login screen → Sync to greeter** copies the
-background and theme currently shown in the controls, including an unapplied
-draft, into the system greeter configuration. It asks for administrator
-authentication, preserves session and login settings, and takes effect the
-next time the greeter starts. GTK themes must be installed system-wide, and a
-dynamic Material theme is copied as its static dark or light variant, because
-no generator runs before login. The button comes with the greeter package and
-is disabled when its helper is absent.
+**Settings → Appearance → Login screen → Choose image and sync** Will ask for root permissions, as the following actions writes to `etc`. The selected png/jpg is copied to `/etc/pearl/greeter-assets` and if you have Dynamic theme 
+generation on will generate a matugen theme based on the selected image that
+is also placed in `/etc/pearl/greeter-assets/palette.json`. If you want to apply the theme manually, you can edit the `palette.json` file.
+
+Example of applied theme:
+
+![Pearl greeter with a matugen theme generated from the selected wallpaper](../../../../assets/screenshots/pearl/greeter-ex.png)
 
 ## Troubleshooting
 
