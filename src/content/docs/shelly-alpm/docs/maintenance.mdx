@@ -22,6 +22,10 @@ Shelly provides three specialized subcommands for system health:
 
 ---
 
+For ownership errors or a broken upgrade-check database cache, see
+[Shelly troubleshooting](/shelly-alpm/docs/troubleshooting/). These recovery
+steps are separate from the package-cache cleanup described below.
+
 ## Cache & Storage Hygiene (`shelly purify`)
 
 Whenever you install or upgrade packages, ALPM stores the downloaded archives in `/var/cache/pacman/pkg/`. Over time,
