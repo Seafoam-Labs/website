@@ -1,0 +1,89 @@
+---
+title: Shelly Troubleshooting
+sidebar:
+  label: Troubleshooting
+description: Recover from Shelly upgrade-check failures, repair ownership of per-user directories, and collect useful error details.
+---
+
+## Shelly cannot check for upgrades
+
+If Shelly reports `Technical details: InitFailed` when checking for Standard
+or AUR upgrades after an interrupted check or a mirror configuration problem,
+its per-user database cache may need rebuilding. `InitFailed` alone does not
+identify the cause. Fix any incorrect repository URLs in your
+[native package configuration](/shelly-alpm/docs/config/#configuration-files-and-their-roles)
+first.
+
+1. **Close Shelly's graphical window and wait for package operations to finish.**
+2. **If you see `AccessDenied` or `Permission denied`, repair ownership first:**
+
+   ```sh
+   shelly utility --fix-permissions
+   ```
+
+   Run this from your normal user session, without adding `sudo`. Shelly
+   requests administrator authorization when needed. It recursively restores
+   your ownership and default group for existing Shelly directories:
+   `~/.config/shelly/`, `~/.cache/Shelly/`, and `~/.local/share/Shelly/` by
+   default. It does not change file permission modes, clear the database
+   cache, or repair the system package database.
+
+   Check the reported `Fixed ownership:` paths, then run `shelly` again. If
+   upgrade checks now succeed, stop here. If ownership repair fails, stop
+   and [collect the error details](#collect-details-if-recovery-fails).
+
+3. **If the cache still needs rebuilding, remove it from your normal user account:**
+
+   ```sh
+   rm -rf ~/.cache/Shelly/db/
+   ```
+
+   This removes the per-user database used for upgrade checks. Shelly
+   recreates it on the next check; installed packages and the system package
+   database are kept. Do not delete the system database or the
+   entire `~/.cache/Shelly/` directory.
+
+4. **Run Shelly again:**
+
+   ```sh
+   shelly
+   ```
+
+   Check that the upgrade checks complete without errors. An “Everything is
+   up to date” message does not confirm this if a check failed above it.
+
+If you set a custom `XDG_CACHE_HOME`, the cache is under its `Shelly/db/`
+directory instead of `~/.cache/Shelly/db/`. For custom XDG directories, check
+that the ownership-repair output names the directories you actually use;
+privilege-elevation tools can filter environment variables.
+
+### Collect details if recovery fails
+
+If errors remain, report the exact error, `shelly --version`, and the output of
+`ls -ld ~/.cache/Shelly/ ~/.cache/Shelly/db/`, using your custom cache path
+if applicable. A missing `db/` directory immediately after removing it is
+expected.
+
+## Distribution-specific paths and diagnostics
+
+The system package configuration and database paths depend on the distribution
+path profile used by your Shelly build:
+
+| Path profile        | Native package configuration | System package database |
+| ------------------- | ---------------------------- | ----------------------- |
+| Default (`pacman`)  | `/etc/pacman.conf`           | `/var/lib/pacman/`      |
+| Devario (`devario`) | `/etc/shelly.conf`           | `/var/lib/shelly/`      |
+
+The recovery command above removes only the per-user `Shelly/db/` cache;
+it must not target either system database. Choosing RLPM or libalpm does not
+by itself change the distribution path profile. See
+[configuration files and their roles](/shelly-alpm/docs/config/#configuration-files-and-their-roles).
+
+On **Devario**, you can also collect a local report with
+`devario-report.sh --no-upload`. Review the file before sharing it; see
+[Devario diagnostics](/devario/readiness/#diagnostics) for details. This report
+tool is specific to Devario, not a requirement for other Shelly installations.
+
+For implementation details, see Shelly's
+[ownership-repair command](https://github.com/Seafoam-Labs/Shelly-ALPM/blob/f2d541337630d4585a69dff9bb7a90519ae33ac4/Shelly.Cli.Zig/src/commands/utility.zig#L151-L205)
+and [upgrade checks](https://github.com/Seafoam-Labs/Shelly-ALPM/blob/f2d541337630d4585a69dff9bb7a90519ae33ac4/Shelly.Cli.Zig/src/commands/list_updates.zig#L679-L750).
