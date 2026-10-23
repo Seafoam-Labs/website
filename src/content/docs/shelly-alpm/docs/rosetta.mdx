@@ -285,6 +285,9 @@ Import installs current repository packages, AUR packages and Flatpak applicatio
 
 ### Repository and settings changes
 
+For choosing the native configuration file, editing options and checking repository definitions, see
+[Native package configuration](/shelly-alpm/docs/native-configuration/).
+
 Reading Shelly configuration can create or normalize its settings file. `ParallelDownloadCount` is a Shelly setting, distinct from Pacman's `ParallelDownloads` directive. Choose one operation per AppImage environment change: set, unset, clear or replace.
 
 Quote ALPM repository URLs to preserve Pacman variables such as `$arch` and `$repo`. Adding or removing repository configuration also refreshes databases unless `--no-sync` is supplied. Flatpak remote changes default to system scope; `--system=false` selects user scope. AppImage update sources include StaticUrl, GitHub, GitLab, Codeberg and Forgejo.

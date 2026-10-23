@@ -1,0 +1,271 @@
+---
+title: Native package configuration
+description: Back up, edit and check Shelly's native package configuration on Devario and Arch Linux.
+sidebar:
+  label: Native package configuration
+---
+
+import { Aside, Tabs, TabItem } from "@astrojs/starlight/components";
+
+Shelly reads repository definitions and native package-manager options from
+`/etc/shelly.conf` on Devario, or `/etc/pacman.conf` on Arch Linux and CachyOS.
+If you are coming from Arch, the structure will look familiar: an `[options]`
+section followed by named repositories.
+
+This guide shows how to back up the file, make a small change, inspect the
+result and restore the original. For CLI and GUI JSON preferences, use
+[Configuration](/shelly-alpm/docs/config/).
+
+## Choose the right file
+
+| Installation         | Usual native configuration | Package database  | Package cache           |
+| -------------------- | -------------------------- | ----------------- | ----------------------- |
+| Devario              | `/etc/shelly.conf`         | `/var/lib/shelly` | `/var/cache/shelly/pkg` |
+| Arch Linux / CachyOS | `/etc/pacman.conf`         | `/var/lib/pacman` | `/var/cache/pacman/pkg` |
+
+These are distribution defaults. A package can select another path profile,
+and directives inside the file can override database and cache paths.
+`shelly --config /path/to/file ...` selects a different native configuration
+for that invocation.
+
+Choosing RLPM does **not** switch an Arch installation to Devario paths.
+Backend selection and path profiles are separate; see
+[RLPM distribution paths](/shelly-alpm/docs/rlpm/#distribution-and-configuration-knobs).
+Keep the configuration supplied by your distribution. Do not create
+`/etc/pacman.conf` on Devario just because an Arch tutorial uses it, or rename
+an Arch configuration to convert its database and keyring.
+
+<Aside type="note" title="Which configuration does this change?">
+  `shelly config set` edits Shelly's CLI preferences, such as output formatting
+  and backend selection. It is not a general editor for `shelly.conf` or
+  `pacman.conf`. `shelly config reset` does not restore either native file.
+  `/etc/shellybuild.conf` belongs to the package builder and is separate too.
+</Aside>
+
+## Back up and open the file
+
+Choose the commands for your installation. Keep the backup until you have
+checked the change. If a backup with this name already exists, the copy
+command asks before replacing it; use another backup name if you need to
+keep both versions. Run the backup first and check that it succeeds before
+opening the editor. If the expected file is missing, check your distribution's
+package and configuration instructions rather than creating an empty file.
+
+<Tabs>
+  <TabItem label="Devario">
+
+```sh
+sudo cp --interactive --preserve=all /etc/shelly.conf /etc/shelly.conf.before-edit
+sudoedit /etc/shelly.conf
+```
+
+  </TabItem>
+  <TabItem label="Arch / CachyOS">
+
+```sh
+sudo cp --interactive --preserve=all /etc/pacman.conf /etc/pacman.conf.before-edit
+sudoedit /etc/pacman.conf
+```
+
+  </TabItem>
+</Tabs>
+
+`sudoedit` opens a temporary copy with your editor and installs the edited
+file after you close it. It uses your `SUDO_EDITOR`, `VISUAL` or `EDITOR`
+setting, or the editor configured by sudo. If it cannot find an editor,
+select a text editor already installed on the system. Do not assume that
+`nano` or `micro` is installed on a fresh Devario system.
+
+## Make a small change
+
+For a first edit, find `ParallelDownloads` inside `[options]`. Devario's
+[default configuration](https://github.com/Seafoam-Labs/devario-os/blob/main/packages/devario-base/shelly.conf)
+sets it to `5`. To reduce the maximum number of concurrent native downloads,
+change that existing line to:
+
+```ini
+[options]
+ParallelDownloads = 3
+```
+
+This is a fragment, **not a replacement configuration**. Keep the other
+options and repository sections. Use an integer from `1` to `255`; `1`
+limits native downloads to one at a time. Save the file and close the editor.
+The next native package operation reads the edited configuration; no reboot
+is needed.
+
+The native `ParallelDownloads` directive is separate from the
+`ParallelDownloadCount` CLI preference. Avoid changing both while testing
+one setting. Changing download concurrency alone does not require a database
+refresh or a package upgrade.
+
+### Read the options section
+
+Some useful entries to recognize:
+
+| Entry          | What it controls                                                                                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DBPath`       | Installed-package and repository database location. This is not a disposable download cache.                                                                           |
+| `CacheDir`     | Storage for downloaded native package archives.                                                                                                                        |
+| `GPGDir`       | The keyring used for native signature checks.                                                                                                                          |
+| `LogFile`      | The native package-manager log.                                                                                                                                        |
+| `Architecture` | Accepted package architectures and architecture substitution in server URLs. Keep your distribution's value unless you need to change it.                              |
+| `CheckSpace`   | Enables the space check; this entry has no `= value`.                                                                                                                  |
+| `HoldPkg`      | Requests confirmation before removing a listed package. It does not stop that package from being upgraded.                                                             |
+| `IgnorePkg`    | Packages excluded from ordinary upgrades. Holding back packages can leave an inconsistent system; see [partial upgrades](/shelly-alpm/docs/rosetta/#partial-upgrades). |
+| `SigLevel`     | Signature policy. Repository sections can set their own policy.                                                                                                        |
+| `DownloadUser` | User used by the native downloader. Devario supplies `alpm`; preserve the configured account and sandbox settings.                                                     |
+| `HookDir`      | Directories containing transaction hooks. Keep the distribution's system and administrator directories.                                                                |
+
+Devario's default file uses `HookDirMode = Replace` and explicitly lists
+`/usr/share/rlpm/hooks/` and `/etc/shelly.d/hooks/`. Replacement mode uses only
+the listed hook directories; an empty list disables hook discovery. Preserve
+these entries unless you intend to change transaction hooks.
+
+Put option edits under `[options]`, before the next repository header.
+Use separate lines beginning with `#` for comments. Do not assume every
+pacman option or syntax extension has the same behavior in Shelly.
+
+## Understand repository sections
+
+A repository has a section name and one or more server definitions. For
+example, Devario's maintained configuration contains:
+
+```ini
+[devario-core]
+SigLevel = Required
+Server = https://mirrors.seafoam-labs.org/devario-core/$arch
+```
+
+The bracketed name identifies the repository. `Server` points to its package
+database and archives; `$arch` is expanded from the configured architecture.
+A URL may also use `$repo` for the repository name.
+
+Some configurations put server lines in a separate file:
+
+```ini
+[example-repo]
+Include = /etc/shelly.d/example-mirrorlist
+```
+
+That example requires the named file to exist and contain the repository's
+server lines. It is an illustration, not a repository to enable. An included
+file inherits the current section, and a section header inside it also
+changes the section used by following lines in the parent file.
+
+Use repository instructions for your distribution. Sharing a configuration
+format does not make repositories interchangeable. Keep Arch/CachyOS and
+Devario repository sets separate, and do not disable signature verification
+to make a repository work. Obtain key fingerprints and trust instructions
+from the repository maintainer.
+
+### Repository commands
+
+Shelly can list, add and remove repository definitions without a text editor.
+For example, this lists the repositories selected by the Devario file:
+
+```sh
+shelly --config /etc/shelly.conf utility repository --list
+```
+
+The following templates show the add/remove syntax. Replace `REPO` and the
+example URL with a repository supported by your distribution before use:
+
+```sh
+shelly --config /etc/shelly.conf utility repository REPO 'https://example.org/$repo/$arch' --add --no-sync
+shelly --config /etc/shelly.conf utility repository REPO --remove --no-sync
+```
+
+On Arch/CachyOS, use `/etc/pacman.conf` in these commands. Quote the URL so
+your shell does not expand `$repo` or `$arch`. The two commands demonstrate
+alternative operations; they are not a sequence to paste and run.
+
+`--no-sync` skips the automatic database refresh; it still changes the
+configuration. Without it, Shelly refreshes after adding or removing the
+repository. If that refresh fails, the configuration change may already
+have been saved. Inspect the file before retrying. Optional `--lsign-key`
+locally signs an existing key before adding the repository; it does not
+replace checking the key's identity.
+
+The add command writes the repository name and server URL without a separate
+`SigLevel`, so the new repository uses the global signature policy. Check
+the resulting section against the repository maintainer's instructions;
+adding its URL alone does not set up its keys or trust policy.
+
+After changing repositories or server URLs, refresh as part of the supported
+upgrade workflow rather than refreshing databases and installing selected
+packages against an otherwise outdated system. See
+[repository upgrades](/shelly-alpm/docs/rosetta/#installation-and-upgrades).
+
+For a full native repository upgrade:
+
+```sh
+shelly upgrade standard
+```
+
+This refreshes databases and can install package upgrades; it is not a
+configuration-only check. Review the transaction before confirming it.
+
+## Check what Shelly reads
+
+Pass the file explicitly so a missing file or unreadable `Include` is reported:
+
+<Tabs>
+  <TabItem label="Devario">
+
+```sh
+shelly --config /etc/shelly.conf search standard --repos
+```
+
+  </TabItem>
+  <TabItem label="Arch / CachyOS">
+
+```sh
+shelly --config /etc/pacman.conf search standard --repos
+```
+
+  </TabItem>
+</Tabs>
+
+Compare the listed names with the repository sections you expected. This
+does not install packages or refresh repository databases. It also does not
+prove that servers are reachable, signatures are trusted or every option
+is valid: unrecognized directives can be ignored. Review the edited lines
+as well as the command's output and exit status.
+
+If an expected repository is missing, check its header, whether it is
+commented out, and any `Include` paths. If parsing fails, first check the
+section containing your edit and the setting's value. A successful search
+with no package match can also mean that the package is unavailable in the
+configured repositories; changing signature policy will not add it.
+
+For failed upgrade checks after the configuration is corrected, follow
+[Shelly troubleshooting](/shelly-alpm/docs/troubleshooting/#shelly-cannot-check-for-upgrades).
+Do not delete the system package database as a configuration repair.
+
+## Undo your edit
+
+To undo just the example change, reopen the file and restore its previous
+`ParallelDownloads` value. To restore the complete backup instead:
+
+<Tabs>
+  <TabItem label="Devario">
+
+```sh
+sudo cp --interactive --preserve=all /etc/shelly.conf.before-edit /etc/shelly.conf
+```
+
+  </TabItem>
+  <TabItem label="Arch / CachyOS">
+
+```sh
+sudo cp --interactive --preserve=all /etc/pacman.conf.before-edit /etc/pacman.conf
+```
+
+  </TabItem>
+</Tabs>
+
+Restoring replaces the whole file, including any later edits. Check the backup
+first, then repeat the repository-listing check. It does not undo installed
+packages or restore a database, keyring or an edited include file; back up
+included files separately before changing them.
