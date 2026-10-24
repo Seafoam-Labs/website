@@ -14,16 +14,37 @@ You can also edit the [TOML files](/aqueous/configuration/) directly.
 
 ## Choose a settings frontend
 
-Use [Welcome](/aqueous/desktop-session/) to select Pearl for a packaged desktop.
-Stable installations use `pearl`; the Git desktop uses `pearl-git` and its
-matching Aqueous helper. Pearl is distributed separately from the compositor.
-A core-only installation includes the helper without a settings window or shell.
+The current Arch `aqueous-desktop` and replacement `aqueous-desktop-git` presets
+select Pearl. They do not provide Welcome or a live desktop-shell switcher; see
+[Desktop Selection](/aqueous/desktop-session/) for package and session differences.
+Pearl is distributed separately from the compositor. A core-only installation
+includes the helper without a settings window or shell.
 
 The former `aqueous-settings` application and Aqueous Settings plugin workflow
 have been retired. Remove custom launch bindings that target the old executable.
 Package upgrades remove package-owned GUI files while retaining personal
 configuration, preferences, drafts, caches, and backups. The optional DMS
 appearance bridge is a backend integration, not a replacement settings UI.
+
+## Change a compositor setting
+
+Open `pearl-settings` and choose **Aqueous**, then a page:
+[Layouts](/aqueous/layouts/#choose-and-try-a-layout),
+[Input](/aqueous/input/#change-your-keyboard-layout),
+[Shortcuts](/aqueous/keybindings/#change-a-shortcut-safely),
+[Rules](/aqueous/window-rules/#make-one-application-float) or
+[Displays](/aqueous/outputs/). Wallpaper, bar and dock settings are on Pearl's
+own pages; see the [Settings task index](/pearl/docs/settings/#find-a-setting).
+
+Change a value, **Validate**, then **Apply & save** and check the result.
+**Discard** drops an unapplied draft; restore the old value to undo a saved
+change. For conflicts or a lost reply, follow
+[Pearl Settings](/pearl/docs/settings/#editing-aqueous-configuration).
+
+Without Pearl, edit the relevant TOML table using the guides below. Check
+[file discovery](/aqueous/configuration/#file-discovery) first. Examples use
+stable tool names and paths; co-installable Git instances use suffixed tools
+and `aqueous-git` paths.
 
 ## Configuration areas
 
@@ -85,7 +106,8 @@ aqueous-config snapshot --shell none
 aqueous-config raw --shell none --file outputs
 ```
 
-In a Git installation, use `aqueous-config-git`. The helper resolves the
+For a co-installable `aqueous-git` instance, use `aqueous-config-git`; the
+replacement `aqueous-desktop-git` uses standard tool names. The helper resolves the
 instance's actual configuration sources, including inherited system files.
 Clients must negotiate capabilities before using newer collection, display,
 preview, or operation-recovery interfaces.

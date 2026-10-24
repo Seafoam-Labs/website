@@ -32,15 +32,16 @@ repository's `packaging/arch-git` recipe, which produces both `pearl-git` and
 
 ```sh
 cd packaging/arch-git
-makepkg -s
-sudo pacman -U ./pearl-greeter-git-*.pkg.tar.zst
+package_dir=$(mktemp -d "$PWD/packages.XXXXXX")
+shelly build --sync-deps --package-destination "$package_dir"
+shelly install standard "$package_dir"/pearl-greeter-git-*.pkg.tar.zst
 ```
 
 The package requires Aqueous, UWSM, greetd, D-Bus, polkit and the GTK
 runtime, and uses your distribution's greetd PAM policy; it installs no
 separate fingerprint or locker PAM configuration.
 
-Installation does not disturb the running desktop:
+Installation selects the login screen for a later boot; it does not restart the running desktop:
 
 1. It creates `/etc/pearl/greeter.json`, with UWSM sessions allowed and the
    Aqueous desktop as the preferred session.
@@ -53,6 +54,11 @@ Installation does not disturb the running desktop:
    boot and records the previous selection. No service is stopped or
    restarted; reboot when you are ready.
 
+On Arch upgrades, the package rewrites `/etc/greetd/config.toml` and keeps
+the original `.bak`. Review local changes afterward. It preserves
+`/etc/pearl/greeter.json` and may start the appearance-sync socket without
+restarting the display manager.
+
 Removing the package, or running
 `sudo /usr/lib/pearl/pearl-greeter-setup restore`, brings back the previous
 display-manager selection and, while the configuration still matches Pearl's
@@ -61,6 +67,58 @@ template, the original greetd config. `sudo
 install left another greeter, such as Ly, enabled alongside it. The full
 setup and recovery behavior is documented in the [Pearl
 repository](https://github.com/Seafoam-Labs/pearl/blob/main/packaging/arch-greeter/README.md).
+
+## Before and after an upgrade
+
+Before updating the greeter, save your work, check that console login works,
+and back up `/etc/greetd/config.toml` and `/etc/pearl/greeter.json`.
+Restarting the greeter can end your desktop session.
+
+After the update, check which display manager is selected:
+
+```sh
+systemctl status display-manager.service --no-pager
+systemctl is-enabled pearl-greeter.service
+```
+
+Review `.pacnew` files and compare the greetd command and keyboard settings
+with your backup before logging in again. Wallpaper sync only changes
+appearance; it does not set the greeter's keyboard layout.
+
+## Wrong keyboard layout or failed login
+
+1. Check the username, selected desktop and Caps Lock. To check key positions,
+   type harmless text in a visible username field, then clear it. Never reveal
+   your password to test a layout.
+2. If you still cannot sign in, try another installed desktop or press
+   `Ctrl+Alt+F1` for console login. Pearl Greeter uses VT7. Console layout is
+   separate; use your distribution's recovery route if console login fails too.
+3. From a working console, check the service and current boot logs:
+
+   ```sh
+   systemctl status pearl-greeter.service --no-pager
+   journalctl -b -u pearl-greeter.service -n 100 --no-pager
+   ```
+
+   Journal access may require administrator privileges. Review the output
+   before sharing it, and include your package versions and intended layout.
+
+4. To restore the previous display manager, run:
+
+   ```sh
+   sudo /usr/lib/pearl/pearl-greeter-setup restore
+   ```
+
+   The helper restores the old greetd config only if the current file still
+   matches Pearl's template. If it refuses, review the differences rather than
+   overwriting your changes. Confirm the selected display manager before rebooting.
+
+The greeter runs its own Aqueous session. Your desktop's
+[Input settings](/aqueous/input/) do not change its layout, and the greeter
+currently has no layout selector or `xkb_layout` JSON setting.
+The German-layout upgrade problem still has no confirmed general fix.
+Keep console access available; changing PAM or disabling authentication does
+not fix a keyboard layout.
 
 ## The login card
 
@@ -123,9 +181,12 @@ the connector name, and the setting applies when the greeter next starts.
 
 ## Syncing appearance from Settings
 
-**Settings → Appearance → Login screen → Choose image and sync** Will ask for root permissions, as the following actions writes to `etc`. The selected png/jpg is copied to `/etc/pearl/greeter-assets` and if you have Dynamic theme
-generation on will generate a matugen theme based on the selected image that
-is also placed in `/etc/pearl/greeter-assets/palette.json`. If you want to apply the theme manually, you can edit the `palette.json` file.
+Open **Settings → Appearance → Login screen → Choose image and sync**.
+Authenticate when prompted. Pearl copies the PNG/JPEG to
+`/etc/pearl/greeter-assets` and, with dynamic theming enabled, writes
+`palette.json` there too. Check the result at the next login screen.
+If no authorization prompt appears, check the
+[polkit agent](/pearl/docs/security/#polkit-agent).
 
 Example of applied theme:
 

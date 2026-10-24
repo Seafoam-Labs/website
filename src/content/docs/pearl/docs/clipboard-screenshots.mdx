@@ -21,7 +21,25 @@ closes it, and opening it while another Pearl popup is shown replaces that
 popup. Pearl never grabs key combinations itself: a clipboard shortcut is an
 Aqueous keybinding that runs `pearlctl clipboard toggle`.
 
+## Copy a screenshot with Print
+
+Press **Print** or **Super+Shift+S**, drag a rectangle, then paste into an app that
+accepts images. Escape cancels. The packaged Aqueous binding runs
+`aqueous-shell-action screenshot` using `slurp`, `grim` and `wl-copy`.
+
+This copies a PNG; it does not save a file. Use [Save PNG](#save-a-screenshot-as-a-file)
+below for that. If nothing happens, check the [binding](/aqueous/keybindings/),
+confirm those tools are installed and try an image-capable app. Custom bindings
+and other distributions may use a different command.
+
 ## Clipboard history
+
+Run `pearlctl clipboard toggle`, filter or select an item and press Enter. Paste
+in the destination app (**Ctrl+V**, or often **Ctrl+Shift+V** in terminals).
+Delete removes an entry; **Clear history** clears the list.
+
+Primary selection is separate: selected text can be pasted with middle-click in
+supporting apps. It does not select a Pearl history entry.
 
 History holds up to 20 entries in memory, text and PNG images alike, with
 duplicates kept once and the least recently used entry evicted first. When an
@@ -61,6 +79,26 @@ contain no clipboard content while suspended.
 
 ## Screenshots
 
+Isolated-window capture and the native capture path are newer than Pearl 0.3.0.
+Check your package version if a control is missing.
+
+### Save a screenshot as a file
+
+1. Run `pearlctl capture show` to open **Clipboard & capture → Capture**.
+2. Choose **Capture output**, enter `x,y,width,height` for **Capture region**,
+   or select a window and choose **Capture isolated window**.
+3. Wait for **Screenshot ready — save or copy**, then run `pearlctl capture show`
+   again to check the preview.
+4. Click **Save PNG** and open the reported path. **Copy image** copies it for
+   pasting instead.
+
+For a specific monitor, get its current output ID from
+`aqueousctl shell snapshot --json`, then run
+`pearlctl capture output --output OUTPUT_ID`. Use the output ID, not the connector
+name; IDs can change after login.
+
+### Choose the right source
+
 The Capture tab takes a screenshot of one whole output or of a region. The
 panel hides itself before the frame is captured and reports completion
 through the on-screen display; reopen it with `pearlctl capture show` to
@@ -88,8 +126,24 @@ subject to the clipboard's size limits, so a very large screenshot can still
 be saved even when it cannot be copied.
 
 One capture runs at a time. Removing an output or changing its geometry,
-scale or mode cancels a capture aimed at it, and HDR or wide-gamut content
-produces an explanation rather than a PNG.
+scale or mode cancels a capture aimed at it. Unsupported HDR or wide-gamut output
+encoding blocks PNG export. Isolated sources need a supported SDR destination
+encoding; see
+[capture color behavior](/aqueous/shell-integration/#isolated-window-capture).
+
+### If capture or saving fails
+
+- Check `pearlctl capture status`: wait for `pending: false` and read `message`.
+  An accepted capture clears the old image, so a failed request cannot save a stale one.
+- Use **Cancel** or `pearlctl capture cancel` to stop a request. Locking clears the
+  preview; capture again after unlock.
+- For color errors, check the source's encoding or try an SDR source. A crop
+  still includes overlapping windows.
+- A failed save keeps the preview. Check the folder is writable and retry.
+  CLI paths must be absolute and new; existing files and symlinks are not overwritten.
+
+This panel saves PNG stills. Use your app's controls for
+[video recording or sharing](/aqueous/shell-integration/#share-or-record-a-source).
 
 ## Command line
 

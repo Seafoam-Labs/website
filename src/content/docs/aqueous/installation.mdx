@@ -18,113 +18,105 @@ import {
 Aqueous separates the compositor and configuration tools from the desktop
 session and shell. The core contains `aqueous`, `aqueousctl`, `aqueous-config`,
 and the matching private wlroots library. Desktop packages add session startup,
-Welcome, portals, and optional shell integrations.
+portals and shell integration. Only some package families include Welcome.
 
-These instructions describe the current source packaging. Repository releases
-can lag behind; package names in a source recipe do not establish that a new
-package has been published to the AUR or a binary repository.
+Package availability varies by repository. Check the package description and
+version before installing.
+
+## Choose a distribution and package family
+
+[Devario](/devario/setup/) already includes Aqueous and Pearl. Update it through
+its configured repositories. Use the Arch instructions below for Arch/CachyOS, not Devario.
+
+On Arch/CachyOS, use your distribution's published package or the Seafoam Labs
+repository documented under [Pearl installation](/pearl/installation/).
+Check the [desktop selection table](/aqueous/desktop-session/#identify-your-desktop-first)
+for the login entry, shell and configuration folder each package uses.
 
 ## Arch Linux
 
-<Card title="CachyOS repositories (Recommended)" icon="download">
-  <Tabs>
-    <TabItem label="shelly">
-      <Code code="shelly -Is aqueous" lang="sh" />
-    </TabItem>
-    <TabItem label="pacman">
-      <Code code="sudo pacman -S aqueous" lang="sh" />
-    </TabItem>
-  </Tabs>
-</Card>
+### Pearl desktop preset
 
-<Card title="AUR" icon="cloud-download">
-  <Tabs>
-    <TabItem label="shelly">
-      <Code code="shelly -Ia aqueous" lang="sh" />
-    </TabItem>
-    <TabItem label="yay">
-      <Code code="yay -S aqueous" lang="sh" />
-    </TabItem>
-    <TabItem label="paru">
-      <Code code="paru -S aqueous" lang="sh" />
-    </TabItem>
-  </Tabs>
-</Card>
+Install the complete Pearl desktop from your configured repository:
 
-To build the Arch package from a checkout:
+```sh
+shelly install standard aqueous-desktop
+```
+
+This installs the compositor, session, Pearl integration, portal, Pearl,
+Pearl Greeter and RTKit. Review the greeter change before accepting: it can
+replace your next boot's login screen. Select **Aqueous** at login; an existing
+user `session.toml` still overrides the Pearl default.
+See [selecting Pearl](/aqueous/desktop-session/#select-pearl-for-the-next-login).
+
+To build and install this preset from an Arch build environment:
 
 ```sh
 git clone https://github.com/Seafoam-Labs/Aqueous.git
-cd Aqueous
-makepkg -s
+cd Aqueous/packaging/arch/aqueous-desktop
+shelly build --sync-deps --install
 ```
 
-After a successful build, install the desktop components together, leaving the
-optional shell presets for Welcome to select. In the same Bash shell:
+Shelly reviews the recipe, builds it as your normal user, and installs all six
+packages together after a successful build. It requests authorization when needed.
 
-```bash
-mapfile -t packages < <(makepkg --packagelist | awk '!/\/aqueous-shell-/')
-sudo pacman -U "${packages[@]}"
+Pearl, its greeter and RTKit must be separately available as dependencies.
+The recipe fetches its published release tag; it does not automatically build
+unpublished checkout changes. See the
+[Arch preset contract](https://github.com/Seafoam-Labs/Aqueous/blob/71c0e722648b93f2f9fc32fbc9a4e6417cccb672/packaging/arch/aqueous-desktop/README.md).
+
+### Git: replacement or coexistence
+
+Choose one Git recipe. Both use the same component package names, but install
+different paths. Do not mix them.
+
+| Recipe                               | Effect                                                                                                                                                   |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packaging/arch/aqueous-desktop-git` | Pearl Git preset replacing stable Aqueous components. Select **Aqueous**; use standard Aqueous commands and `~/.config/aqueous/`.                        |
+| `packaging/arch/aqueous-git`         | Coexisting **Aqueous-Git** session with suffixed Aqueous commands and `~/.config/aqueous-git/`. Pearl is optional; a fresh desktop starts with no shell. |
+
+To build the separate **Aqueous-Git** desktop:
+
+```sh
+cd Aqueous/packaging/arch/aqueous-git
+package_dir=$(mktemp -d "$PWD/packages.XXXXXX")
+shelly build --sync-deps --package-destination "$package_dir"
 ```
 
-### Shell and package variants
-
-| Package or recipe                  | Purpose                                                                                            |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `aqueous-core`                     | Stable compositor, CLI, configuration helper, and private wlroots; no desktop session or shell.    |
-| `aqueous` from the root `PKGBUILD` | Complete stable desktop composed from core, session, Welcome, portal, and shell integrations.      |
-| `PKGBUILD-bin`                     | Matching release component archives; use a generated recipe with release checksums.                |
-| `aqueous-core-git`                 | Development core alongside stable Aqueous, with suffixed commands and private configuration.       |
-| `aqueous-desktop-git`              | Optional Git desktop, login entry, Welcome, portal, and integrations around the matching Git core. |
-
-Shell integration packages contain conditional services. The explicit
-`aqueous-shell-pearl`, `aqueous-shell-dms`, and `aqueous-shell-noctalia` presets
-also install their shell; Git desktops use the corresponding `-git` presets.
-Welcome offers Pearl, DMS, Noctalia, or Nothing. Installing an integration alone
-does not select or start a shell.
-
-The old combined Git, Intel, DMS, and Noctalia package recipes have been retired.
-Existing legacy packages and personal configurations are not automatically
-renamed or migrated. Current x86_64 package builds target **x86-64-v3** on Intel
-and AMD; older CPUs need a custom lower-target build. Aarch64 uses its baseline.
-
-The separate `packaging/arch/aqueous/PKGBUILD` is compositor-only; unlike the
-root recipe, it does not install the full desktop.
-
-### Build a co-installable Git desktop
-
-From a checkout, build both recipes and install the core and desktop components
-together. In Bash:
+After a successful build, continue in the same Bash terminal to install the
+default components, leaving the three optional shell presets out:
 
 ```bash
-repo=$PWD
-core="$repo/packaging/arch/aqueous-core-git"
-desktop="$repo/packaging/arch/aqueous-desktop-git"
-
-(cd "$core" && makepkg -s) && (cd "$desktop" && makepkg -s)
-```
-
-Continue only if both builds succeeded:
-
-```bash
-mapfile -t core_packages < <(cd "$core" && makepkg --packagelist)
-mapfile -t desktop_packages < <(
-    cd "$desktop" && makepkg --packagelist | awk '!/\/aqueous-shell-/'
+mapfile -t packages < <(
+    printf '%s\n' "$package_dir"/*.pkg.tar.zst |
+        awk '!/\/aqueous-shell-(dms|noctalia|pearl)-git-/'
 )
-sudo pacman -U "${core_packages[@]}" "${desktop_packages[@]}"
+shelly install standard "${packages[@]}"
 ```
 
-The desktop recipe also builds optional shell presets; the filter leaves those
-for an explicit choice in Welcome. Use a normal Arch build environment and
-resolve the matching core dependency before building the desktop. These VCS
-recipes fetch upstream Git, rather than building unpublished local changes.
-See the [Git packaging guide](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/git-desktop-packages.md)
-for dependency and isolated-build details.
+Install a matching shell preset, such as `aqueous-shell-pearl-git`, configure the
+[per-instance shell selection](/aqueous/desktop-session/#select-pearl-for-the-next-login)
+and log into **Aqueous-Git**. For this recipe, do not use `shelly build --install`: it would install every
+split output, including all three optional shells.
 
-Select **Aqueous-Git** at login. It uses `aqueous-git`, `aqueousctl-git`, and
-`aqueous-config-git`, with configuration under `~/.config/aqueous-git/`.
-Stable Aqueous continues to use `~/.config/aqueous/`. See
-[Desktop selection and Git sessions](/aqueous/desktop-session/).
+This family no longer installs Welcome or the standalone GTK source picker.
+Its live shell-switch command is retired. DMS and shell-free sessions need an
+explicit sharing chooser; see [screen-sharing setup](/aqueous/shell-integration/).
+See the [Git packaging guide](https://github.com/Seafoam-Labs/Aqueous/blob/71c0e722648b93f2f9fc32fbc9a4e6417cccb672/docs/git-desktop-packages.md) for details.
+
+### Other Arch package variants
+
+- A distribution's `aqueous` package can still be the root `PKGBUILD`
+  component desktop (`1.0.5-1`), including Welcome and optional shell presets.
+  Follow its installed package description and [Welcome flow](/aqueous/desktop-session/#older-packages-with-welcome).
+- `packaging/arch/aqueous/PKGBUILD` is compositor-only; it does not install a
+  desktop session. Likewise, installing a core package alone is not a complete
+  desktop installation.
+- `PKGBUILD-bin` uses matching release component archives and needs a generated
+  recipe with release checksums. Check the actual AUR recipe before building.
+- Current x86_64 package builds target **x86-64-v3** on Intel and AMD. Older
+  CPUs need a separately built lower-target package; aarch64 uses its baseline.
+  Keep the private wlroots library paired with its compositor.
 
 ## Fedora
 
@@ -249,14 +241,14 @@ Useful build switches are:
    `WAYLAND_DISPLAY` and optional XWayland environment, and starts the
    graphical-session services and portals.
 
-3. On a fresh component desktop, Welcome offers a shell choice. Select Pearl,
-   DMS, Noctalia, or Nothing, then complete setup. Existing selections and
-   personal configuration are retained.
+3. Follow the shell selection for your package family. Current Pearl presets
+   select Pearl; older component desktops can include Welcome; coexisting Git
+   needs an explicit shell selection. Existing user configuration is retained.
 
 </Steps>
 
-Use [Desktop selection](/aqueous/desktop-session/) for Welcome activation,
-Git-session shell switching, and recovery. Settings are supplied by Pearl and
+Use [Desktop selection](/aqueous/desktop-session/) for package-specific activation,
+configuration paths, upgrades and recovery. Settings are supplied by Pearl and
 the [canonical configuration helper](/aqueous/settings/).
 
 To run a nested development session inside another Wayland compositor:

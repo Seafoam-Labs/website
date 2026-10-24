@@ -41,6 +41,14 @@ in place.
   reasons, and a sender's critical-urgency notifications persist until
   dismissed unless the sender asked otherwise.
 
+### Quiet every application temporarily
+
+Open the notifications button and enable **Do Not Disturb**. Turn it off to
+allow new popups again. It resets when Pearl restarts and has no schedule.
+Application sounds use the application's own settings.
+
+For one application, use a saved filter below.
+
 ### Filters
 
 **Settings → Notifications** edits blocking rules through the shared Pearl
@@ -53,6 +61,37 @@ sample against the current draft without sending anything, and blocked
 content never appears in counts, flyouts or status output. Filter edits are
 not retroactive: rules apply to future arrivals, not to existing history. The
 draft workflow is described on the [Settings page](/pearl/docs/settings/).
+
+### Quiet one application and keep its history
+
+1. Open **Settings → Notifications**, enable filters and select **Add filter**.
+2. Name the filter and choose **History only — no popup**. Add an
+   **Application name** condition using **Is exactly** and the name sent by the
+   application. This may differ from its window title.
+3. Select **Save rule**. Under **Test filters**, enter a matching sample and
+   press **Test sample**. Expect **History only — no popup**.
+4. Select **Apply & save**. With Do Not Disturb off, request a new notification
+   from the application and check that it appears only in history.
+
+Choose **Block — hide everywhere** to hide both popups and history. Block takes
+priority when several filters match, including for critical notifications.
+**Is exactly** and **Contains** match literal text, without regular expressions
+or schedules. **Match all conditions** requires every condition;
+**Match any condition** requires one.
+
+To undo a filter, disable it and **Apply & save**. Test with a new notification:
+old history is unchanged, and blocked deliveries cannot be recovered. Saved
+filters survive a restart; Do Not Disturb and history do not.
+
+### Notifications unavailable or missing
+
+Check `pearlctl session status`, Do Not Disturb, filters and whether the session
+is locked.
+
+If another daemon owns `org.freedesktop.Notifications`, Pearl waits for it to
+release the name. Check the other shell or notification service's startup
+settings through your distribution's service tools. Restarting Pearl cannot
+release a name owned by another process.
 
 ## Tray
 
@@ -75,6 +114,19 @@ tracking items when another watcher runs. Likewise, when another notification
 daemon owns the bus, Pearl reports notifications as unavailable until the name
 becomes free.
 
+### An application stays open after closing its window
+
+Use **Quit** or **Exit** in the application's tray menu, or change its own
+“close to tray” setting. Closing a window may leave the application running;
+removing Pearl's tray widget only hides its icon.
+
+For an application that returns at login, check its start-at-login setting and
+[session startup entries](/pearl/docs/desktop/#start-an-application-at-login).
+
+For a missing icon, check the tray widget and overflow list first. Pearl supports
+StatusNotifier items and DBusMenu. Legacy XEmbed-only icons need external
+compatibility support.
+
 ## Media
 
 The media button, or **Media controls** in the compact Overview, opens the
@@ -84,6 +136,10 @@ anything a player does not support is disabled rather than hidden. The
 progress bar extrapolates from the player's reported position and refreshes
 once per second while the panel is open and playing, and an edited slider
 position survives moving focus to the Seek button until the track changes.
+
+Start playback, open the media panel, choose the player and press **Play/Pause**
+or **Next**. If no player appears, check that the application supports MPRIS.
+For a silent player, see [Sound troubleshooting](/pearl/docs/audio-power/#no-sound-missing-microphone-or-bluetooth-audio).
 
 Album artwork is loaded from local PNG and JPEG files only. Network artwork,
 other formats and oversized or invalid images fall back to a media icon; Pearl
@@ -118,7 +174,7 @@ status calls report the actual outcome. All session actions keep Pearl's
 same-display, same-user checks and are rejected while the session is locked.
 
 <Aside type="note">
-  These services live on the session bus. If it restarts, Pearl reconnects
-  automatically, but the in-memory notification history belongs to the running
-  process and does not come back.
+  These services live on the session bus, and Pearl reconnects after a bus
+  restart. Restarting the Pearl process starts an empty notification history;
+  saved notification filters remain in your preferences.
 </Aside>

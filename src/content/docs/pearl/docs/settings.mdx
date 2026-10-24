@@ -29,6 +29,69 @@ The package installs the executable, desktop entry and icon as
 `org.aqueous.Pearl.Settings`. Git packages use `pearl-settings-git` and
 `org.aqueous.Pearl.Git.Settings`.
 
+## Find a setting
+
+Use these routes to find common controls. **Aqueous → Shortcuts** has its own
+action search; there is no global Settings search. Labels below are in English.
+
+| Task                             | Open                                      | Guide                                                                  |
+| -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------- |
+| Wallpaper, colors and app themes | **Appearance**                            | [Appearance](/pearl/docs/appearance/)                                  |
+| Dock visibility and bar widgets  | **Bar & dock**                            | [Desktop](/pearl/docs/desktop/#dock-and-bar-islands)                   |
+| Floating, tiling and gaps        | **Aqueous → Layouts**                     | [Layouts](/aqueous/layouts/#choose-and-try-a-layout)                   |
+| Keyboard, tapping and focus      | **Aqueous → Input**                       | [Input](/aqueous/input/#change-your-keyboard-layout)                   |
+| Shortcuts                        | **Aqueous → Shortcuts**                   | [Keybindings](/aqueous/keybindings/#change-a-shortcut-safely)          |
+| App window placement             | **Aqueous → Rules**                       | [Window rules](/aqueous/window-rules/#make-one-application-float)      |
+| Resolution, scale and monitors   | **Aqueous → Displays**                    | [Outputs](/aqueous/outputs/)                                           |
+| Wi-Fi, Bluetooth and VPN         | Bar's **Network** or **Bluetooth** button | [Connectivity](/pearl/docs/connectivity/)                              |
+| Volume, sleep and power          | Bar's **Speaker** or **Battery** button   | [Audio and power](/pearl/docs/audio-power/)                            |
+| Locking and authentication       | Session security guide                    | [Security](/pearl/docs/security/)                                      |
+| Apps at login                    | Aqueous `wm.toml`                         | [Startup commands](/pearl/docs/desktop/#start-an-application-at-login) |
+
+### Make and check one change
+
+Change a setting, then **Apply & save**. For Aqueous settings, **Validate** first.
+Pearl and Aqueous have separate drafts; applying one does not apply the other.
+Read the save/reload result and check the change on the desktop.
+
+**Discard** drops the unapplied draft, including changes on other pages. To undo
+a saved change, restore its previous value and apply again. Device actions such
+as connecting to a network happen immediately.
+
+For conflicts, review the merge/rebase result before applying. If a reply is
+lost, check the operation status before trying again. If a saved setting has no
+effect, check the loaded configuration and
+[helper status](/aqueous/settings/#inspect-the-configuration-backend).
+
+### When a control is missing
+
+Check your package versions, [helper status](/aqueous/settings/#inspect-the-configuration-backend)
+and whether Settings is connected to your stable or Git session. Newer controls
+may be missing from an older release. Use the linked TOML guide where supported;
+do not copy a newer helper into an older installation.
+
+## Language and accessibility preferences
+
+In **Appearance**, adjust **Font size**, **Density** or **Reduced motion**, then
+**Apply & save**. Font size changes Pearl's text, not every application's text
+or desktop magnification. For keyboard navigation, see the
+[desktop shortcuts](/pearl/docs/desktop/#your-first-few-minutes) and
+[dock controls](/pearl/docs/desktop/#opening-surfaces-from-the-command-line).
+Aqueous also has [visual bell feedback](/aqueous/system-bell/).
+
+**Pearl builds after v0.3.0** add language packs and **Appearance → Interface
+language**. Install a pack from your distribution, reopen Settings, select it
+or **Follow system**, and apply. Sign out and back in for the full change.
+Untranslated text falls back to English; missing packs are marked in the
+selector. To switch back, choose **English** or Follow system, apply and sign
+in again. These pack controls are not part of v0.3.0.
+
+Pearl's language, application locale, installer language, greeter layout and
+[session keyboard layout](/aqueous/input/#change-your-keyboard-layout) are
+separate settings. IMEs and on-screen keyboards need their own installed
+services. See [input-method and accessibility limits](/aqueous/input/#accessibility-and-input-method-readiness)
+for screen readers, magnifiers and on-screen keyboards.
+
 ## Pages and the shared draft
 
 The Appearance, Bar & dock, Plugins and Advanced pages all edit **one shared

@@ -11,9 +11,11 @@ import { Aside } from "@astrojs/starlight/components";
 Aqueous owns window and workspace policy in the compositor. Desktop shells can
 use standard layer-shell, workspace, and foreign-toplevel protocols, plus the
 versioned Aqueous shell interface for richer state and typed runtime actions.
-Component desktops select Pearl, DMS, Noctalia, or no shell through Welcome.
+Older component packages select Pearl, DMS, Noctalia or no shell through
+Welcome. Current Pearl desktop presets select Pearl, and coexisting Git
+packages use a saved shell choice without Welcome.
 See [Desktop selection](/aqueous/desktop-session/) and
-[Installation](/aqueous/installation/#shell-and-package-variants).
+[Installation](/aqueous/installation/#choose-a-distribution-and-package-family).
 
 ## Discover live capabilities
 
@@ -165,12 +167,43 @@ for format support and export conversion requirements.
 ## Screen sharing and portals
 
 Packages include a private namespaced build of `xdg-desktop-portal-wlr` as
-`xdg-desktop-portal-aqueous`. It handles ScreenCast and Screenshot, while GTK
-handles the remaining portal interfaces. Component desktops route the source
-chooser through `aqueous-shell-action` using the active session choice: DMS
-uses its portal bridge, Noctalia uses its menu, and Pearl/Nothing use the
-standalone GTK picker supplied by Welcome. Installing another shell alone does
-not change the active selection. Explicit custom chooser overrides are retained.
+`xdg-desktop-portal-aqueous` for ScreenCast and Screenshot. Other interfaces use
+the session's Pearl/GTK routing. Your recording application creates the video file.
+
+### Share or record a source
+
+1. Start sharing or recording in your browser, meeting app or recorder. Choose
+   Wayland/PipeWire capture if the app offers several backends.
+2. Select a monitor or window in the picker. Output sharing includes the visible
+   desktop; supported isolated-window sources exclude covering windows.
+3. Check the app's preview and sharing indicator. Use **Stop sharing** or
+   **Stop recording** in that app to end it. The recorder sets the file path,
+   format and encoder.
+4. Stop and start again to change sources. Escape, **Cancel** or closing the
+   picker selects nothing. A later prompt is a new app request.
+
+Apps can reuse a monitor choice during their lifetime when they request
+persistence. Window choices cannot be restored. After an app restart, output
+removal or an invalid restore token, select the source again.
+
+### Which picker should appear?
+
+`aqueous-shell-action chooser` follows the active session:
+
+| Session                             | Picker                         |
+| ----------------------------------- | ------------------------------ |
+| Pearl                               | Bundled `pearl-capture-picker` |
+| Noctalia                            | Its own menu                   |
+| Stable component DMS                | `aqueousPortal` bridge         |
+| Stable shell-free component session | `aqueous-portal-picker`        |
+
+Older component packages use Welcome to choose the next-login shell. Current
+Pearl desktop presets have no Welcome step. Installing a shell does not switch
+the active session; custom chooser overrides are kept.
+
+The coexisting `aqueous-git` family uses separate commands, config and services.
+It keeps Pearl/Noctalia pickers but ships no standalone picker; DMS and shell-free
+sessions need a custom chooser. See [package selection](/aqueous/desktop-session/).
 
 DMS sharing uses the independent **Aqueous Screen Sharing** (`aqueousPortal`)
 daemon plugin. It works independently of the retired settings UI and needs no
@@ -189,9 +222,16 @@ shell or silently select a screen.
 
 ### Troubleshooting the picker
 
+Stop the share and retry with one picker open. After a portal update or chooser
+change, log out and back in. Finish recordings before restarting services.
+Check the backend journal:
+
 ```sh
 journalctl --user -u xdg-desktop-portal-aqueous.service -b
 ```
+
+The coexisting Git family uses `xdg-desktop-portal-aqueous-git.service`; the
+replacement `aqueous-desktop-git` preset retains the standard service name.
 
 | Error                   | Meaning                                        |
 | ----------------------- | ---------------------------------------------- |
@@ -210,3 +250,27 @@ Backend configuration uses the first readable file, without merging:
 `XDG_CONFIG_HOME` defaults to `~/.config`. An existing override can mask the
 new package's chooser settings. Review it and any `.pacnew` file when changing
 shell variants, then log out and back in to load the backend configuration.
+
+### Sharing is slow, black or frozen
+
+Collect the portal journal, app logs and `aqueousctl outputs --json`. Include the
+app/version, native or Flatpak package, output/window source, resolution/fps,
+GPU/driver, codec and actual encoder. Note whether lag starts in the picker,
+preview or when a viewer connects.
+
+Compare output and window capture at the same resolution/fps. CPU encoding,
+PipeWire conversion and compositor capture can have different bottlenecks;
+hardware encoding and zero-copy are not guaranteed. Do not assume a picker fix
+also resolves stream lag. See [app diagnostics](/aqueous/compatibility/#games-and-application-stalls).
+
+## Remote viewing and control
+
+Screen sharing sends video. Keyboard and pointer control need a remote app with
+support for your compositor/session and its own consent and revoke controls.
+Aqueous's capture backend supplies ScreenCast/Screenshot, not RemoteDesktop.
+Virtual-input support alone does not guarantee RustDesk or another remote app works.
+
+Check the app's version and Wayland support before relying on it. Keep local
+access, share only the needed source and end the session in the app. Lock,
+keyboard layout, reconnect, revocation and recovery still need testing with the
+chosen app on two devices.

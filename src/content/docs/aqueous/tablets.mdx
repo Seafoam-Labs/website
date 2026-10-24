@@ -49,6 +49,22 @@ policy, and checks for concurrent changes before replacement. It refuses malform
 or unsupported forms (for example TOML date/time values) rather than rewriting
 them. The selected wm configuration is not an input-sidecar destination.
 
+### Check the result and undo
+
+Back up the selected input file before `--write`, especially if the rule ID
+already exists. Use discovery's `input_file` path when it differs from the example.
+After writing, lift the pen out of proximity and run discovery again: expect your
+rule ID, the intended output, `status: "resolved"` and `pending: false`.
+
+In a tablet-v2 app such as a compatible Krita build, test hover, all four corners
+and light/firm strokes. Check the display's rotation and scale, then reconnect.
+A resolved mapping does not guarantee calibration, pressure or XWayland support.
+Do not disable other monitors as a permanent mapping fix.
+
+To undo, remove the new `[[input.tablet]]` block, or restore the previous block
+if its ID was replaced. Save, lift the pen and check discovery again: removing
+an override may reveal an inherited rule. Invalid edits keep the previous policy.
+
 ## input.toml rules
 
 ```toml

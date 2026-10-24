@@ -178,7 +178,7 @@ diagnostic file Pearl writes is the `pearlctl report` bundle below.
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Shell started by Pearl's own user service | `journalctl --user -u pearl.service` (`pearl-git.service` for Git packages), equivalently `journalctl --user -t pearl`            |
 | Shell started by Aqueous                  | The compositor's integration unit, for example `journalctl --user -u aqueous-git-pearl.service`; `-t pearl` matches nothing there |
-| Any install, unit name unknown            | `journalctl --user _EXE=/usr/bin/pearl`                                                                                           |
+| Any install, unit name unknown            | `journalctl --user _EXE=/usr/bin/pearl` (or `/usr/bin/pearl-git`)                                                                 |
 | Greeter and greeter-launched sessions     | `sudo journalctl -b -u pearl-greeter.service`                                                                                     |
 
 Crash traces land in the same journal stream. A journald "Suppressed N
@@ -209,18 +209,53 @@ host) take no flags and log at their build default.
 
 ## When something fails
 
-`pearl --check-environment` diagnoses a shell that will not start and works
-without a display. Beyond that, the journal carries greppable `event=` names:
+Use the commands for your installation: Git Pearl uses `pearl-git` and
+`pearlctl-git`. Check the [instance table](/aqueous/desktop-session/#stable-and-git-instance-paths)
+for Aqueous paths and service names.
 
-| Symptom                            | First checks                                                                                                                                    |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Shell does not start, black screen | `pearl --check-environment`, then `event=startup-failed` and `event=session-error` in the journal, then `systemctl --user status pearl.service` |
-| Greeter does not appear            | `sudo journalctl -b -u pearl-greeter.service`, then `coredumpctl info /usr/lib/pearl/pearl-greeter-host`                                        |
-| Lock does not engage               | `pearlctl lifecycle status`, then `event=lock-` journal lines                                                                                   |
-| Theme fails to load                | `event=css-error` and `event=resource-error` journal lines; `pearlctl preferences status`; the shell falls back to its bundled palette          |
-| No audio                           | `pearlctl services status` reports per-service reasons                                                                                          |
-| Network applet empty               | `pearlctl connectivity status`, then `event=network-failed` or `event=bluetooth-failed`                                                         |
-| Compositor disconnect warning      | `event=aqueous-disconnected` and `event=aqueous-availability`; the shell keeps its last state and reconnects                                    |
+1. If the desktop responds, open its terminal and run `pearlctl status`,
+   `pearlctl services status` and `pearlctl report`. Include your installed
+   package versions when reporting a problem.
+2. For a missing shell, run `pearl --check-environment` and check its service:
+
+   ```sh
+   systemctl --user status aqueous-pearl.service --no-pager
+   journalctl --user -b -u aqueous-pearl.service -n 200 --no-pager
+   ```
+
+   Use `aqueous-git-pearl.service` for the separate Git session. A shell started
+   independently may use `pearl.service` or `pearl-git.service` instead.
+   A console does not inherit the desktop's sockets, so a console `pearlctl`
+   connection failure alone does not mean the shell crashed.
+
+3. If graphics are unusable, switch to a working console or another desktop.
+   After a forced reboot, check the previous boot if its journal was retained:
+
+   ```sh
+   journalctl --user -b -1 -n 200 --no-pager
+   journalctl -b -1 -k -n 200 --no-pager
+   ```
+
+4. Note the distribution/image, package versions, GPU/driver, native Wayland
+   or XWayland, and the action and time of the failure. Review paths, window
+   titles and identifiers before sharing logs.
+
+Keep your last working configuration and recovery records. Use
+[draft recovery](/pearl/docs/settings/) for failed edits and
+[session recovery](/aqueous/desktop-session/#recover-a-missing-shell-or-failed-upgrade)
+for missing components before deleting configuration or restarting services.
+
+The journal carries greppable `event=` names:
+
+| Symptom                            | First checks                                                                                                                                                                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shell does not start, black screen | `pearl --check-environment`, then `event=startup-failed` and `event=session-error` in the journal, then the matching managed unit from [session paths](/aqueous/desktop-session/#stable-and-git-instance-paths) |
+| Greeter does not appear            | `sudo journalctl -b -u pearl-greeter.service`, then `coredumpctl info /usr/lib/pearl/pearl-greeter-host`                                                                                                        |
+| Lock does not engage               | `pearlctl lifecycle status`, then `event=lock-` journal lines                                                                                                                                                   |
+| Theme fails to load                | `event=css-error` and `event=resource-error` journal lines; `pearlctl preferences status`; the shell falls back to its bundled palette                                                                          |
+| No audio                           | `pearlctl services status` reports per-service reasons                                                                                                                                                          |
+| Network applet empty               | `pearlctl connectivity status`, then `event=network-failed` or `event=bluetooth-failed`                                                                                                                         |
+| Compositor disconnect warning      | `event=aqueous-disconnected` and `event=aqueous-availability`; the shell keeps its last state and reconnects                                                                                                    |
 
 The complete runbook, including file-preview diagnostics, lives in the [Pearl
 repository's logging
@@ -234,10 +269,14 @@ While the shell is running, execute:
 pearlctl report
 ```
 
-The reply names a bounded text file under `~/.local/state/pearl/`: the launch
-arguments, version and log filters, `--check-environment` output, the live
-`status` JSON and the last 500 lines of the shell's journal stream. Attach it,
-with a description of what you did and what happened, to a [GitHub
-issue](https://github.com/Seafoam-Labs/pearl/issues). The last three reports
-are kept, and a report never contains typed content, passwords, clipboard
-payloads or session tokens.
+The reply gives a text file under `~/.local/state/pearl/` with the launch
+arguments, version, environment check, status and last 500 journal lines.
+Pearl keeps the last three reports. Reports exclude typed content, passwords,
+clipboard payloads and session tokens; still review the file before sharing it.
+
+Include the steps, expected and actual result, versions and time. Search
+existing issues first. Use [Pearl issues](https://github.com/Seafoam-Labs/pearl/issues)
+for the shell, Settings, themes and applets, or
+[Aqueous issues](https://github.com/Seafoam-Labs/Aqueous/issues) for window,
+input, display and compositor rendering problems. If the owner is unclear,
+say so in one report rather than filing duplicates.

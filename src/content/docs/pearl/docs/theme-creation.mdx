@@ -14,7 +14,11 @@ checkout is needed. A **community package** adds dark and light palettes,
 widget styling and publication metadata so other people can install it. Start
 with a palette; export it to a package when you want to share.
 
-Local palette authoring uses either **Settings → Appearance** or the installed
+A palette supplies colors. Application profiles supply templates and activation
+instructions; importing colors does not import another shell or its profiles.
+
+Local palette authoring uses either **Settings → Appearance → Installed themes
+& customization…** or the installed
 `pearl-themes` command, and both work on the same files under
 `$XDG_CONFIG_HOME/pearl/palettes/`, normally `~/.config/pearl/palettes/`.
 
@@ -107,6 +111,9 @@ differ:
 }
 ```
 
+Keep a copy before replacing a palette. To undo a file edit, restore that copy.
+To change back, select **Material** or your previous palette and **Apply & save**.
+
 ## Refine derived colors
 
 Every other color role is optional. Omitted roles are compiled from your three
@@ -139,6 +146,105 @@ foreground, cursor, selection and ANSI `normal`/`bright` colors. Terminal
 application templates (Ghostty, Kitty, Foot, Alacritty, WezTerm) consume these
 values; missing slots use Material defaults derived from your palette.
 
+## Complete local palette reference
+
+These case-sensitive names apply to compact local palettes, not the
+thirteen-role palettes inside full packages. See the [palette parser](https://github.com/Seafoam-Labs/pearl/blob/6cb9b5526fd4998ccaee2fae3a9ceabdd52636f1/src/theme/palette_model.zig)
+and [default color rules](https://github.com/Seafoam-Labs/pearl/blob/6cb9b5526fd4998ccaee2fae3a9ceabdd52636f1/src/theme/palette_resolver.zig).
+
+| Top-level key   | Type and requirement                                                                                           |
+| --------------- | -------------------------------------------------------------------------------------------------------------- |
+| `name`          | Optional text string, at most 256 bytes when nonempty; filename stem is the display fallback                   |
+| `dark`, `light` | Color objects; at least one must be present and non-null. Each needs `surface`, `on_surface`, `primary`        |
+| `publication`   | Optional metadata object for [publishing](#publish-a-palette-in-a-github-repository); not needed for local use |
+
+All roles are **`#RRGGBB` strings** without alpha. Only the first three are
+required. “Mix X%” blends `surface` toward the named color; containers fall back
+to `surface` if needed for contrast. “Readable foreground” chooses black or
+white. Explicit values stay exact and must pass validation.
+
+| Canonical role(s) in each variant                                         | Default when omitted                                                 |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `surface`, `on_surface`, `primary`                                        | Required                                                             |
+| `background`, `surface_dim`, `surface_container_lowest`                   | `surface`                                                            |
+| `on_background`                                                           | `on_surface`                                                         |
+| `surface_container_low`                                                   | Mix 4% toward `on_surface`                                           |
+| `surface_container`                                                       | Mix 8% toward `on_surface`                                           |
+| `surface_container_high`                                                  | Mix 12% toward `on_surface`                                          |
+| `surface_container_highest`, `surface_bright`                             | Mix 16% toward `on_surface`                                          |
+| `surface_variant`                                                         | Mix 8% toward `on_surface`                                           |
+| `on_surface_variant`                                                      | Mix 75% toward `on_surface`; use `on_surface` if needed for contrast |
+| `outline`, `outline_variant`                                              | Mix 55% and 25% toward `on_surface`, respectively                    |
+| `secondary`, `tertiary`                                                   | `primary`                                                            |
+| `on_primary`, `on_secondary`, `on_tertiary`                               | Readable foreground on the corresponding accent                      |
+| `primary_container`, `secondary_container`, `tertiary_container`          | Mix 20% toward the corresponding accent                              |
+| `on_primary_container`, `on_secondary_container`, `on_tertiary_container` | `on_surface` if readable on that container, otherwise black or white |
+| `primary_fixed`, `primary_fixed_dim`                                      | `primary`                                                            |
+| `secondary_fixed`, `secondary_fixed_dim`                                  | `secondary`                                                          |
+| `tertiary_fixed`, `tertiary_fixed_dim`                                    | `tertiary`                                                           |
+| `on_primary_fixed`, `on_primary_fixed_variant`                            | Readable foreground on `primary`                                     |
+| `on_secondary_fixed`, `on_secondary_fixed_variant`                        | Readable foreground on `secondary`                                   |
+| `on_tertiary_fixed`, `on_tertiary_fixed_variant`                          | Readable foreground on `tertiary`                                    |
+| `error`, `error_container`                                                | Built-in Material defaults for that variant                          |
+| `on_error`, `on_error_container`                                          | Readable foreground on the respective error role                     |
+| `shadow`, `scrim`                                                         | Built-in Material defaults for that variant                          |
+| `surface_tint`, `source_color`                                            | `primary`                                                            |
+| `inverse_surface`, `inverse_on_surface`                                   | `on_surface`, `surface`, respectively                                |
+| `inverse_primary`                                                         | Readable foreground on `on_surface`                                  |
+| `hover`, `on_hover`                                                       | `surface_container_high`, `on_surface`, respectively                 |
+
+Only these aliases are accepted. An alias and its canonical role may coexist
+if their colors match (case-insensitively); other camelCase names are not converted.
+
+| Accepted alias      | Canonical role       |
+| ------------------- | -------------------- |
+| `mPrimary`          | `primary`            |
+| `mOnPrimary`        | `on_primary`         |
+| `mSecondary`        | `secondary`          |
+| `mOnSecondary`      | `on_secondary`       |
+| `mTertiary`         | `tertiary`           |
+| `mOnTertiary`       | `on_tertiary`        |
+| `mError`            | `error`              |
+| `mOnError`          | `on_error`           |
+| `mSurface`          | `surface`            |
+| `mOnSurface`        | `on_surface`         |
+| `mSurfaceVariant`   | `surface_variant`    |
+| `mOnSurfaceVariant` | `on_surface_variant` |
+| `mOutline`          | `outline`            |
+| `mShadow`           | `shadow`             |
+| `mHover`            | `hover`              |
+| `mOnHover`          | `on_hover`           |
+
+### Terminal fields
+
+Each variant accepts an optional `terminal` object. Its color values are
+optional `#RRGGBB` strings; use the exact names below.
+
+| Field below `terminal`       | Default                                                                                   |
+| ---------------------------- | ----------------------------------------------------------------------------------------- |
+| `background`, `foreground`   | `surface`, `on_surface`                                                                   |
+| `cursor`, `cursorText`       | `primary`, `on_primary`                                                                   |
+| `selectionBg`, `selectionFg` | `primary_container`, `on_primary_container`                                               |
+| `normal`, `bright`           | Objects with any of `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white` |
+
+ANSI normal black uses `surface`; white in both groups uses `on_surface`.
+Bright black and the six colored slots use Material base16 defaults for the
+variant unless overridden. Missing slots and transport tone ramps are not
+generated from your accent.
+
+### Rejected input and contrast checks
+
+`onPrimary`, `surfaceContainer`, `mPrimaryContainer`, CSS color names, `#RGB`,
+`#RRGGBBAA`, arrays of ANSI colors, foreign template settings and arbitrary
+metadata keys are rejected. Use the canonical names above. Files must be strict
+JSON, at most 64 KiB, without duplicate keys or excessive nesting.
+
+The compiler checks 4.5:1 for these foreground/background pairs:
+`on_surface`/`surface`, `on_surface`/`surface_container_high`,
+`on_surface_variant`/`surface_container`, each accent's `on_…`/accent and
+`on_…_container`/container, `error`/`error_container`, and `on_hover`/`hover`.
+ANSI pairs are not checked; inspect the terminal colors too.
+
 ## Theme applications with the same palette
 
 Under **Appearance → Application themes**, enable management, choose **Use
@@ -151,18 +257,45 @@ recovery details.
 
 ## Import Noctalia colors
 
-```sh
-pearl-themes import "/path/to/Noctalia Palette.json" --name noctalia-meadow
+Wrap imported colors in `dark` or `light` using the roles or aliases above.
+For example, save this as `noctalia-meadow.json`:
+
+```json
+{
+  "name": "Noctalia Meadow",
+  "dark": {
+    "mSurface": "#101c19",
+    "mOnSurface": "#e8f4e9",
+    "mPrimary": "#a4dfb0",
+    "mSecondary": "#abcdef"
+  }
+}
 ```
 
-In Settings, expand **Import and export**, enter the absolute input path, set a
-new **Filename** and click **Import palette**. Import validates colors, maps
-Noctalia's `mPrimary`, `mSurface`, `mOnSurface` and similar aliases onto
-Pearl's roles, and refuses to overwrite an existing local file. Select the
-result separately to activate it. An alias and its canonical role carrying
-different values produce `ConflictingPaletteAlias`; remove one and validate
-again. Import covers palette colors only: Noctalia templates, hooks and shell
-configuration are separate.
+Import converts these aliases to `surface`, `on_surface`, `primary` and
+`secondary`. The last is an **accent**; use `on_surface_variant` for muted text.
+Map other exports to these roles and leave out their template or shell settings.
+
+```sh
+pearl-themes validate ./noctalia-meadow.json
+pearl-themes import ./noctalia-meadow.json --name noctalia-meadow
+palette="${XDG_CONFIG_HOME:-$HOME/.config}/pearl/palettes/noctalia-meadow.json"
+pearl-themes validate "$palette"
+```
+
+Successful commands return `"valid": true`; import also reports
+`local.palette.noctalia-meadow` and its saved path. It refuses to overwrite an
+existing file. To activate it, open **Appearance → Installed themes &
+customization… → Palette and widget style**, choose **Use theme**, then **Apply
+& save**. A dark-only palette is used in both variants.
+
+To import in Settings, expand **Import and export**, enter the absolute input
+path and a new **Filename**, then click **Import palette**.
+`ConflictingPaletteAlias` means an alias and its canonical role disagree;
+remove one or make their values match.
+
+DMS Matugen templates need a [Pearl profile manifest and adapter](https://github.com/Seafoam-Labs/pearl/blob/6cb9b5526fd4998ccaee2fae3a9ceabdd52636f1/docs/CUSTOM_THEMES.md);
+this command imports colors only.
 
 ## Export a community package
 

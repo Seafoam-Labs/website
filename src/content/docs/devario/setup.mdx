@@ -37,6 +37,29 @@ The [installer sequence](https://github.com/Seafoam-Labs/devario-os/blob/main/is
 and [partition defaults](https://github.com/Seafoam-Labs/devario-os/blob/main/iso/airootfs/etc/calamares/modules/partition.conf)
 describe the actual image setup.
 
+## Check your first login
+
+Aqueous manages windows and the session; Pearl provides the desktop and
+Settings. The greeter is the separate login screen.
+
+1. Remove the installation media after restarting. Select **Aqueous** and
+   sign in with your new account, not `liveuser`.
+2. Check the username, Caps Lock and keyboard layout. If login fails, use
+   [greeter recovery](/pearl/docs/greeter/#wrong-keyboard-layout-or-failed-login).
+3. Open a terminal (normally `Super+Return`) and run `pearlctl status`.
+   Open **Settings → Aqueous → Input** to check your
+   [desktop keyboard layout](/aqueous/input/).
+4. Check networking, sound and monitors. The [Settings task index](/pearl/docs/settings/)
+   points to each control. Display previews revert if you do not confirm them.
+
+Installer language, console keymap, greeter input and desktop layout are
+separate settings. Keep a working console or another desktop available before
+changing login settings. Note the image date, package versions and any failures.
+
+For updates, use Shelly's **Update** page and the configured Devario
+repositories. See [upgrade preparation](/aqueous/desktop-session/#upgrade-without-losing-your-settings);
+a missing shell or failed download usually calls for troubleshooting first.
+
 ## Make it yours
 
 | Task                                           | Where to start                                                                           |

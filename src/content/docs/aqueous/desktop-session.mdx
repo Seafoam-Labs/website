@@ -1,103 +1,133 @@
 ---
-title: Desktop Selection and Git Sessions
-description: Choose Pearl, DMS, Noctalia, or no shell, and manage separate stable and Git sessions.
+title: Desktop selection and session recovery
+description: Identify your Aqueous package family, select Pearl, and preserve configuration when updating or changing sessions.
 sidebar:
   label: Desktop Selection
   order: 2
 ---
 
-The component desktop includes a native GTK4 Welcome application. It offers
-**Pearl**, **DMS**, **Noctalia**, or **Nothing**, plus an optional application
-catalog. Core-only installations do not include this desktop setup flow.
+Aqueous manages windows and the desktop session. Pearl provides the bar,
+launcher and Settings. Choose the matching session when you log in.
 
-## Choose a desktop
+## Identify your desktop first
 
-Start `aqueous-welcome`, or `aqueous-welcome-git` in an Aqueous-Git session.
-Packaged bindings also open Welcome with `Super+Shift+F1`.
+The package you install determines the login entry and configuration folder.
+The two Git options below share component names, so choose one.
 
-1. Select a shell and review the proposed changes. Nothing installs no shell.
-2. Complete the package installation and configuration steps. Welcome uses
-   Shelly and requests a password when package installation requires elevation.
-3. Select **Close Welcome and start desktop** to activate the chosen shell in
-   the current matching session. Nothing offers **Close Welcome and use no shell**.
+| Desktop package                                 | Login entry     | Configuration                                               |
+| ----------------------------------------------- | --------------- | ----------------------------------------------------------- |
+| `aqueous-desktop`                               | **Aqueous**     | `~/.config/aqueous/`; Pearl selected by default             |
+| `aqueous-desktop-git`                           | **Aqueous**     | Same folder; replaces stable Aqueous and starts `pearl-git` |
+| `aqueous-git` from `packaging/arch/aqueous-git` | **Aqueous-Git** | `~/.config/aqueous-git/`; choose a shell yourself           |
 
-Closing the window normally leaves activation for the next login. Outside the
-matching Aqueous session, Welcome also offers next-login instructions instead of
-attempting live activation. If startup fails, it restores the previous active
-choice and managed shell, then reopens with an error.
+These packages no longer include Welcome. The older root `PKGBUILD`
+(`aqueous 1.0.5-1`) still uses the [Welcome flow](#older-packages-with-welcome).
+The Arch Pearl preset changed at `1.0.5-2`.
 
-The saved selection lives in the instance's `session.toml`:
-
-```toml
-version = 1
-shell = "pearl" # pearl | dms | noctalia | none
-```
-
-The session's active choice routes launcher, screenshot, lock, and portal
-actions through `aqueous-shell-action`. Saving another choice alone does not
-change those actions underneath the current shell. Existing custom commands
-are retained; recognized packaged commands can be updated during setup.
-
-Nothing retains compositor controls, the packaged terminal shortcut, shell-free
-screenshots, and a GTK portal picker. It does not configure a locker.
-
-## Switch shells in a Git session
-
-Run inside the matching, non-nested Aqueous-Git desktop:
+On Arch/CachyOS, check your installed packages with:
 
 ```sh
-aqueousctl-git shell switch pearl
-aqueousctl-git shell switch dms
-aqueousctl-git shell switch noctalia --json
+shelly search standard --installed aqueous
+shelly search standard --installed pearl
 ```
 
-Each command switches the managed shell immediately and saves the choice for
-future logins. Open applications and all shells' personal settings remain.
-The command does not install packages or reset configuration.
+Use `shelly search standard --detail aqueous-desktop` (or `aqueous-git`) to check available packages,
+dependencies and conflicts before installing. Fedora's `aqueous-git` RPM is a
+different package; follow the [distribution guide](/aqueous/installation/).
 
-Install the matching `aqueous-welcome-git` worker and target
-`aqueous-shell-<shell>-git` preset first. Pearl uses `pearl-git`, DMS uses
-`dms-shell`, and Noctalia uses `noctalia`. Missing dependencies are reported
-before stopping the current shell. Stable builds do not expose this switch
-command; use Welcome for their setup and activation flow.
+## Select Pearl for the next login
+
+1. Install the matching Pearl preset. `aqueous-desktop` already includes it;
+   the separate **Aqueous-Git** session needs `aqueous-shell-pearl-git` and
+   `pearl-git`.
+2. Back up an existing `session.toml`, then edit it in the folder above:
+
+   ```toml
+   version = 1
+   shell = "pearl"
+   ```
+
+3. Save your work, log out and select **Aqueous** or **Aqueous-Git** as
+   appropriate. Changing the file takes effect at the next login.
+4. Open a terminal and run `pearlctl status`, or `pearlctl-git status` for
+   Git Pearl. Check that Settings opens and your [keyboard layout](/aqueous/input/)
+   works.
+
+Your user `session.toml` overrides `/etc/xdg/aqueous/session.toml`, including
+after upgrades. Keep exactly one `version` and one `shell` field.
+
+The separate **Aqueous-Git** session also accepts `dms`, `noctalia` and `none`.
+Install the matching preset before choosing another shell. With `none`, the
+launcher shortcut opens Ghostty and there is no locker. Live
+`aqueousctl-git shell switch` is retired; edit the file and log in again.
+See the [Git packaging guide](https://github.com/Seafoam-Labs/Aqueous/blob/71c0e722648b93f2f9fc32fbc9a4e6417cccb672/docs/git-desktop-packages.md).
+
+### Older packages with Welcome
+
+If your package includes `aqueous-welcome`, open it, choose a shell and review
+the changes. **Close Welcome and start desktop** starts it immediately;
+closing the window normally leaves the change for your next login. A failed
+activation restores the previous managed shell. Newer presets do not need
+Welcome.
 
 ## Stable and Git instance paths
 
-| Item                    | Stable                    | Git                           |
-| ----------------------- | ------------------------- | ----------------------------- |
-| Login entry             | Aqueous                   | Aqueous-Git                   |
-| Compositor              | `aqueous`                 | `aqueous-git`                 |
-| CLI                     | `aqueousctl`              | `aqueousctl-git`              |
-| Configuration helper    | `aqueous-config`          | `aqueous-config-git`          |
-| Configuration directory | `~/.config/aqueous`       | `~/.config/aqueous-git`       |
-| Managed shell unit      | `aqueous-<shell>.service` | `aqueous-git-<shell>.service` |
+| Item                  | Aqueous / replacement Git desktop | Separate Aqueous-Git desktop |
+| --------------------- | --------------------------------- | ---------------------------- |
+| Compositor            | `aqueous`                         | `aqueous-git`                |
+| CLI                   | `aqueousctl`                      | `aqueousctl-git`             |
+| Settings helper       | `aqueous-config`                  | `aqueous-config-git`         |
+| Configuration         | `~/.config/aqueous/`              | `~/.config/aqueous-git/`     |
+| Managed Pearl service | `aqueous-pearl.service`           | `aqueous-git-pearl.service`  |
 
-The configuration directories use `$XDG_CONFIG_HOME` when set. Helper journals
-use `$XDG_STATE_HOME/<instance>/config-writer`, and IPC endpoints belong to the
-running compositor instance. Run the matching tools from that session's terminal
-so they inherit the correct display and socket.
+Use `pearlctl-git` with Git Pearl, including in the replacement desktop.
+**Both Pearl packages share `~/.config/pearl/` preferences.** A separate
+Aqueous-Git session does not isolate those settings or your applications.
 
-When deliberately targeting a Git compositor from another session, obtain its
-actual endpoint values from a child process and set `AQUEOUS_GIT_WAYLAND_DISPLAY`
-and `AQUEOUS_GIT_SOCKET`. Do not guess display numbers or reuse a stable socket.
-See the [Git core guide](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/git-packages.md).
+Paths use `$XDG_CONFIG_HOME` when set. Run tools from the intended session's
+terminal so they reach the right compositor. Helper journals are under
+`$XDG_STATE_HOME/<instance>/config-writer`.
+See [configuration paths](/aqueous/configuration/).
 
-## Recover from a failed switch
+## Upgrade without losing your settings
 
-Update the Git core and desktop worker together if a switch reports an old
-worker or prints the session-runtime usage text. The core package alone does
-not update the separately packaged Welcome worker.
+1. Save your work and [back up the files you use](/aqueous/configuration/#back-up-restore-or-share-configuration).
+   Keep a working console login or another desktop available.
+2. Update through your distribution. On Devario, use Shelly's **Update** page
+   and the configured Devario repositories. On Arch/CachyOS, update matching
+   components together with `shelly upgrade standard`. Use
+   `shelly upgrade aur` for AUR packages, or `shelly upgrade all` for all enabled
+   backends.
+3. Review replacements and `.pacnew` files. The Pearl preset replaces retired
+   Welcome and other-shell integration packages, but keeps those applications
+   and their settings. Check [greeter changes](/pearl/docs/greeter/#before-and-after-an-upgrade)
+   before your next login.
+4. Log in again and check Pearl, Settings, keyboard input, displays and capture.
 
-If DMS reports two services using `org.freedesktop.Notifications`, update
-`aqueous-integration-dms-git`. Current Arch integration units avoid the older
-notification-bus declaration conflict. Inspect the managed unit and any manual
-shell service if an extra shell survives a switch:
+Moving from the separate Git session to the replacement Git desktop changes
+the config folder from `aqueous-git/` to `aqueous/`. Merge only the settings
+you want; packaging does not migrate them. Review monitor and device IDs
+before reusing a configuration on another machine.
+
+## Recover a missing shell or failed upgrade
+
+If Aqueous still responds, open a terminal (normally `Super+Return`) and check
+`session.toml`, the installed shell and its service:
 
 ```sh
-systemctl --user status aqueous-git-dms.service dms.service --no-pager
+systemctl --user status aqueous-pearl.service --no-pager
 ```
 
-Switching controls this instance's managed units. Independently launched
-shells remain outside that ownership. The
-[CLI reference](https://github.com/Seafoam-Labs/Aqueous/blob/master/docs/aqueousctl-command-reference.md#switch-desktop-shells-git-sessions-only)
-contains detailed service recovery instructions.
+Use `aqueous-git-pearl.service` for the separate Git session. Restore your
+previous shell selection if needed, then log in again. A missing shell or an
+invalid selection leaves the session without that shell. A second,
+independently started shell service can cause duplicate bars or notifications.
+
+If graphical login fails, use [console or greeter recovery](/pearl/docs/greeter/#wrong-keyboard-layout-or-failed-login).
+For a downgrade, restore a compatible package set and its config backup;
+downgrading only the compositor can break versioned dependencies. Keep theme
+ownership records and use [theme recovery](/pearl/docs/appearance/) before
+changing versions.
+
+For freezes or a black screen, collect [diagnostics](/pearl/docs/command-line/#when-something-fails)
+first. The reported logout hard-lock still has no confirmed fix.

@@ -13,7 +13,11 @@ contains a manifest, a Wasm component and optional image assets, and each
 enabled plugin runs in its own isolated helper process. Plugins have no
 network access, no filesystem access and no access to other applications;
 the exact package bytes are fingerprinted and verified before execution. The
-feature is experimental and opt-in.
+feature is experimental and opt-in. A fingerprint identifies package bytes;
+you still need to trust their source.
+
+Packaged builds enable the Wasm host. For custom builds, `wasm-plugins` defaults
+off; check the build if Settings reports the runtime unavailable.
 
 Plugin management lives in **Settings → Plugins**, in the main Settings
 application only: the compact control-center flyout has no plugin controls.
@@ -32,7 +36,7 @@ after installation or upgrade, and stay disabled until you approve and enable
 them: installing never changes your preferences or adds bar widgets.
 
 To install a plugin package yourself, copy its directory into
-`~/.local/share/pearl/plugins/`. Pearl discovers it automatically, and the
+`$XDG_DATA_HOME/pearl/plugins/`, normally `~/.local/share/pearl/plugins/`. Pearl discovers it automatically, and the
 Plugins page also offers **Refresh plugins**. Your user directory takes
 priority over system-installed packages with the same ID, and two packages
 with one ID in the same location are a conflict: the page shows the selected
@@ -41,13 +45,18 @@ Discovery never executes a plugin.
 
 ## Approving and enabling
 
-Enabling a plugin is a deliberate, two-part decision that joins the shared
-Settings draft:
+Review and enable a plugin in two steps:
 
-1. Choose **Review package**, check the exact fingerprint and the optional
-   permissions the package requests, then **Save review to draft**. Saving a
-   review does not enable anything, and Cancel leaves the draft unchanged.
-2. Enable the plugin and **Apply & save**.
+1. Choose **Review package** directly on the plugin card. In **Review plugin
+   package**, check the plugin ID, version, selected source path, fingerprint
+   and optional permissions, then **Save review to draft**. This does not
+   enable the plugin; **Cancel** leaves the draft unchanged.
+2. Turn on the card's enable switch and **Apply & save**. Expect **Running**
+   and the chosen bar widget or overlay.
+
+If the enable switch is gray, use **Review package** on the card first
+([#66](https://github.com/Seafoam-Labs/pearl/issues/66)). If it stays disabled,
+read the notice and **Package details and diagnostics**.
 
 If the package changes or disappears during review, the dialog closes and the
 new package needs a fresh review. Changed package bytes can never reuse an
@@ -62,6 +71,16 @@ plugin to the bar. Bar layout references have the form
 `plugin:pearl.timer-c/main` and can also be entered directly in **Bar &
 dock** or in per-output preferences. Unknown references stay harmless until a
 matching plugin runs.
+
+### Disable a plugin or revoke optional permissions
+
+Turn the enable switch off and **Apply & save** to stop the plugin. **Disabled**
+means no widget or overlay is running; settings and approval are retained.
+
+Under **Settings and placement**, turn off **Allow keyboard and mouse activity**
+or **Allow desktop overlay**, then apply. Activity notifications stop when
+revoked; removing overlay permission returns an enabled plugin to the bar.
+Use **Discard** for unsaved changes, or turn a permission back on and apply later.
 
 Each plugin card shows live status and marks unsaved preference changes
 separately. **Settings and placement** exposes the plugin's own controls
@@ -89,6 +108,24 @@ restart:
   an older copy. Stage a complete package directory outside the plugins
   folder and rename it into place.
 
+### Recover after an update or package error
+
+| What Settings reports             | Recovery                                                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Needs a fresh review after update | Check the new ID/version/path/fingerprint, review permissions again, enable if needed, then apply                       |
+| `InvalidPluginImage`              | Restore the complete original package; declared images must be PNGs with the manifest's exact dimensions                |
+| Package unavailable or missing    | Read candidate paths in diagnostics, restore a complete package from its original source, then refresh                  |
+| Duplicate/conflicting ID          | Move the unwanted user copy outside the discovery directory; refresh and check which source now wins                    |
+| Settings changed/incompatible     | Review the new package and use **Reset settings** for its plugin-owned controls, then apply; record custom values first |
+| Stopped unexpectedly              | Read the runtime error, then **Retry** after addressing the cause                                                       |
+
+An invalid user copy still shadows the system package. Move unwanted copies
+and backups outside plugin directories, then refresh. Do not edit assets under
+`/usr/share/pearl/plugins` or `/usr/share/pearl-git/plugins` to bypass review.
+Restore modified packaged files through their original distribution/channel,
+then refresh and review if requested. If that fails, report the error, source
+path and fingerprint rather than resetting all Pearl preferences.
+
 ## Overlays and the Pearl Cat companion
 
 The Pearl Cat companion animates in the bar or, with the overlay grant, as a
@@ -98,6 +135,17 @@ Overlays reserve no screen space, never take keyboard focus, and disappear
 before the lock screen or an authentication prompt. Dragging an unlocked
 overlay saves its position when no Settings draft is pending. Reduced motion
 stops animation playback.
+
+### Can I give Pearl Cat a different skin?
+
+There is no skin picker or separate skins directory yet; see
+[Pearl #68](https://github.com/Seafoam-Labs/pearl/issues/68). Use the available
+placement, size, interaction and animation settings.
+
+The manifest, component and declared PNG assets make up the fingerprint.
+Replacing `cat.png` requires fresh validation and review, and the image must
+match the manifest's format and dimensions. A user copy has the same checks.
+Creating a different package is covered by the plugin development guide.
 
 ### Input activity
 
@@ -128,7 +176,8 @@ the current availability and its reason.
 
 ```sh
 pearlctl plugins refresh
-pearlctl plugins list [--offset N]
+pearlctl plugins list
+pearlctl plugins list --offset 4
 pearlctl plugins inspect --path pearl.timer-c
 pearlctl plugins enable --path pearl.timer-c --text PACKAGE_SHA256 --revision N
 pearlctl plugins disable --path pearl.timer-c --revision N
@@ -142,7 +191,10 @@ revision from `pearlctl preferences status` and the package's SHA-256
 fingerprint from `inspect`, and they are rejected while a Settings draft is
 retained or the revision is stale. Enabling a new fingerprint clears
 previously granted optional permissions; review and grant them in Settings.
-`reload` is an explicit retry of a running plugin, not a rescan.
+`reload` retries a running plugin; it does not rescan. Replace `PACKAGE_SHA256`
+with the full fingerprint you reviewed and `N` with the current numeric
+revision. Enabling can start the plugin immediately; use Settings to review
+optional permissions.
 
 The inventory is bounded: at most 32 discovered packages and eight enabled
 instances. List and inspect responses page four entries at a time through

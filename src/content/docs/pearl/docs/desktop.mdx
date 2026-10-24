@@ -14,6 +14,51 @@ each one does, how to open it, and how to configure it. Bar, dock and flyout
 settings live in **Settings → Bar & dock**; open Settings from the launcher, the
 dock, or by running `pearl-settings`.
 
+## Your first few minutes
+
+In the packaged Pearl/Aqueous session, Super is the Windows/logo key.
+[Custom bindings](/aqueous/keybindings/) can change these shortcuts.
+
+| Task                 | Action                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| Open an application  | Click Launcher or press `Super+Space`, type its name and press Enter. Escape closes search. |
+| Open a terminal      | Press `Super+Return` to open the configured terminal (Ghostty by default).                  |
+| Open Settings        | Find Pearl Settings in Launcher or run `pearl-settings`.                                    |
+| Find a window        | Search its title in Launcher to activate its workspace and display.                         |
+| See the date         | Click a clock to open the calendar.                                                         |
+| Close an application | Press `Super+Q` and save documents when prompted.                                           |
+| Lock                 | Press `Super+Ctrl+L`. See [Session security](/pearl/docs/security/) for locker setup.       |
+
+If a shortcut does nothing, check its program under **Settings → Aqueous →
+Shortcuts → Action commands**. Pearl does not install every application.
+Use the [Settings task index](/pearl/docs/settings/#find-a-setting) for other controls.
+
+## Files, copying and uploads
+
+Open **Phyto** from Launcher. Select a file, choose **Copy** (`Ctrl+C`), open the
+destination folder and **Paste** (`Ctrl+V`). Use **Cut** (`Ctrl+X`) to move it.
+Check progress in File operations and read any collision or failure prompt.
+Check the destination before deleting the original. **Undo** only covers
+operations Phyto offers to undo, not uploads or changes made by other programs.
+
+For uploads, use the website's **Choose file** or **Browse** button. Dragging files
+from Phyto into another application is not supported;
+[Pearl #55](https://github.com/Seafoam-Labs/pearl/issues/55) tracks it.
+Executable and `.desktop` files do not run on double-click; open them deliberately
+with the appropriate application.
+
+Network locations need GIO/GVfs providers (`gvfs-smb` for SMB, `gvfs-dnssd` for
+discovery). Archives need `file-roller`; PDF/video previews need their preview
+tools and `bubblewrap`. Phyto's search filters the current folder, not document
+contents across your computer.
+
+## Start an application at login
+
+Follow [Start an application at login](/aqueous/configuration/#start-an-application-at-login)
+to add, check or disable an Aqueous startup command. Window rules do not launch
+applications. Check existing XDG autostart entries to avoid starting the same
+app twice, and use your session's configuration root.
+
 ## The bar
 
 The bar is a strip pinned to one edge of each display.
@@ -282,6 +327,27 @@ Pearl never parses an `Exec` line itself or interpolates it into a shell. Launch
 goes through GIO, which handles field codes, `Path`, `Terminal`, D-Bus activation
 and desktop actions. A rejected, dropped or unknown compositor action shows a
 non-focusable on-screen message.
+
+### Choose the right search
+
+Open Launcher, then type an application name or window title. Use
+[Calculator](#calculator) for arithmetic,
+[Settings](/pearl/docs/settings/#find-a-setting) for settings, or Phyto for files.
+Launcher does not search all settings or file contents. Typing on the desktop
+does not open it.
+
+To use the experimental **Ask Pearl** assistant, open **Settings → Assistant**,
+select and set up a local model and runtime, then enable **Launcher assistant**
+and **Apply & save**. Model selection alone does not download it. In Launcher,
+type a question and activate Ask Pearl. Typing sends nothing and starts no model;
+submitting a question can send a query to the selected search provider.
+Downloads, removal and connection tests happen immediately, outside Apply/Discard.
+
+Disable the assistant and apply before removing its managed model downloads.
+App search and the calculator still work. The assistant does not apply compositor
+settings or index private documents. Controls vary by version; see the
+[v0.3.0 assistant guide](https://github.com/Seafoam-Labs/pearl/blob/v0.3.0/docs/ASSISTANT.md)
+for dependencies, and check answers against their sources.
 
 ### Changing the launcher icon
 

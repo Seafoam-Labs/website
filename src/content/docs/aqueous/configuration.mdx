@@ -29,7 +29,7 @@ files are sidecars for keeping each policy area understandable.
 
 </FileTree>
 
-The paths below describe stable Aqueous. Co-installable Git packages use
+The paths below describe stable Aqueous. The replacement Pearl Git preset uses these same paths. Co-installable Git packages use
 `~/.config/aqueous-git/` and suffixed tools. See
 [instance paths](/aqueous/desktop-session/#stable-and-git-instance-paths).
 
@@ -120,9 +120,9 @@ left = 0
 right = 0
 
 [actions]
-toggle_start_menu = "dms ipc call spotlight toggle"
+toggle_start_menu = "aqueous-shell-action launcher"
 spawn_terminal = "ghostty"
-screenshot = "dms screenshot region"
+screenshot = "aqueous-shell-action screenshot"
 
 [layout]
 path = "~/.config/aqueous/layout.toml"
@@ -161,6 +161,32 @@ Output positions are logical coordinates after scaling. Unconfigured outputs
 receive non-overlapping horizontal positions. Live layer-shell exclusive zones
 are applied before `[struts]`; keep static struts at zero when a bar already
 reserves its own space.
+
+## Start an application at login
+
+Use `[[exec]]` in the active `wm.toml` to start an app with this Aqueous
+session. Window rules do not launch applications.
+
+1. Check that the command works in a terminal, for example `coral`.
+2. Back up `wm.toml`, then add:
+
+   ```toml
+   [[exec]]
+   name = "coral-at-login"
+   command = "coral"
+   when = "startup"
+   once = true
+   restart = false
+   ```
+
+3. Log out and back in. Coral should open once; `startup` entries do not run
+   on a config reload. Use `coral-git` if that is the installed command.
+4. To disable it, remove the block and close the app. It should stay closed
+   at the next login.
+
+If it starts twice, check the app's own startup setting, XDG autostart and
+user services. Do not add Pearl here: its session service already starts it.
+Use the app's XDG autostart setting when it should start in other desktops too.
 
 ## Managed commands
 
@@ -266,3 +292,40 @@ plugin instructions no longer apply to current packages. See
   <LinkCard title="rules.toml reference" href="/aqueous/docs/toml/rules/" />
   <LinkCard title="Command-line tools" href="/aqueous/command-line/" />
 </CardGrid>
+
+## Back up, restore or share configuration
+
+Back up the files you use before an upgrade or experiment. Check the
+[active instance](/aqueous/desktop-session/#stable-and-git-instance-paths)
+and any path overrides above first.
+
+| Files                                                                | Check before restoring or sharing                                                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `wm.toml`, `input.toml`, `layout.toml`, `rules.toml`, `outputs.toml` | Commands, local paths, monitor/EDID and device IDs, titles and app rules              |
+| `session.toml`, `appearance.toml`                                    | Shell choice, fonts, cursors and target version                                       |
+| `~/.config/pearl/preferences.json`, themes and wallpapers            | Shared stable/Git preferences, format compatibility and private images                |
+| `/etc/pearl/greeter.json`, `/etc/greetd/config.toml`                 | Administrator-owned login configuration; use [greeter recovery](/pearl/docs/greeter/) |
+
+For example, in Bash, copy two existing stable-instance files into a new
+private directory:
+
+```bash
+umask 077
+backup="$HOME/aqueous-backup-$(date +%Y%m%d-%H%M%S)"
+mkdir -- "$backup" &&
+  cp -p -- "${XDG_CONFIG_HOME:-$HOME/.config}/aqueous/wm.toml" \
+            "${XDG_CONFIG_HOME:-$HOME/.config}/aqueous/session.toml" "$backup/"
+```
+
+Adjust the list for your installation and add wanted sidecars or themes.
+A missing user file may be inherited from system defaults; check the copies
+and record package versions. Keep theme ownership and recovery records too.
+
+To restore, back up the current files, then restore compatible copies to the
+same instance. Reload ordinary policy; shell selection needs a new login.
+Use the protected [display workflow](/aqueous/outputs/) for physical outputs,
+and review device/monitor fields on a different machine.
+
+For shared dotfiles, prepare a separate list of sanitized files. Check commands,
+paths and images before publishing. Do not upload all of `~/.config`, keyrings,
+tokens, clipboard state or private diagnostics.

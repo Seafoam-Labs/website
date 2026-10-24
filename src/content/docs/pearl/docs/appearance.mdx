@@ -10,20 +10,38 @@ import { Aside } from "@astrojs/starlight/components";
 
 **Settings → Appearance** edits how Pearl looks: the wallpaper, the color
 theme, fonts, the colors of other applications, Night Light and Qt integration.
-Every control on the page joins the shared Pearl draft, so nothing changes on
-the desktop until you choose **Apply & save**. See
-[Settings](/pearl/docs/settings/) for how drafts, conflicts and recovery work.
+Choose **Apply & save** to save appearance preferences, or **Discard** to undo
+unsaved changes. Palette creation, import and **Save palette** write files
+separately; saving an active palette updates it live. See
+[Settings](/pearl/docs/settings/) for draft and recovery details.
+
+## Find the right appearance control
+
+| What you want to change                                          | Where to go                                                                                                             |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Wallpaper, built-in colors, fonts or a wallpaper-derived palette | **Settings → Appearance** on this page                                                                                  |
+| Exact colors, imported JSON or widget styling                    | **Appearance → Installed themes & customization…**, then [Theme creation](/pearl/docs/theme-creation/)                  |
+| Ghostty or another application's colors                          | [Application themes](#application-themes)                                                                               |
+| Qt 5/6 widgets and fonts                                         | [Qt applications](#qt-applications)                                                                                     |
+| Tray, clocks, running applications, bar or dock visibility       | [Desktop → The bar](/pearl/docs/desktop/#the-bar) and [Dock and bar islands](/pearl/docs/desktop/#dock-and-bar-islands) |
+| Window borders, blur or corner radius                            | [Aqueous visual effects](/aqueous/visual-effects/)                                                                      |
+| Pearl Cat or another add-on                                      | [Plugins](/pearl/docs/plugins/)                                                                                         |
+
+Bar opacity changes only the bar. Dock visibility is set separately.
+Community themes and showcase customizations can look different from the defaults.
 
 ## Wallpaper
 
-In the Wallpaper card, **Choose image…** browses for a PNG or JPEG file.
-Selecting an image sets Wallpaper fit to Cover; you can switch to Contain
-afterwards. The wallpaper also offers gradient and solid background modes with a
-color choice, and gradient is the default for fresh configurations.
+In **Wallpaper**, click **Choose image…**, select a PNG or JPEG, then **Apply &
+save**. Selecting an image sets Wallpaper fit to Cover; you can switch to
+Contain afterwards. To restore an earlier image, choose it and apply again.
+The wallpaper also offers gradient and solid background modes with a color
+choice; gradient is the default for fresh configurations.
 
 The wallpaper is global: one image is shared across every display and fitted
 independently to each output's geometry. Per-output settings control bars and
-docks, not different images.
+docks, not different images. Separate images per monitor remain tracked in
+[Pearl #19](https://github.com/Seafoam-Labs/pearl/issues/19).
 
 Double-click the desktop background, or a thumbnail in the bar's **Wallpaper**
 pane, to open the crop editor. Its frame is locked to the output's aspect ratio,
@@ -55,7 +73,9 @@ follow the new image when your theme uses it.
 
 ## Theme modes
 
-Pearl draws its shell with one of three theme modes.
+Choose a mode under **Theme & colors**. **Community** opens installed palettes
+and widget styles through **Installed themes & customization…**. The other modes
+are:
 
 - **Static Material**: Pearl's built-in dark or light Material Design palette.
   No generator is required.
@@ -78,6 +98,21 @@ Pearl draws its shell with one of three theme modes.
   surface opacity, an opaque theme hides the compositor's blur behind it.
 </Aside>
 
+### Follow the wallpaper or keep fixed colors
+
+- **Wallpaper colors:** choose **Dynamic**, set **Dynamic colors from** to
+  **Wallpaper**, choose a **Color variant**, then **Apply & save**.
+- **Fixed colors:** choose **Material** and a variant, or select a
+  [local palette](/pearl/docs/theme-creation/), then apply.
+
+Applications follow their own [color source](#application-themes), so check that
+setting if only the shell changes.
+
+Development builds after **v0.3.0** add **Matugen scheme**: Content, Expressive,
+Fidelity, Fruit salad, Monochrome, Neutral, Rainbow, Tonal spot (default), Vibrant
+and Smart. v0.3.0 has neither this selector nor the `theme.scheme` preference;
+adding that field makes it reject the file. See [package channels](/pearl/installation/).
+
 **Window borders follow Pearl theme** synchronizes Aqueous border colors after
 saving the theme: focused borders use the palette's primary color, normal
 borders the outline color and urgent borders the error color. It defaults off,
@@ -95,10 +130,9 @@ Beyond the shell itself, Pearl can generate matching color themes for other
 applications using Matugen. Management is opt-in and lives under **Appearance →
 Application themes**.
 
-Enable management, then choose per application: follow the active theme's
-assignment, pick an explicit profile, or turn that application Off. **Use
-Material defaults** adopts the built-in assignments for the whole catalog in the
-shared draft. Application colors can follow Pearl, use an independent seed, or
+Turn on **Enable application themes**, then choose per application: **Follow
+Pearl theme**, **Choose profile**, or **Off**. **Use Material defaults** fills
+in built-in assignments while preserving explicit profile choices and Off. Application colors can follow Pearl, use an independent seed, or
 use the current wallpaper; wallpaper-derived colors update automatically when
 the committed image changes.
 
@@ -138,8 +172,36 @@ journals to bypass a conflict.
 
 Missing or invalid images and generator failures retain existing outputs, and a
 later valid image event retries automatically. `pearlctl preferences reload`
-rechecks the image and reattaches an unavailable directory watch, and **Retry**
-in Application themes reconciles the latest prepared snapshot.
+rechecks the image and reattaches an unavailable directory watch. **Retry
+committed application themes** retries the saved snapshot.
+
+To adopt updated profile assets, choose **Refresh application profiles**, then
+**Use current profile versions on Apply** and **Apply & save**. Existing saved
+profiles can keep their earlier assets after a package update.
+
+### Set up Ghostty and recover readable colors
+
+1. In **Application themes · Matugen profiles**, enable application themes.
+   Search for `ghostty`, choose **Choose profile → Material · ghostty**, set
+   **Application colors** to **Follow Pearl**, then **Apply & save**.
+2. Check the row's status and output path. The generated theme is normally
+   `~/.config/ghostty/themes/pearl-material`, under `XDG_CONFIG_HOME` when set.
+3. Add `theme = pearl-material` to your Ghostty configuration, normally
+   `~/.config/ghostty/config`, then reload it or restart Ghostty.
+
+If wallpaper colors are unreadable, try a fixed Material shell palette with
+application colors on Follow Pearl, or choose **Independent seed** for
+application colors. Check text, cursor, selection and ANSI colors; shell
+contrast checks do not cover every terminal color pair.
+
+To stop using the theme, remove the line you added, restore your previous
+Ghostty theme and reload. Set the `ghostty` row to **Off** and apply to restore
+only unchanged Pearl-owned files. Resolve any reported file conflict first.
+
+For contrast reports, include Pearl/Ghostty versions, wallpaper or seed,
+variant, profile ID/version and the affected colors. Development color changes
+after v0.3.0 may not be in your saved profile. For flickering or rendering
+artifacts, see [Hardware and status](/devario/readiness/).
 
 ## Night Light
 
@@ -152,7 +214,7 @@ default and saves through the shared draft like everything else on the page.
   the end exclusive. Overnight intervals work; equal start and end are invalid.
   Daylight-saving transitions are accounted for at the boundaries.
 
-Night Light needs Aqueous's output warming support. When no output can apply it,
+Night Light uses [Aqueous output warming](/aqueous/screen-warming/). When no output can apply it,
 Pearl reports warming as unavailable rather than pretending to write to the
 display, and rejected requests change nothing.
 
@@ -175,12 +237,17 @@ appearance of Qt 5 and Qt 6 applications through the QtEngine platform plugin
 and the Darkly application style. Management defaults off, joins the shared
 draft, and previews never write external settings.
 
-Install the `qtengine` and `pearl-darkly-style` packages first; both are listed
-as optional dependencies of the Pearl packages, and `pearl-darkly-style` is
-published in the [seafoam-labs repository](https://repo.seafoam-labs.org/setup).
-After installation, use **Retry saved Qt settings** in Appearance, then sign out
-and back in when the environment status requests it, so applications start with
-the QtEngine platform theme.
+Install `qtengine` and `pearl-darkly-style`, then enable management and **Apply
+& save**. Click **Retry saved Qt settings** and sign out and back in if the
+environment status requests it. Launch a fresh Qt application and check the
+separate Qt 5 and Qt 6 status.
+
+On **Devario**, use its configured repositories. On another supported
+**Arch-based system**, follow [Pearl installation](/pearl/installation/).
+If a provider is missing, check your repository configuration and refresh its
+package metadata; do not add another distribution's repository. The
+[package catalogue](https://repo.seafoam-labs.org/api/v1/packages) lists available
+builds; Settings checks whether the installed Qt providers load.
 
 <Aside type="caution">
   These changes affect the shared, account-wide Qt configuration, including
@@ -219,6 +286,32 @@ current, previous Pearl and original values, and replacement requires that exact
 review to remain current. Ordinary retries never overwrite a conflicting
 external edit, and disabling restores original values only where the current
 value still matches Pearl's last write.
+
+### Diagnose a missing Qt provider or environment conflict
+
+Check the Qt 5, Qt 6, QtEngine, Darkly and environment status. Source builds need
+the optional probes (`-Dqt-themes=true`); provider libraries must match the Qt
+runtime that loads them.
+
+Check the affected session's environment and Pearl's session marker:
+
+```sh
+printenv QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE QTENGINE_CONFIG
+cat "${XDG_CONFIG_HOME:-$HOME/.config}/pearl/qt/session.conf"
+```
+
+After setup, the marker and a fresh session should use
+`QT_QPA_PLATFORMTHEME=qtengine`. Unset variables print nothing; a missing marker
+can mean setup has not completed. Already-running apps keep their old
+environment. Check Settings for conflicts from a competing platform plugin,
+`QT_STYLE_OVERRIDE` or `QTENGINE_CONFIG` before editing their source configuration.
+
+The packaged login wrapper and UWSM hook read this marker at startup. Custom
+launchers need the [Qt startup integration](https://github.com/Seafoam-Labs/pearl/blob/6cb9b5526fd4998ccaee2fae3a9ceabdd52636f1/docs/QT_THEMING.md#install-and-activate),
+not a global `/etc/environment` edit. Pearl installs no global Flatpak override.
+
+If it still fails, report your distribution/channel, Pearl and provider versions,
+Qt 5/6 and environment status, and an affected application/version.
 
 ## Advanced
 

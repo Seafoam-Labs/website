@@ -24,19 +24,55 @@ default selection, plus a row per application stream:
 - Device volume covers 0 to 100% without amplification above nominal. The
   slider shows the loudest channel and scaling preserves the channel balance;
   mute is independent.
-- Application playback and recording streams can be moved to the current
-  default output, and their volumes adjust live. Read-only stream controls
-  are disabled rather than misleading.
+- Application playback streams can be moved to an output and recording streams
+  to an input, including the corresponding default device. Their volumes adjust
+  live. Read-only stream controls are disabled rather than misleading.
 - Changes made by other applications, and your existing media keys, update the
   same rows; Pearl does not own the sound server.
 - With no devices or a disconnected sound server the rows are replaced by a
   status message, and Pearl reconnects automatically when the service
   returns, without ever starting a daemon itself.
 
+### Choose speakers or a microphone
+
+1. Open **Settings → Sound**. Under **Output**, use **Change device** or
+   **Use by default** to choose speakers or headphones. Do the same under
+   **Input** for your microphone.
+2. Check **Mute**, set a moderate volume, then start playback or recording.
+3. Under **Applications**, check the application's volume and mute state. Use
+   its **•••** menu to **Move to default** or **Choose device**.
+4. Check the displayed route, then listen or make a short recording.
+
+Changes take effect immediately. Applications appear only while playing or
+recording. For player buttons, see [Media](/pearl/docs/notifications-media/#media).
+
+### No sound, missing microphone or Bluetooth audio
+
+- **One application is silent:** check its own controls and its row under
+  **Applications**. For a microphone, check the application's input permission
+  and any physical mute switch.
+- **Sound uses the wrong device:** choose the default and move the application's
+  stream to it. Check the route again after unplugging or reconnecting devices.
+- **Bluetooth headset missing:** check for **Connected** in
+  [Bluetooth settings](/pearl/docs/connectivity/#pair-and-connect-a-device).
+  Use your distribution's audio tools to select headset profiles or codecs;
+  Pearl does not provide those controls.
+- **Audio service unavailable. Reconnecting…:** check your existing PipeWire or
+  PulseAudio service. Pearl does not start a sound server.
+- **No devices listed:** compare with the sound server's device list. If it is
+  empty too, check the hardware connection, driver and device profile.
+
+`pearlctl services status` shows the devices and streams Pearl can see; follow
+`next_offset` for more entries.
+
 ## Battery
 
 The Power & battery page shows the aggregate battery percentage, charging
 state and estimated time to empty or full, and whether the machine is on AC.
+The bar shows charging, full or discharge-level glyphs from UPower's state.
+Firmware charge thresholds can leave a plugged-in battery pending charge,
+without its percentage rising.
+
 On a desktop without a system battery the battery card, source selector and
 automatic power-saver row are hidden, the timers edit AC settings, and your
 battery settings remain saved for later.
@@ -45,6 +81,16 @@ The page also keeps a session-only charge history of up to six hours, which
 resets when the battery identity or service changes. An unknown charge or
 health value is never displayed as zero or as "Good", and UPS or peripheral
 batteries do not appear as laptop batteries.
+
+### Check a missing battery or charging indication
+
+Open **Settings → Power & battery** and compare its state with the bar. Add a
+removed battery widget in **Settings → Bar & dock**.
+
+If charging state does not change, compare `pearlctl services status` with
+`upower -d`. If UPower also misses the change, check its service and hardware
+reporting. Use the glyph and Power page to check charging; a charger-plug toast
+is not guaranteed.
 
 ## Brightness
 
@@ -55,6 +101,10 @@ denial leaves the observed state unchanged. Writes from other tools, such as
 page and the on-screen display. A machine without a backlight device shows an
 explicit unavailable state.
 
+Pearl needs a supported backlight and a valid logind session. For an external
+monitor without a system backlight, use the monitor's controls or a separate
+DDC/CI tool; Pearl has no monitor brightness chooser.
+
 ## Power profiles
 
 Where power-profiles-daemon is installed, the page offers its power-saver,
@@ -63,13 +113,20 @@ advertises are enabled, a degraded-performance reason is shown when the
 daemon reports one, and the displayed profile always follows the daemon's
 authoritative state rather than the last click.
 
+Select a mode in **Settings → Power & battery**. If modes are unavailable,
+check `systemctl status power-profiles-daemon.service --no-pager` and the page's
+message. **Performance** depends on the hardware. Power modes are separate
+from CPU scheduler profiles.
+
 ## Idle, sleep and automatic power saver
 
-The Power & battery page edits separate AC and battery idle timers: lock,
-screen off and suspend, each in seconds, where zero disables a timeout. Its
-controls behave differently from the rest of Settings: brightness and power
-mode apply immediately, and sleep, dimming and automatic power-saver settings
-save immediately on their own, without applying unrelated pending preferences
+Open **Settings → Power & battery → Sleep & energy saving**, choose AC or
+battery under **Settings for**, then set **Turn screen off after** and
+**Suspend after**. **Never** disables a timeout. Use **Session & lock settings**
+to set the [lock timer](/pearl/docs/security/#automatic-idle-and-sleep).
+
+Brightness and power mode apply immediately. Sleep, dimming and automatic
+power-saver settings also save immediately, without applying unrelated changes
 from the shared draft.
 
 The timers are constrained so the sequence stays sane: suspend requires an
@@ -89,6 +146,20 @@ restores only a profile it still owns: if you changed the profile manually or
 another tool changed it, automation stays out of the way until the low-battery
 episode ends. It keeps running while Settings is closed and never rewrites
 your saved threshold.
+
+### Check sleep and resume safely
+
+Save your work, then check that **Lock** and unlock work. Choose **Suspend** or
+**Hibernate** in the control center's **Session & security** card and confirm.
+Hibernate requires system storage and firmware support.
+
+After resume, check that the session is locked, unlock it, and check brightness
+and networking. Lid-triggered sleep follows
+[system policy](/pearl/docs/security/#automatic-idle-and-sleep).
+
+For an unwanted timeout, set **Never** for the affected AC or battery setting.
+For a failed sleep or logout, keep the exact error and previous-boot logs
+(`journalctl -b -1`). Avoid repeating a freeze with unsaved work.
 
 ## Power off and restart
 
@@ -112,12 +183,49 @@ click-through, never takes focus, and is dismissed by locking the session.
 
 ## System and scheduling
 
-**Settings → System** can select and apply installed sched-ext CPU schedulers
-through `scxctl`. This needs a sched-ext-capable kernel, `scxctl`, a running
-`scx_loader` daemon and the scheduler executables in Pearl's PATH. Changes are
-runtime-only: Pearl does not use sudo or pkexec, install packages, launch
-scheduler binaries directly or edit boot configuration, and errors are
-reported on the page with bounded diagnostics.
+Choose a CPU scheduler profile in **Settings → System**, or add **CPU Scheduler**
+under **Settings → Bar & dock → Add widget**. The widget needs an installed
+profile file.
+
+<Aside type="caution">
+  Scheduler profiles apply to every user and persist across boots. Pearl's
+  helper uses polkit authorization to replace `/etc/default/scx` and
+  enable/restart `scx.service`. **Default** disables the service and returns to
+  the kernel scheduler. Selecting a profile replaces hand edits to that file.
+</Aside>
+
+Pearl v0.3.0 uses `scx.service`, not the older `scxctl`/`scx_loader` backend.
+It needs a sched_ext-capable kernel, scheduler binaries, Pearl's helper/polkit
+files and a version-2 profile file. Pearl reads
+`/etc/pearl/scheduling-profiles.json` before
+`/usr/share/pearl/scheduling-profiles.json`; Git builds use `pearl-git` in these
+paths.
+
+After selecting a profile, wait for **Running** and the scheduler's identity.
+**Custom** means a scheduler is running outside these profiles. If a profile
+fails, Pearl reports the error and attempts to return to **Default**.
+
+### Profiles installed but unavailable
+
+Check the message in **Settings → System**, then inspect the kernel and service:
+
+```sh
+uname -r
+systemctl status scx.service --no-pager
+cat /sys/kernel/sched_ext/state
+cat /sys/kernel/sched_ext/root/ops
+journalctl -b -u scx.service --no-pager -n 80
+```
+
+`root/ops` can be absent when no sched_ext scheduler is attached. Check the
+profile file and `/usr/lib/pearl/pearl-scheduling-helper`
+(Git: `/usr/lib/pearl-git/`). Check your distribution's package instructions for
+missing profiles, binaries, helper files or `scx.service`. A scheduler binary
+alone is not enough.
+
+When requesting help, include the Pearl, scx, scheduler and kernel versions.
+See the [profile format and backend details](https://github.com/Seafoam-Labs/pearl/blob/6cb9b5526fd4998ccaee2fae3a9ceabdd52636f1/docs/SCHEDULING_PROFILES.md)
+for administrator setup.
 
 ## Command line
 

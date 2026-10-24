@@ -15,6 +15,9 @@ Bluetooth widget (which shows the connected-device count) each open the
 matching compact page directly. Opening a page never starts a scan or a
 discovery on its own.
 
+Both need a running system service and a supported adapter. NetworkManager and
+BlueZ are optional dependencies of Pearl's Arch package.
+
 ## Wi-Fi
 
 The Network view shows the Wi-Fi switch, the current connection, nearby
@@ -36,32 +39,103 @@ Settings page, and connects. NetworkManager creates a persistent profile for
 the connection and stores the password itself; the profile then appears as a
 saved row you can activate later.
 
+### Connect to Wi-Fi
+
+1. Open **Settings → Network**, turn **Wi-Fi** on and choose an adapter if needed.
+2. Press **Refresh**, find the network under **Nearby networks**, then press
+   **Connect**. Use **Choose profile…** if several saved profiles match.
+3. Enter the password for a secured network and confirm.
+4. Wait for **Connected**, then open a website. For **Sign-in required**, complete
+   the network's sign-in in your browser.
+
+Use **Saved networks** in Settings to reconnect later. Use **Cancel** to stop an
+unfinished connection attempt.
+
 ### Credentials handling
 
 Pearl never writes credentials to its own configuration, and never reads
 stored secrets back out of NetworkManager: it only supplies the password you
 typed when NetworkManager asks during a connection you started.
 
-- Password fields are masked, have no peek button, and are cleared on submit,
-  cancel, popup close, loss of the NetworkManager service and session locking.
+- Password fields are masked except while you hold the peek icon. They clear on
+  submit, cancel, popup close, loss of the NetworkManager service and session
+  locking.
 - A rejected password opens a fresh masked entry instead of reusing the
   previous one.
 - Secrets never appear in logs, diagnostics, the on-screen display, the
   preferences file or CLI output.
-- If you abandon an attempt, cancel it, or the activation fails, the
-  half-created profile is removed again, so a mistyped password does not
-  survive as an autoconnecting profile.
+- Pearl removes new profiles after a cancelled or failed connection. If the
+  service disappears before profile creation finishes, a saved entry may remain;
+  inspect that entry in the network editor before removing it.
 
 ### Saved profiles and unsupported types
 
 Saved profiles, including wired ones, are listed in Settings and can be
-activated, edited or removed there. Creating new wired profiles, VPN, WEP,
-enterprise/802.1X and hidden networks is handed to the standard
-`nm-connection-editor` application; if it is not installed, the card names it
-so you can install it. A secured network is never treated as open as a
-fallback.
+activated there. Use **Advanced network settings…** to edit or remove profiles.
+New wired profiles, VPN, WEP, enterprise/802.1X and hidden networks use the
+external `nm-connection-editor`; unsupported nearby entries show **Set up…**.
+If the editor is missing, install it through your distribution's package manager.
+A secured network is never treated as open as a fallback.
+
+To add a VPN, open **Advanced network settings…** and enter your provider's
+settings. Some VPN types also need a NetworkManager plugin from your distribution.
+
+The native page shows signal and basic security labels. For frequency, band or
+IPv4/IPv6 details, use NetworkManager's tools; Pearl has no detailed connection
+information card.
+
+### Network unavailable, no adapter or repeated passwords
+
+Check the message in **Settings → Network** and the system state:
+
+```sh
+systemctl status NetworkManager.service --no-pager
+nmcli device status
+nmcli connection show
+rfkill list
+```
+
+- **Network service unavailable:** check that NetworkManager is installed and
+  running. Pearl does not start it.
+- **Wi-Fi off** or software-blocked: turn Wi-Fi on. For a hardware block, check
+  the laptop's wireless switch or firmware setting.
+- **No Wi-Fi adapter found:** check `nmcli device status`. If the adapter is also
+  missing there, check its USB connection, driver and firmware.
+- **Connected** with limited internet: check browser sign-in and the network's
+  internet connection.
+- Password requested after every login or resume: check the saved profile's
+  autoconnect and password-storage settings in the editor. Also check whether
+  the adapter disappeared or NetworkManager restarted during resume.
+
+Keep working profiles while troubleshooting. Remove only a specific unwanted
+profile, and review logs for private details before sharing them.
 
 ## Bluetooth
+
+### Pair and connect a device
+
+1. Open **Settings → Bluetooth**, choose the adapter and turn it on. Put the
+   device into pairing mode.
+2. Press **Discover**, select the device by name and address, then choose
+   **Pair**. Confirm the passkeys or enter its PIN.
+3. Use **Connect** if needed. **Trust** is a separate choice.
+4. Check for **Connected**. For headphones or a microphone, select the device in
+   [Sound settings](/pearl/docs/audio-power/#choose-speakers-or-a-microphone).
+
+If the device is missing, check its pairing mode and distance, then discover
+again. For an unavailable service or adapter, check:
+
+```sh
+systemctl status bluetooth.service --no-pager
+rfkill list
+```
+
+If BlueZ is installed but inactive, start `bluetooth.service` through your
+distribution's service manager. Enable it separately if you want it at boot.
+If it runs without showing an adapter, check the hardware and driver rather
+than deleting pairings.
+
+### Discovery, pairing and trust
 
 The Bluetooth page lists adapters and devices with power, discovery, pair,
 connect/disconnect and trust controls. Device aliases are shown together with
@@ -75,7 +149,8 @@ Device actions are disabled while the adapter is off.
 - **Pairing** prompts for PINs and passkey confirmation in the panel itself;
   codes never appear in status output or logs. Pairing has a 90-second
   deadline, and cancelling it sends a proper cancellation to BlueZ. A pairing
-  BlueZ already completed cannot be undone by cancelling; use Remove instead.
+  BlueZ already completed cannot be undone by cancelling; use your system
+  Bluetooth tools if you need to remove that pairing.
 - **Trust** is separate from pairing: pairing never silently trusts a device.
 - Cancelling a connect sends a disconnect, so a late successful reply cannot
   leave the device connected against your intent.
@@ -83,6 +158,12 @@ Device actions are disabled while the adapter is off.
 Locking the session revokes interactive operations such as prompts and
 discovery, but established network and device connections survive ordinary
 navigation, page closes and locking.
+
+## Cellular, SIM and GPS
+
+Pearl has no dedicated cellular, APN, SIM-unlock or GPS/location pages. Use your
+distribution's tools for supported modem or GPS hardware. Pairing a Bluetooth
+device does not set up mobile broadband or location services.
 
 ## Command line
 
@@ -109,6 +190,6 @@ read the actual outcome from a later status call.
   for example after `pearlctl control-center show --page network` or `--page
   bluetooth`, and the CLI cannot answer or cancel another frontend's prompt.
   Password entry and passkey confirmation are deliberately available only
-  through the graphical interface, and all connectivity commands are rejected
-  while the session is locked.
+  through the graphical interface, and connectivity actions are rejected while
+  the session is locked.
 </Aside>
