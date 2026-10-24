@@ -23,6 +23,71 @@ Omitting an action keeps its compiled default. The packaged `wm.toml` adds
 convenient bindings for layout slots and column movement that are not all
 compiled defaults.
 
+## Change a shortcut safely
+
+Open **Settings → Aqueous → Shortcuts**, find the action and choose its recording
+control. Wait until recording is ready, then press the chord. Escape cancels;
+modifier-only presses are ignored. Recording inhibits normal compositor
+shortcuts. If inhibition is unavailable, cancel and type the chord instead.
+
+**Validate**, **Apply & save**, then test the shortcut. Restore its previous
+chord to undo. In TOML, `[]` disables an action; deleting its assignment restores
+the compiled default. Check for duplicate chords: the last declaration wins.
+The recorder changes one binding; it does not import another compositor's config.
+
+For Alt+Tab cycling alongside Super+Tab, edit the existing `[keybinds]` table:
+
+```toml
+[keybinds]
+cycle_focus = ["Super+Tab", "Alt+Tab"]
+```
+
+Save to reload. This cycles through the active workspace's focus history.
+
+## Choose a window or workspace
+
+- `Super+Tab` cycles focus. `Super+W` opens the active workspace's overview.
+- `Super+1` through `Super+9` switch workspaces on the target output.
+  `Super+Shift+1` through `9` move a window there; select the workspace to follow it.
+- [Output bindings](#workspaces-and-outputs) switch displays or move windows.
+  Workspace numbers are per output; IPC IDs are session-local identifiers.
+
+For a visual switcher across outputs and workspaces, bind these unassigned actions
+instead of using Alt+Tab for `cycle_focus`:
+
+```toml
+[keybinds]
+window_switcher_next = "Alt+Tab"
+window_switcher_previous = "Alt+Shift+Tab"
+```
+
+This switcher keeps a stable order when focus changes, rather than MRU order.
+It visits non-minimized, activatable windows and switches to the selected
+window's display and workspace. Keep `cycle_focus` on a different chord.
+Save and try both directions; restore the old bindings or use `[]` to unbind.
+
+Pearl's [Cycle windows widget](/pearl/docs/desktop/#cycle-windows) also provides
+the switcher, with a fallback for older compositors. Use
+[Launcher](/pearl/docs/desktop/#launcher) to find minimized windows too.
+
+## Minimize, maximize and restore a window
+
+These are the compiled shortcuts; custom bindings can change them.
+
+| Task                 | Shortcut            | Return                                              |
+| -------------------- | ------------------- | --------------------------------------------------- |
+| Minimize             | `Super+N`           | `Super+Shift+N` restores the last minimized window. |
+| Maximize             | `Super+Shift+M`     | Press again to restore.                             |
+| Fullscreen           | `Super+Shift+F`     | Press again to leave fullscreen.                    |
+| Float a tiled window | `Super+Shift+Space` | Press again to return it to the layout.             |
+
+Minimized windows leave the layout and focus cycle; Launcher can activate them.
+Fullscreen uses the full output; maximize normally uses its usable area.
+Shell menus, CLI requests and client buttons may reject minimize/maximize on a
+tiled window even when native shortcuts work. Shell records expose
+`can_minimize`, `can_maximize` and `can_activate`. Title-bar buttons also depend
+on the app's decorations and layout policy.
+
 ## Chord grammar
 
 Join case-insensitive tokens with `+`.
@@ -61,14 +126,16 @@ Four command actions run values from `[actions]`:
 
 ```toml
 [actions]
-toggle_start_menu = "dms ipc call spotlight toggle"
+toggle_start_menu = "aqueous-shell-action launcher"
 spawn_terminal = "ghostty"
-screenshot = "dms screenshot region"
+screenshot = "aqueous-shell-action screenshot"
+lock_screen = "aqueous-shell-action lock"
 ```
 
-These examples use the DMS source-package commands. Set `lock_screen` to your
-chosen session locker's command; binding the action alone does not configure a
-locker. Noctalia users can keep their existing shell commands.
+These commands use the packaged stable session helpers, which dispatch to the
+selected shell. Co-installable Git instances use their matching suffixed helpers.
+A core-only installation needs its own launcher, terminal, screenshot tool and
+locker commands. Binding an action alone does not install or configure them.
 
 ## Layout-aware movement
 

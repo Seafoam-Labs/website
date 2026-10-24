@@ -15,7 +15,8 @@ needed, including windows, panels, popups, effects, and the cursor.
 
 ## Configure a mirror
 
-Find connector names and advertised modes with `aqueousctl outputs --json`.
+Back up `outputs.toml`. Run `aqueousctl outputs --json` and replace the connector
+names and modes below with your own. Both outputs must share a backend/device.
 Add the relationship to `~/.config/aqueous/outputs.toml`:
 
 ```toml
@@ -43,11 +44,13 @@ do not need to be integer multiples. Aqueous copies frames at destination
 demand, skips intermediate source updates, and retains the latest complete
 image when the source is idle.
 
-Configure compatible modes, SDR, and normal orientation before applying the
-relationship. Position and scale are retained for a later return to extended mode.
-The compositor mirroring path is separate from protected display previews:
-physical mirroring previews remain blocked in that path. A settings frontend
-must honor that capability result; see [Display previews](/aqueous/outputs/#display-previews).
+Set compatible SDR modes and normal orientation first. With
+`[display].apply_on_reload = true`, save and press **Super+R**. Check that the
+destination shows the source and reports `mirror_status: "active"`.
+Position and scale are retained for a return to extended mode.
+
+File edits have no protected confirmation timer. Physical mirroring previews
+remain blocked; see [Display previews](/aqueous/outputs/#display-previews).
 
 ## Return to an extended desktop
 
@@ -60,7 +63,9 @@ mirror_of = ""
 position = [2560, 0]
 ```
 
-Adjust the position for your source's logical size after scaling. An omitted
+Save and reload, then check `mirror_status: "extended"` and move the pointer onto
+the destination. On failure, check `mirror_error` and restore your backup.
+Adjust position for the source's logical size after scaling. An omitted
 `mirror_of` inherits policy; an empty string clears it. A value in
 `outputs.toml` takes precedence over `wm.toml`. Named output profiles accept
 the same field.

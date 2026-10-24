@@ -12,6 +12,35 @@ Rules live in `rules.toml`. Aqueous hot-reloads the file, re-evaluates managed
 windows and layer surfaces, and preserves the previous snapshot after a parse
 failure.
 
+## Make one application float
+
+1. Open the app and run `aqueousctl inspect --rule`. Find its block by title
+   and identity. Native Wayland apps use `app_id`; XWayland apps use `class`.
+   `aqueousctl windows --json` also lists these values.
+2. In **Settings → Aqueous → Rules**, add that matcher and enable floating.
+   Or add this to `rules.toml`, replacing the example ID:
+
+   ```toml
+   [[window]]
+   app_id = "org.example.Editor"
+   floating = true
+   ```
+
+3. Place it before broader matching rules. Validate and apply in Settings,
+   or save the file. Check that the app floats and other apps are unaffected.
+   Reopen the window if an earlier manual override hides the rule's effect.
+
+To undo, remove this rule and apply/save. A manual override can persist; save
+your work and reopen the window to check.
+
+Multiple matchers mean **AND**: `app_id` and `title` must both match. Globs are
+case-sensitive; titles can change with the document. Use TOML quoting for
+backslashes. `output` and `workspace` are destinations, not matchers; moving a
+window to workspace 2 does not switch you there.
+
+Rules do not launch apps. For that, see
+[Start an application at login](/pearl/docs/desktop/#start-an-application-at-login).
+
 ## Discover identities
 
 ```sh

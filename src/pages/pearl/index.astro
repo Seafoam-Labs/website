@@ -43,21 +43,22 @@ import {
   </AnchorHeading>
 
   <p>
-    Pearl runs on <a href="/aqueous/overview/">Aqueous</a>. Add the
-    <a href="https://repo.seafoam-labs.org/setup">Seafoam Labs repository</a>,
-    then install the shell:
+    Pearl runs on <a href="/aqueous/overview/">Aqueous</a> and ships with
+    <a href="/devario/setup/">Devario</a>. On Arch/CachyOS, choose the matching
+    desktop from the <a href="/pearl/installation/">installation guide</a>
+    before installing a shell. If you use the
+    <a href="https://repo.seafoam-labs.org/setup">Seafoam Labs repository</a>:
   </p>
 
   <Tabs>
     <TabItem label="Seafoam Labs repository">
-      <Code code="sudo pacman -S pearl-git" lang="sh" />
+      <Code code="shelly install standard aqueous-desktop" lang="sh" />
     </TabItem>
     <TabItem label="Build from source">
       <Code
         code={`git clone https://github.com/Seafoam-Labs/pearl.git
 cd pearl/packaging/arch-git
-makepkg -s
-sudo pacman -U ./pearl-git-*.pkg.tar.zst ./pearl-greeter-git-*.pkg.tar.zst`}
+shelly build --sync-deps --install`}
         lang="sh"
       />
     </TabItem>

@@ -12,6 +12,47 @@ Physical display policy belongs in `~/.config/aqueous/outputs.toml`. Aqueous
 stages accepted changes and commits the complete multi-output state atomically;
 if the backend rejects the transaction, it restores the last working state.
 
+## Arrange your monitors in Pearl
+
+Open **Settings → Aqueous → Displays** with the matching `aqueous-config` helper
+installed. The display canvas is newer than Pearl 0.3.0; older packages show a
+different editor.
+
+1. Run `aqueousctl outputs` to identify your monitors and advertised modes.
+2. Select a monitor in Pearl. Set its resolution, refresh rate, scale and
+   rotation, then arrange the rectangles to match your desk. Keep one working
+   output enabled and choose one primary output.
+3. Select **Apply**, check every screen, then **Keep changes**. This saves all
+   pending Aqueous edits. **Revert** restores the previous displays and keeps
+   your draft. Older editors use **Keep displays** and **Revert displays**.
+4. Check the saved result and `aqueousctl outputs --json` for the new mode,
+   scale, transform and position.
+
+If the preview is unreadable, let it time out. The timer starts after the enabled
+outputs present the new state; restoration errors are reported separately.
+See [Display previews](#display-previews). Primary is a fallback target; it does
+not move your current window or focus.
+
+### Configure one monitor or recover an arrangement
+
+Back up `outputs.toml`, then edit the matching block. One monitor needs one
+`[[output]]` block. Use a real connector and advertised mode; omit `edid` unless
+you have its actual identity. With `[display].apply_on_reload = true`, save and
+press **Super+R**. File edits do not use Pearl's protected confirmation dialog.
+
+Positions use logical pixels. A 2560-pixel-wide output at scale 2 is 1280 logical
+pixels wide, so its right-hand neighbor starts at `[1280, 0]`. Use negative X for
+a display to the left. A 90° or 270° rotation swaps width and height; avoid overlapping
+positions for an extended desktop.
+
+If docking or rearranging fails, check `aqueousctl outputs --json` against the
+saved connector, `enabled`, mode and EDID settings. Restore your backup and
+reload if needed. A reload notification alone does not confirm a display change.
+
+To recover an offscreen window, find its ID with `aqueousctl windows --json`, then
+run `aqueousctl window move --id ID --output DP-1 --json` with a working connector.
+See [runtime actions](/aqueous/command-line/#shell-state-and-runtime-actions).
+
 ## Discover outputs
 
 ```sh
@@ -79,6 +120,10 @@ transform.
 
 ## Adaptive sync
 
+Enable **Adaptive sync** in Pearl or set the policy below. The monitor and mode
+must support VRR. Set `adaptive_sync = false` to turn it off. Fullscreen-only VRR
+requires a fullscreen window; the Game Mode layout alone does not activate it.
+
 ```toml
 [[output]]
 name = "DP-1"
@@ -98,6 +143,8 @@ and `adaptive_sync_error` (`null`, `unsupported`, or `commit_failed`). A saved
 VRR request alone does not establish that the hardware enabled it.
 
 ## Named profiles
+
+Output profiles save monitor arrangements, not ICC color calibration.
 
 Profiles contain the same fields as ordinary output blocks:
 
@@ -215,6 +262,14 @@ used by Direct3D 12 games such as Stellar Blade.
 - An EDID or `Failed to parse display metadata + colorimetry info` error alone
   does not prove HDR is unavailable. DXVK can use fallback display metadata;
   check the output state and launch options before treating it as the cause.
+
+### Color problems in a Proton game
+
+For wrong HDR colors, report the game, Proton version, PQ/scRGB mode, GPU/driver
+and `aqueousctl outputs --json`.
+[Aqueous #104](https://github.com/Seafoam-Labs/Aqueous/issues/104) tracks scRGB
+channel crosstalk in Cyberpunk 2077 and remains open as of 24 October 2026.
+Compare the game's SDR mode; Auto HDR does not repair native HDR.
 
 ## Auto HDR
 

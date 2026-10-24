@@ -112,15 +112,17 @@ The packaged desktop also includes:
 - The `aqueous-config` backend used by Pearl, with validated edits, protected
   collection transactions, display previews, conflict detection, recovery, and
   toolkit preference synchronization.
-- A native Welcome application to choose Pearl, DMS, Noctalia, or no shell.
+- Package-specific desktop selection: Pearl presets select Pearl; older component
+  packages include Welcome; coexisting Git sessions use a saved shell choice.
   Stable and Git desktops can use separate configuration and command paths.
 - A shell-native screen-sharing chooser backed by Aqueous's private desktop
   portal backend.
 
 <Aside type="note">
   Core packages install the compositor and configuration tools without a shell.
-  Component desktops add Welcome, portals, and shell integrations. Pearl
-  supplies the current settings UI; the old Aqueous settings GUI is retired. See
+  Desktop families add portals and shell integration, with Welcome only in
+  packages that still include it. Pearl supplies the current settings UI; the
+  old Aqueous settings GUI is retired. See
   [Installation](/aqueous/installation/) and [Desktop
   selection](/aqueous/desktop-session/).
 </Aside>

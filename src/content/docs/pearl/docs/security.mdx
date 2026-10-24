@@ -153,3 +153,22 @@ Suspend, hibernate and log out need the two-step request-then-confirm flow,
 with the generation taken from a current `lifecycle status`. `lock` is
 immediate, and an accepted lock request is reported as accepted rather than
 as a completed acquisition; the status call reports the actual lock state.
+
+## Unable to unlock or find an authorization prompt
+
+- Check Caps Lock and your keyboard layout. Escape cancels the current
+  conversation; retry after the cooldown. Restarting Pearl does not unlock
+  the session.
+- If a privileged action seems frozen, check the other monitors for its prompt.
+  In an unlocked terminal, `pearlctl lifecycle status` shows agent registration
+  and errors. Check for an existing agent before starting another one.
+- Fingerprint readers and security keys need your distribution's enrollment,
+  services and PAM policy. Pearl has no enrollment or factor-bypass control.
+- If no prompt is usable, use a working authenticated console or alternate
+  session to collect diagnostics. See [login recovery](/pearl/docs/greeter/#wrong-keyboard-layout-or-failed-login).
+  Ending a locked desktop can lose unsaved work; it does not unlock it.
+
+Before relying on automatic sleep, save work, test manual lock/unlock, then
+try suspend/resume. Check that every output stays covered and authentication
+is required after resume. Screen readers, authentication devices and
+multi-monitor setups need testing on your machine.

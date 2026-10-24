@@ -12,6 +12,38 @@ Put input policy in `~/.config/aqueous/input.toml`. The sidecar overlays matchin
 `wm.toml` input and gesture values, and changes apply to connected devices and
 devices added later.
 
+## Change your keyboard layout
+
+Open **Settings → Aqueous → Input → Keyboard** and enter an XKB code: `de` for
+German or `us,de` for both layouts. Set `grp:alt_shift_toggle` in XKB options
+to switch with Alt+Shift. **Validate** and **Apply & save**, then test both
+layouts in a text editor before entering a password.
+
+To edit the file instead, update the existing `[input]` table in `input.toml`:
+
+```toml
+[input]
+xkb_layout = "us,de"
+xkb_options = "grp:alt_shift_toggle"
+```
+
+Save for automatic reload, or run `aqueousctl session reload --json`.
+Restore the previous layout/options to undo. This changes the session keymap,
+not the greeter, interface language or IME; see
+[language choices](/pearl/docs/settings/#language-and-accessibility-preferences).
+
+## Set touchpad tapping and scrolling
+
+Open **Settings → Aqueous → Input → Pointer and touchpad**. Change the touchpad's
+tapping or natural scrolling, **Validate** and **Apply & save**. Test tapping
+and two-finger scrolling in an application. In TOML, use `[input.touchpad].tap`
+and `natural_scroll`; other controls are listed below.
+
+If the saved setting has no effect, check the loaded configuration and
+[helper status](/aqueous/settings/#inspect-the-configuration-backend).
+Keep the policy in one file. **Focus behavior** controls pointer-driven focus
+separately from tapping and scrolling.
+
 ## Keyboard and focus
 
 ```toml
@@ -127,6 +159,13 @@ settings reverse those directions consistently. Configure or disable these
 actions with `wheel_scroll_left/right/up/down`; see
 [wheel bindings](/aqueous/keybindings/#scrolling-actions).
 
+## Touchscreen limits
+
+Touch input and client drag-and-drop do not support native window move/resize
+requests from a touchscreen or pen. Use a mouse, touchpad or
+[keyboard window actions](/aqueous/keybindings/) instead. Touchpad swipe
+bindings are separate from touchscreen window drags.
+
 ## Tablets
 
 Map a tablet's absolute pen input to one output with repeated `[[input.tablet]]`
@@ -154,7 +193,21 @@ At the protocol layer Aqueous supports tablet v2, text-input v3, input-method
 v2 and input popups, relative pointers, pointer gestures, virtual keyboards,
 and virtual pointers. These standard interfaces allow drawing tablets, on-
 screen keyboards, IMEs, accessibility tools, and test/automation clients to
-participate in normal seat focus.
+participate in normal seat focus. These protocols do not install or configure
+the tools themselves.
+
+### Accessibility and input-method readiness
+
+| Task                          | Current limits                                                                                                       |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Keyboard-only desktop         | Use Aqueous bindings and Pearl's launcher, dock and Settings navigation; check login and locking with your bindings. |
+| Screen reader, including Orca | Full speech and lock-screen support is unconfirmed.                                                                  |
+| Magnification                 | Pearl's font and cursor settings help visibility; they do not provide a desktop magnifier.                           |
+| IME or on-screen keyboard     | Install and configure a separate service; protocol support alone does not provide a working setup.                   |
+
+Keep a working input method available during setup. Check composition and
+candidate windows in your apps, and check navigation, speech and password
+privacy through locking and unlocking. Report the tool, version and failed step.
 
 ## Trackpoints and legacy pointer values
 

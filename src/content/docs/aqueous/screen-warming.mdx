@@ -23,9 +23,18 @@ does not establish measured display calibration or physical restoration accuracy
 
 ## Use warming
 
-Configure the schedule or temporary temperature override in Pearl. The shell
-owns the desired schedule; Aqueous reports whether each output can acquire and
-commit a warming adjustment. Native requests accept **2500–6500 K**, with
+In Pearl, open **Settings → Appearance → Night Light**:
+
+1. Enable **Night Light**, set **Color temperature (K)** and choose **Manual**
+   or **Custom times** (local time).
+2. Select **Apply & save** and check each display's status.
+3. Use the Control center **Night Light** tile for a temporary override, then
+   **Resume saved policy** to end it. To turn warming off, disable
+   **Enable Night Light**, **Apply & save** and check restoration completes.
+
+You can also check `pearlctl night-light status`; see
+[Pearl Night Light](/pearl/docs/appearance/#night-light).
+Native requests accept **2500–6500 K**, with
 **6500 K neutral**. These temperatures are adjustment parameters, not measured
 white points.
 
@@ -45,6 +54,16 @@ does not mean the display has changed.
 Different outputs can have different results; a partially warmed desktop is not
 reported as all active. Version 1 acknowledges backend commits, not physical
 presentation or measured color accuracy.
+
+### Only one monitor changes, or Night Light is unavailable
+
+Check each display's status. **Partial** means only some displays applied warming.
+HDR outputs and mirrors cannot warm. **Busy** means another color-control client
+owns the output; release it in that client before retrying. For **Failed** or
+**Restoring**, check the result before assuming normal colors have returned.
+
+Night Light does not calibrate a display. Arbitrary ICC import is not supported
+here, and [display profiles](/aqueous/outputs/#named-profiles) save arrangements.
 
 ## Ownership and restoration
 

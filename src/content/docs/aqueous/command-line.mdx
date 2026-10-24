@@ -245,20 +245,11 @@ older builds should check the `config_reload` capability first.
 
 ## Switch desktop shells
 
-Git desktop sessions support live shell switching:
-
-```sh
-aqueousctl-git shell switch pearl
-aqueousctl-git shell switch dms
-aqueousctl-git shell switch noctalia --json
-```
-
-The target shell and its matching preset must already be installed. The command
-preserves applications and shell configuration, saves the next-login selection,
-and restores the previous managed shell if activation fails. It is unavailable
-in stable builds and mismatched/nested sessions. See
-[Desktop selection](/aqueous/desktop-session/#switch-shells-in-a-git-session)
-for prerequisites and recovery.
+The separate Git desktop no longer supports live shell switching.
+Install the matching shell preset, edit `session.toml`, then log out and select
+**Aqueous-Git**. `aqueousctl-git shell switch` prints these manual instructions.
+The replacement Git desktop uses standard Aqueous paths instead; see
+[desktop selection](/aqueous/desktop-session/).
 
 ## Compatibility clients
 

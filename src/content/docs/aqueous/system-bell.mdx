@@ -10,6 +10,17 @@ Aqueous can briefly highlight an output edge, play a custom sound, or do both
 when a Wayland application rings the system bell. Visual feedback is enabled
 by default. Sound playback is optional.
 
+## Use visual feedback without sound
+
+Set `mode = "visual"` in `[bell]` in the loaded `wm.toml`, then save and reload.
+A visible Wayland app using `xdg-system-bell-v1` should briefly highlight the
+output edge. A terminal's ASCII BEL may not use this protocol; check the app's
+bell settings if nothing appears.
+
+Use `mode = "off"` to disable feedback, or restore your previous mode to undo.
+The visual cue does not replace a screen reader. Sound needs the player and
+setup below.
+
 ## Configure the bell
 
 Add a `[bell]` section to your instance's `wm.toml`, or use a compatible

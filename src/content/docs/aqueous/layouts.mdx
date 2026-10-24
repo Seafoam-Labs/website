@@ -11,6 +11,55 @@ import { Aside } from "@astrojs/starlight/components";
 Layout policy belongs in `layout.toml`, although the same sections remain
 accepted in `wm.toml`. The sidecar overlays recognized values one key at a time.
 
+## Choose and try a layout
+
+Open **Settings → Aqueous → Layouts** to set the default layout and shortcuts.
+To try a layout on the active workspace, open two windows and choose one:
+
+| Arrangement           | Layout                      | Behavior                                            |
+| --------------------- | --------------------------- | --------------------------------------------------- |
+| Overlapping windows   | **Stacking** (`stacking`)   | Move and resize windows freely.                     |
+| Master area and stack | **Tile** (`tile`)           | New windows reflow the layout.                      |
+| Side-by-side columns  | **Scrolling** (`scrolling`) | Pan between columns; they need not fill the screen. |
+| One full-area window  | **Monocle** (`monocle`)     | Switch focus to show another window.                |
+
+Find your connector with `aqueousctl outputs --json`, then replace `DP-1`:
+
+```sh
+aqueousctl layout --output DP-1 --json
+aqueousctl layout --output DP-1 --set stacking --json
+```
+
+The first command shows the current layout and workspace. Set that layout ID
+again to undo. `--set` changes only the active workspace's live layout.
+
+To save a default, change **Default layout**, **Validate** and **Apply & save**,
+or edit `[layout].default` in `layout.toml`. Live choices and more-specific
+[workspace/output mappings](#per-output-and-workspace-selection) take priority.
+A reload keeps live choices; a new session clears them. There is no CLI command
+to clear just a layout override. See [selection precedence](/aqueous/configuration/#how-files-combine).
+
+Slots are [layout shortcuts](/aqueous/keybindings/#layout-selection-and-composable-regions);
+editing a slot does not switch the layout.
+
+## Move, resize and change gaps
+
+Hold **Super + left mouse button** and drag to move or rearrange a window.
+Use **Super + right mouse button** to resize. Tiled layouts reflow neighbors;
+Stacking keeps independent window sizes. Leave fullscreen first; fixed-position
+windows restrict these actions.
+
+For tiled spacing, open **Settings → Aqueous → Layouts → Spacing**, change
+inner or outer gaps, then Validate and apply. Inner gaps separate windows;
+outer gaps separate them from the workspace edge. Per-layout overrides take
+priority. If the controls are missing, edit `gaps_inner` and `gaps_outer` in
+`[layout]` below. Restore the old values to undo.
+
+Stacking uses `snap_gap` for snap padding. Drag to an edge and release on the
+preview to snap; see [snapping](#pointer-movement-and-snapping) for named zones
+and top-edge maximize. These drags need a mouse or touchpad;
+[touchscreen/pen window move and resize are unsupported](/aqueous/input/#touchscreen-limits).
+
 ## Layout engines
 
 | Engine            | Behavior                                                              |

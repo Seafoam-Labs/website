@@ -40,6 +40,28 @@ tracks development limitations, and the
 [test suite](https://github.com/Seafoam-Labs/devario-os/tree/main/tests)
 covers image, installer, package, desktop, and boot behavior.
 
+## Trying a live image or virtual machine
+
+Try input, displays and networking in the live desktop before partitioning.
+Then check the installer and a fresh boot separately.
+
+For a VM, record the image checksum, hypervisor version, UEFI mode, CPU model,
+GPU/3D backend and memory. The image needs the CPU target above, installation
+needs 64-bit UEFI, and the virtual graphics path must support Vulkan. A generic
+“3D acceleration” checkbox does not guarantee this. There is no single tested
+Virtio/Venus setup or minimum VM memory recommendation here.
+
+If both the desktop and installer disappear, collect crash diagnostics rather
+than assuming you were logged out.
+
+| Symptom                                            | Next check                                                                                                                                                              |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Live desktop works but installation will not start | Firmware mode, CPU target and the installer log/error; preserve the image checksum.                                                                                     |
+| Repository or upgrade check fails                  | Network/time and [Shelly diagnostics](/shelly-alpm/docs/troubleshooting/); do not change repository families to bypass an error.                                        |
+| No shell after login                               | [Package/session selection](/aqueous/desktop-session/#recover-a-missing-shell-or-failed-upgrade) and the matching managed unit.                                         |
+| Wrong layout or failed login                       | [Greeter recovery](/pearl/docs/greeter/#wrong-keyboard-layout-or-failed-login); check the layout again after an upgrade.                                                |
+| Freeze, game stall or logout hard-lock             | [Desktop failure collection](/pearl/docs/command-line/#when-something-fails), including the previous boot if available. No general logout hard-lock fix is established. |
+
 ## Diagnostics
 
 Open **Devario Report** from the application menu, or collect a local report
