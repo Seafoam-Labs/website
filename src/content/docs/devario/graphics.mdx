@@ -1,0 +1,171 @@
+---
+title: NVIDIA and laptop GPUs
+description: Run a game or application on your dedicated GPU in Devario, including NVIDIA offload, hybrid laptops, and Steam launch options.
+sidebar:
+  label: NVIDIA and laptop GPUs
+---
+
+Use `devario-gpu-run` to run a game or application on a selected GPU.
+On a hybrid laptop, you can keep the desktop on integrated graphics (**iGPU**)
+and run demanding games on dedicated graphics (**dGPU**).
+
+The choice applies to the application, not the whole desktop. It does not
+switch a laptop's hardware MUX or change which GPU is wired to a monitor.
+Using the dGPU can increase power consumption and heat.
+
+## Check your GPUs
+
+Open a terminal and run:
+
+```sh
+devario-gpu-run --help
+devario-gpu-run --list
+```
+
+The list shows PCI addresses, hardware IDs and bound kernel drivers. For
+example, an Intel/NVIDIA laptop might show:
+
+```text
+0000:00:02.0  id=8086:9a49  driver=i915
+0000:01:00.0  id=10de:25a0  driver=nvidia
+```
+
+`i915` or `xe` identifies an Intel driver, `amdgpu` identifies AMD, and
+`nvidia` identifies NVIDIA. Use addresses from your own output; these are
+examples. Only GPUs with a bound driver appear in this list.
+
+The helper accepts `nvidia`, `auto`, or a Mesa GPU's full PCI address, not
+`amd`. Older installations may differ; check your installed `--help` output.
+
+## Run an application on NVIDIA
+
+With an NVIDIA GPU listed as `driver=nvidia`, use:
+
+```sh
+devario-gpu-run nvidia -- APPLICATION
+```
+
+Replace `APPLICATION` with the executable and any arguments. The `--`
+separates the GPU choice from the application command. Run this as your normal
+user, not with `sudo`.
+
+The helper sets up NVIDIA PRIME render offload and clears conflicting GPU
+selection settings. You do not need to add `prime-run`. If you have multiple
+NVIDIA GPUs, `nvidia` does not pick a specific card by PCI address.
+
+### Steam launch options
+
+For native Steam, stop the game, open **Properties → General → Launch Options**
+and enter:
+
+```sh
+devario-gpu-run nvidia -- %command%
+```
+
+Keep `%command%` exactly as written. Steam replaces it with the game's command;
+do not add `APPLICATION`. Set this on the game, not just the Steam client.
+
+Flatpak Steam runs in a sandbox where the host helper may not be available.
+These launch options are for native Steam, not a Flatpak setup procedure.
+
+### Keep existing launch options
+
+Put environment variables after `--` using `env`, before `%command%`.
+For example, if you already use DXVK's FPS display:
+
+```sh
+devario-gpu-run nvidia -- env DXVK_HUD=fps %command%
+```
+
+`DXVK_HUD=fps` is optional and applies to games using DXVK. Keep ordinary game
+arguments after `%command%`, as required by the game. Quote values containing
+spaces, for example `env NAME="value with spaces"`.
+
+Keep `env` before the assignments: without it, the helper tries to run
+`DXVK_HUD=fps` as a program. Start with the simple launch option, then add your
+existing settings back one at a time.
+
+## Select an AMD or Intel GPU
+
+For a Mesa-driven GPU, copy its full PCI address from `--list`. For example,
+if your AMD dedicated GPU is listed at `0000:03:00.0` with `driver=amdgpu`:
+
+```sh
+devario-gpu-run 0000:03:00.0 -- APPLICATION
+```
+
+The corresponding Steam launch option is:
+
+```sh
+devario-gpu-run 0000:03:00.0 -- %command%
+```
+
+Replace the address with your own. This also works for an Intel integrated
+GPU; choose the device you want from the list rather than assuming a particular
+PCI address means "dedicated".
+
+If the helper warns about `vulkan-mesa-layers`, Vulkan applications may ignore
+the selection. The older `radeon` kernel driver has no Vulkan support in this
+helper, so selecting it will not fix a Proton game.
+
+## Verify the result
+
+Check the game's graphics settings or renderer log for the selected GPU.
+Compare the same scene, resolution and graphics settings before and after
+changing the launch option.
+
+For NVIDIA, if `nvidia-smi` is installed, run it while the game is open:
+
+```sh
+nvidia-smi
+```
+
+Look for the game or its Wine/Proton process. Steam or the compositor appearing
+alone does not tell you which GPU the game uses; process reporting varies.
+
+If `glxinfo` is installed, this checks a separate OpenGL/GLX test process:
+
+```sh
+devario-gpu-run nvidia -- glxinfo -B
+```
+
+Check its OpenGL renderer string. This tests `glxinfo`, not a Vulkan/Proton
+game. Use the game's own renderer information to check the game itself.
+
+## If it still does not work
+
+- **The helper is missing or its options differ:** check your image and package
+  versions and ask for support. Do not copy a replacement into `/usr/bin`.
+- **The GPU is missing or the NVIDIA driver is unavailable:** check `--list`,
+  `lspci -nnk` if installed, and any `nvidia-smi` error. The helper selects a GPU;
+  it does not install drivers. Keep the driver branch supported by your GPU
+  and image. The [installer policy](https://github.com/Seafoam-Labs/devario-os/blob/6df879a63baea479fa1ecc9ff0c8a1f65b9c1553/docs/nvidia-install-policy.md)
+  describes the current open and older 580 branches; older images may differ.
+- **The game still uses another GPU:** keep `%command%`, remove other GPU
+  wrappers and retry the simple launch option on the game.
+- **The correct GPU is active but resolution is wrong:** check the game's
+  display/fullscreen settings and [monitor configuration](/aqueous/outputs/).
+  Selecting a GPU does not set the game's resolution.
+- **It worked before an update:** record the kernel, driver, Aqueous, game
+  and Proton versions. A compositor or runtime update can change behavior
+  even without a driver update. Change one thing at a time.
+
+## Undo the change
+
+To undo this guide's change, remove the wrapper from Steam's launch options,
+restore your previous options and relaunch the game. For a terminal launch,
+close the application and start it normally.
+
+`auto` clears inherited GPU-selection variables but keeps driver filters.
+To return to your usual setup, remove the wrapper rather than replacing
+`nvidia` with `auto`.
+
+## Get help
+
+Include your laptop/GPU models, image and package versions, `--help`/`--list`
+output, Steam packaging, game/Proton version and exact launch options. Describe
+what changed and what you expected. Collect a
+[local Devario report](/devario/readiness/#diagnostics) and review it before sharing.
+
+For implementation details, see the
+[GPU helper source](https://github.com/Seafoam-Labs/devario-os/blob/6df879a63baea479fa1ecc9ff0c8a1f65b9c1553/packages/devario-system-integration/devario-gpu-run).
