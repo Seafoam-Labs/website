@@ -13,15 +13,19 @@ that every published image contains the latest changes.
 
 ## Hardware and installation
 
-| Area                   | Current setup                                                                                                                             |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| CPU                    | x86-64-v3 target for the Devario kernel and image                                                                                         |
-| Firmware               | BIOS or UEFI for live boot; **64-bit UEFI required for installation**                                                                     |
-| Secure Boot            | Not configured by the image                                                                                                               |
-| Intel and AMD graphics | Mesa and Vulkan drivers are included; check your hardware with the live desktop                                                           |
-| NVIDIA graphics        | Open kernel modules for supported Turing-and-newer GPUs; Calamares checks the packaged driver's PCI support list before partitioning      |
-| Older NVIDIA GPUs      | Unsupported by this image; Nouveau is blacklisted                                                                                         |
-| External GPUs          | Bolt authorization tools and GPU hotplug handling are included; physical hotplug, display, and suspend/resume validation remain necessary |
+| Area                   | Current setup                                                                                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CPU                    | x86-64-v3 target for the Devario kernel and image                                                                                                                |
+| Firmware               | BIOS or UEFI for live boot; **64-bit UEFI required for installation**                                                                                            |
+| Secure Boot            | Not configured by the image                                                                                                                                      |
+| Intel and AMD graphics | Mesa and Vulkan drivers are included; check your hardware with the live desktop                                                                                  |
+| NVIDIA graphics        | Open kernel modules for supported Turing-and-newer GPUs; Calamares checks the packaged driver's PCI support list before partitioning                             |
+| Older NVIDIA GPUs      | Support depends on the image and driver branch; the current installer source includes a 580 path for supported Maxwell/Pascal/Volta GPUs. Nouveau is blacklisted |
+| External GPUs          | Bolt authorization tools and GPU hotplug handling are included; physical hotplug, display, and suspend/resume validation remain necessary                        |
+
+For per-application GPU selection, Steam launch options and hybrid-laptop
+checks, see [NVIDIA and laptop GPUs](/devario/graphics/). Driver support must
+match your actual image; the latest source policy does not certify an older ISO.
 
 ## Software and release boundaries
 
