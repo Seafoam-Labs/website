@@ -1,3 +1,3 @@
 export const isoDownloadUrl =
-  "https://mirrors.seafoam-labs.org/iso/devario-2026.10.28-x86_64.iso";
+  "https://mirrors.seafoam-labs.org/iso/devario-2026.10.31-x86_64.iso";
 export const isoChecksumUrl = `${isoDownloadUrl}.sha256`;
