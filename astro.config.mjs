@@ -102,6 +102,7 @@ export default defineConfig({
           label: "Devario",
           items: [
             "devario/overview",
+            "devario/installation",
             "devario/setup",
             "devario/package-requests",
             "devario/graphics",
