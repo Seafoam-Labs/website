@@ -125,6 +125,57 @@ Each clock instance has its own time zone, label, format and date setting, added
 and configured in Settings → Bar & dock. Every clock button opens the calendar
 and anchors it to the clicked button.
 
+#### Custom time and date patterns
+
+Each clock definition accepts optional `time_format` and `date_format`
+[strftime-style](https://docs.gtk.org/glib/method.DateTime.format.html)
+patterns (up to 64 UTF-8 bytes each; every `%` must be followed by a known
+specifier). When a pattern is empty, the built-in patterns apply: the time
+follows the 12/24-hour setting (`%H:%M` or `%I:%M %p`) and the date is
+`%a %d %b`. The optional `separator` (up to 16 bytes, default `·`) is rendered
+between the date and the time on horizontal bars. Common specifiers:
+
+| Specifier            | Meaning                                | Example                |
+| -------------------- | -------------------------------------- | ---------------------- |
+| `%H` / `%I`          | Hour, 24-hour / 12-hour                | `14` / `02`            |
+| `%M` / `%S`          | Minute / second                        | `05`                   |
+| `%p`                 | AM/PM                                  | `PM`                   |
+| `%a` / `%A`          | Weekday, short / full                  | `Sun` / `Sunday`       |
+| `%d` / `%-d`         | Day of month, padded / unpadded        | `01` / `1`             |
+| `%b` / `%B`          | Month, short / full                    | `Nov` / `November`     |
+| `%m` / `%Y` / `%y`   | Month / 4-digit year / 2-digit year    | `11` / `2026` / `26`   |
+| `%F`                 | ISO 8601 date, same as `%Y-%m-%d`      | `2026-11-01`           |
+| `%R` / `%T`          | ISO 8601 time, same as `%H:%M` / `%H:%M:%S` | `14:05` / `14:05:09` |
+| `%Z` / `%:z`         | Zone name / UTC offset                 | `JST` / `+09:00`       |
+| `%%`                 | Literal `%`                            | `%`                    |
+
+For an ISO 8601 clock use `"time_format": "%T"` (or `%H:%M`) with
+`"date_format": "%F"`; any separator works, for example `"separator": "|"` or a
+space. Custom patterns are used verbatim on both horizontal and vertical bars;
+only the built-in patterns stack their fields on vertical bars. The Settings
+preview shows the result live, and invalid patterns are rejected before saving.
+
+Patterns live in the `bar.clocks` definitions:
+
+```json
+{
+  "bar": {
+    "clocks": [
+      {
+        "id": "tokyo",
+        "timezone": "Asia/Tokyo",
+        "label": "Tokyo",
+        "hour_format": "12h",
+        "show_date": false,
+        "time_format": "%H:%M:%S",
+        "date_format": "%Y-%m-%d",
+        "separator": "•"
+      }
+    ]
+  }
+}
+```
+
 ## Bar widgets
 
 Add widgets in **Settings → Bar & dock → Add widget**. Existing layouts are
