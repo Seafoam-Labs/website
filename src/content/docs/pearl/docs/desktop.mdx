@@ -135,19 +135,19 @@ follows the 12/24-hour setting (`%H:%M` or `%I:%M %p`) and the date is
 `%a %d %b`. The optional `separator` (up to 16 bytes, default `·`) is rendered
 between the date and the time on horizontal bars. Common specifiers:
 
-| Specifier            | Meaning                                | Example                |
-| -------------------- | -------------------------------------- | ---------------------- |
-| `%H` / `%I`          | Hour, 24-hour / 12-hour                | `14` / `02`            |
-| `%M` / `%S`          | Minute / second                        | `05`                   |
-| `%p`                 | AM/PM                                  | `PM`                   |
-| `%a` / `%A`          | Weekday, short / full                  | `Sun` / `Sunday`       |
-| `%d` / `%-d`         | Day of month, padded / unpadded        | `01` / `1`             |
-| `%b` / `%B`          | Month, short / full                    | `Nov` / `November`     |
-| `%m` / `%Y` / `%y`   | Month / 4-digit year / 2-digit year    | `11` / `2026` / `26`   |
-| `%F`                 | ISO 8601 date, same as `%Y-%m-%d`      | `2026-11-01`           |
-| `%R` / `%T`          | ISO 8601 time, same as `%H:%M` / `%H:%M:%S` | `14:05` / `14:05:09` |
-| `%Z` / `%:z`         | Zone name / UTC offset                 | `JST` / `+09:00`       |
-| `%%`                 | Literal `%`                            | `%`                    |
+| Specifier          | Meaning                                     | Example              |
+| ------------------ | ------------------------------------------- | -------------------- |
+| `%H` / `%I`        | Hour, 24-hour / 12-hour                     | `14` / `02`          |
+| `%M` / `%S`        | Minute / second                             | `05`                 |
+| `%p`               | AM/PM                                       | `PM`                 |
+| `%a` / `%A`        | Weekday, short / full                       | `Sun` / `Sunday`     |
+| `%d` / `%-d`       | Day of month, padded / unpadded             | `01` / `1`           |
+| `%b` / `%B`        | Month, short / full                         | `Nov` / `November`   |
+| `%m` / `%Y` / `%y` | Month / 4-digit year / 2-digit year         | `11` / `2026` / `26` |
+| `%F`               | ISO 8601 date, same as `%Y-%m-%d`           | `2026-11-01`         |
+| `%R` / `%T`        | ISO 8601 time, same as `%H:%M` / `%H:%M:%S` | `14:05` / `14:05:09` |
+| `%Z` / `%:z`       | Zone name / UTC offset                      | `JST` / `+09:00`     |
+| `%%`               | Literal `%`                                 | `%`                  |
 
 For an ISO 8601 clock use `"time_format": "%T"` (or `%H:%M`) with
 `"date_format": "%F"`; any separator works, for example `"separator": "|"` or a
