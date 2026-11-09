@@ -185,6 +185,21 @@ export default defineConfig({
           ],
         },
         {
+          label: "sched_ext",
+          items: [
+            "sched-ext/overview",
+            "sched-ext/installation",
+            {
+              label: "Documentation",
+              items: [
+                "sched-ext/docs/usage",
+                "sched-ext/docs/configuration",
+                "sched-ext/docs/troubleshooting",
+              ],
+            },
+          ],
+        },
+        {
           label: "Pori",
           items: [
             { autogenerate: { directory: "pori" } },
