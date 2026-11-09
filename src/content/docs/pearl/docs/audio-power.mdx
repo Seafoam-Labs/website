@@ -183,6 +183,11 @@ click-through, never takes focus, and is dismissed by locking the session.
 
 ## System and scheduling
 
+This section covers Pearl's graphical controls and profile requirements. For
+package installation and the terminal tools, see
+[the sched_ext guides](/sched-ext/overview/). Pearl's scheduling profile file
+is separate from the scxcli catalog.
+
 Choose a CPU scheduler profile in **Settings → System**, or add **CPU Scheduler**
 under **Settings → Bar & dock → Add widget**. The widget needs an installed
 profile file.
@@ -194,7 +199,7 @@ profile file.
   the kernel scheduler. Selecting a profile replaces hand edits to that file.
 </Aside>
 
-Pearl v0.3.0 uses `scx.service`, not the older `scxctl`/`scx_loader` backend.
+Pearl's scheduling controls use `scx.service`.
 It needs a sched_ext-capable kernel, scheduler binaries, Pearl's helper/polkit
 files and a version-2 profile file. Pearl reads
 `/etc/pearl/scheduling-profiles.json` before
