@@ -116,48 +116,70 @@ import cdn77 from "../assets/icons/cdn77.svg";
     href="https://repo.seafoam-labs.org/"
   />
 
-  <AnchorHeading level="3" id="powered-by">
-    Powered by
-  </AnchorHeading>
-
-  <div class="my-4 flex flex-wrap items-center gap-x-8 gap-y-2">
-    <a
-      href="https://jb.gg/OpenSource"
-      class="inline-block rounded-md p-3 hover:bg-(--sl-color-gray-6) dark:hover:bg-(--sl-color-gray-6)"
-    >
-      <Image
-        src={jetbrainsWhite}
-        class="hidden dark:block"
-        alt="JetBrains logo."
-        width={298}
-        height={64}
-      />
-      <Image
-        src={jetbrains}
-        class="mt-0 block dark:hidden"
-        alt="JetBrains logo."
-        width={298}
-        height={64}
-      />
-    </a>
-    <a
-      href="https://www.cdn77.com/sponsorship"
-      class="inline-block rounded-md p-3 hover:bg-(--sl-color-gray-6) dark:hover:bg-(--sl-color-gray-6)"
-    >
-      <Image
-        src={cdn77White}
-        class="hidden dark:block"
-        alt="CDN77 logo."
-        width={217}
-        height={64}
-      />
-      <Image
-        src={cdn77}
-        class="mt-0 block dark:hidden"
-        alt="CDN77 logo."
-        width={217}
-        height={64}
-      />
-    </a>
+  <div class="grid gap-x-8 gap-y-10 md:grid-cols-2">
+    <section class="mt-0">
+      <AnchorHeading level="3" id="sponsors">
+        Sponsors
+      </AnchorHeading>
+      <div class="mt-4">
+        <a
+          href="https://www.cdn77.com/sponsorship"
+          class="-ml-3 inline-block rounded-md p-3 hover:bg-(--sl-color-gray-6) dark:hover:bg-(--sl-color-gray-6)"
+        >
+          <Image
+            src={cdn77White}
+            class="hidden dark:block"
+            alt="CDN77 logo."
+            width={217}
+            height={64}
+          />
+          <Image
+            src={cdn77}
+            class="mt-0 block dark:hidden"
+            alt="CDN77 logo."
+            width={217}
+            height={64}
+          />
+        </a>
+      </div>
+      <p class="mt-3 mb-0 text-(length:--sl-text-sm) text-(--sl-color-gray-3)">
+        CDN77 supports Seafoam Labs through their open-source sponsorship
+        program.
+      </p>
+    </section>
+    <section class="mt-0">
+      <AnchorHeading level="3" id="supported-by">
+        Supported by
+      </AnchorHeading>
+      <div class="mt-4">
+        <a
+          href="https://www.jetbrains.com/"
+          class="-ml-3 inline-block rounded-md p-3 hover:bg-(--sl-color-gray-6) dark:hover:bg-(--sl-color-gray-6)"
+        >
+          <Image
+            src={jetbrainsWhite}
+            class="hidden dark:block"
+            alt="JetBrains logo."
+            width={298}
+            height={64}
+          />
+          <Image
+            src={jetbrains}
+            class="mt-0 block dark:hidden"
+            alt="JetBrains logo."
+            width={298}
+            height={64}
+          />
+        </a>
+      </div>
+      <p class="mt-3 mb-0 text-(length:--sl-text-sm) text-(--sl-color-gray-3)">
+        Product subscriptions provided by JetBrains'{" "}
+        <a href="https://jb.gg/OpenSource">open-source support program</a>.
+      </p>
+      <p class="mt-2 mb-0 text-(length:--sl-text-xs) text-(--sl-color-gray-3)">
+        Copyright © {new Date().getFullYear()} JetBrains s.r.o. JetBrains and
+        the JetBrains logo are trademarks of JetBrains s.r.o.
+      </p>
+    </section>
   </div>
 </StarlightPage>
