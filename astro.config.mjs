@@ -197,6 +197,15 @@ export default defineConfig({
                 "sched-ext/docs/troubleshooting",
               ],
             },
+            {
+              label: "helicoprion",
+              items: [
+                {
+                  slug: "helicoprion/overview",
+                  label: "Benchmarking guide",
+                },
+              ],
+            },
           ],
         },
         {
