@@ -158,13 +158,13 @@ For crashes, freezes or low frame rates:
 4. Change one setting at a time and keep its previous value. For a total input
    freeze, arrange an independent recovery console before trying to reproduce it.
 
-These reports remain open as of 24 October 2026:
+These closed reports document earlier symptoms:
 
 | Symptom                                                             | Existing report                                                                                                            |
 | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| MPV playback slows the desktop                                      | [#44](https://github.com/Seafoam-Labs/Aqueous/issues/44): reported on Aqueous 0.4.8 with AMD Lucienne; still unreproduced. |
-| Fullscreen game freezes and input stops while other content updates | [#103](https://github.com/Seafoam-Labs/Aqueous/issues/103): immediate freeze versus focus-return trigger remains unclear.  |
-| Proton native-Wayland scRGB HDR colors spill into other channels    | [#104](https://github.com/Seafoam-Labs/Aqueous/issues/104): reported with Cyberpunk 2077.                                  |
+| MPV playback slows the desktop                                      | [#44](https://github.com/Seafoam-Labs/Aqueous/issues/44): closed without reproduction. |
+| Fullscreen game freezes and input stops while other content updates | [#103](https://github.com/Seafoam-Labs/Aqueous/issues/103): the reporter no longer reproduced the freeze after a Steam update. |
+| Proton native-Wayland scRGB HDR colors spill into other channels    | [#104](https://github.com/Seafoam-Labs/Aqueous/issues/104): the reported scRGB path was fixed in Aqueous v1.0.19. |
 
 An offscreen crash needs diagnosis before a keep-active rule. Focus, suspension,
 frame callbacks, rendering and process liveness are different states. No general

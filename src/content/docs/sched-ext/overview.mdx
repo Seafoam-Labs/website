@@ -64,18 +64,21 @@ A scheduler that exits returns control to the kernel's own scheduler.
 
 ## Pearl desktop controls
 
-Pearl also has graphical scheduler controls. Their profile files and helper
-requirements belong to [Pearl's scheduling documentation](/pearl/docs/audio-power/#system-and-scheduling);
-they are not interchangeable with the scxcli catalog. Use that guide for the
-Pearl Settings interface and these guides for the terminal tools.
+Pearl builds with the scx backend use the same scheduler catalog as `scxcli`
+and `scxtui`.
+See [Pearl's scheduling guide](/pearl/docs/audio-power/#system-and-scheduling)
+for the graphical controls and for the difference between a configured and an
+active scheduler.
 
 ## Developer references
 
 This page adapts the **sched_ext guide for Devario by [sir_lucjan](https://github.com/sirlucjan)**. It describes the
-`scxtui` / `scxcli` / `scx.service` workflow in
-[the current source](https://github.com/sched-ext/scx/tree/9344d26331bbdfbeec0e44d3cc444aed54b6a1a0).
-Devario's release package is built from
-[`v1.1.5-devario5`](https://github.com/Seafoam-Labs/scx/tree/v1.1.5-devario5).
+`scxtui` / `scxcli` / `scx.service` workflow shipped in Devario's
+[`scx-scheds` package](https://repo.seafoam-labs.org/package/devario-core/x86_64/scx-scheds).
+See the [Devario package recipe](https://github.com/Seafoam-Labs/devario-custom-packagbuilds/blob/HEAD/devario-core/scx-scheds/PKGBUILD)
+for the source tag used by the recipe.
+On other distributions, check the installed package rather than assuming the
+same tools and service are available.
 
 - [scxcli reference](https://github.com/sched-ext/scx/blob/main/tools/scxcli/README.md): commands, privileges and custom profiles.
 - [scxtui reference](https://github.com/sched-ext/scx/blob/main/tools/scxtui/README.md): requirements, keyboard controls and interface behavior.
