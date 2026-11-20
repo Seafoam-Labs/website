@@ -21,7 +21,7 @@ scxtui
 3. Check the status panel to confirm the scheduler is running.
 4. Press **q** in the recommended list to close the menu. The scheduler keeps running.
 
-Your selection also starts at boot.
+The service is enabled to try the saved selection at boot.
 
 Switching normally needs no password in an active local session with `pkexec`
 and the packaged polkit policy. Remote sessions and local administrator policies
@@ -62,9 +62,9 @@ pkexec scxcli start scx_lavd
 scxcli get
 ```
 
-To switch, run `start` again with another listed ID. The new selection takes
-effect immediately and persists after reboot. To pause that selection and
-resume it later:
+To switch, run `start` again with another listed ID and check the result with
+`scxcli get`. The selection is saved for later boots. To pause it and resume
+it later:
 
 ```sh
 pkexec scxcli stop
@@ -92,8 +92,9 @@ need root privileges; `pkexec` applies the installed polkit policy.
 ## Start automatically at boot
 
 Choosing a scheduler with `scxtui` or `scxcli start ID` saves the selection
-and enables `scx.service`. It starts again at the next boot; you do not need
-to add a separate autostart command or leave the terminal open.
+and enables `scx.service` to try the selection at boot. An incompatible kernel
+or a missing scheduler binary can prevent it from attaching. You do not need
+a separate autostart command. Run `scxcli get` after reboot to verify what attached.
 
 Check the boot setting and current scheduler with:
 

@@ -169,10 +169,12 @@ promise that every optional backend is installed or supported on Devario.
 System packages are upgraded as a full native system upgrade, without per-package System
 checkboxes. AUR and Flatpak rows have an individual **Update this package** action when available.
 
-:::caution[Combined upgrade scope in Shelly 3.3.0]
-Do not rely on individual optional-package checkboxes to exclude packages from the combined
-upgrade. Its command uses source-level flags, not the checked row names. Use the row's individual
-update action when you need to update one supported AUR or Flatpak package.
+:::caution[Upgrade Selected can include unchecked packages]
+Do not rely on individual optional-package checkboxes to exclude packages from
+the combined upgrade. The builds checked through Shelly 3.4.0 pass
+[source-level flags, not the checked row names](https://github.com/Seafoam-Labs/Shelly-ALPM/blob/v3.4.0/Shelly.Ui.Gtk/src/pages/update_page.zig#L659-L705).
+Use the row's individual update action when you need to update one supported
+AUR or Flatpak package.
 
 The combined CLI workflow can also include AppImage updates when that backend is enabled, although
 the page does not list AppImage rows. For explicit backend controls, read the

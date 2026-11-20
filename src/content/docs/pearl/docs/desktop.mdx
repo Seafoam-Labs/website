@@ -54,10 +54,14 @@ contents across your computer.
 
 ## Start an application at login
 
-Follow [Start an application at login](/aqueous/configuration/#start-an-application-at-login)
-to add, check or disable an Aqueous startup command. Window rules do not launch
-applications. Check existing XDG autostart entries to avoid starting the same
-app twice, and use your session's configuration root.
+Open **Settings → Startup** to add, remove, or toggle XDG autostart entries.
+Disabling a system entry creates a per-user
+override; it does not change the system file.
+
+For commands launched by the compositor itself, use
+[Aqueous startup commands](/aqueous/configuration/#start-an-application-at-login).
+Use one method per application to avoid starting it twice. Window rules do
+not launch applications.
 
 ## The bar
 
@@ -175,6 +179,15 @@ Patterns live in the `bar.clocks` definitions:
   }
 }
 ```
+
+### Layout presets
+
+Open **Settings → Bar & dock → Layout presets** to
+start from a shipped bar and dock arrangement. Select the **macOS** or
+**Windows** tile to stage a draft, then review it and use **Apply & save**.
+If the picker is missing, check [package versions](/pearl/installation/#version-and-distribution-differences):
+it requires Pearl v0.3.11 or newer. Presets change the bar and dock
+fields they own without replacing unrelated settings or per-display overrides.
 
 ## Bar widgets
 
@@ -380,6 +393,11 @@ and desktop actions. A rejected, dropped or unknown compositor action shows a
 non-focusable on-screen message.
 
 ### Choose the right search
+
+To search local documents, enable **Settings → Assistant → Semantic search**
+and select only the folders you want indexed.
+The launcher shows ordinary results first and document matches as they become
+available. Embedding and ranking run locally; the feature is off by default.
 
 Open Launcher, then type an application name or window title. Use
 [Calculator](#calculator) for arithmetic,

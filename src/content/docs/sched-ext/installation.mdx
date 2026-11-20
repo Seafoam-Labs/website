@@ -19,7 +19,8 @@ Choose the instructions for your distribution. Use the release package,
   <TabItem label="Devario (Shelly)">
 
     Install from [devario-core](https://repo.seafoam-labs.org/package/devario-core/x86_64/scx-scheds).
-    You do not need a development repository.
+    The regular `linux-devario` kernel supports sched_ext. You do not need a
+    development kernel or repository.
 
     <Steps>
 
@@ -43,14 +44,15 @@ Choose the instructions for your distribution. Use the release package,
     configuration. On Arch, the release package is available from the official
     repositories; you do not need to add a Devario development repository.
 
-    <Code code="sudo pacman -Syu scx-scheds polkit" lang="sh" />
+    <Code code="sudo pacman -Syu scx-scheds" lang="sh" />
 
-    The Arch package and the Devario fork can contain different tools. Check for
-    `scxcli` and `scxtui` before following the [switching instructions](/sched-ext/docs/usage/). If either
-    is missing, use the
-    [upstream catalog installation instructions](https://github.com/sched-ext/scx/blob/main/INSTALL.md#the-scheduler-catalog-scxcli-and-scxtui)
-    for your release instead. Do not assume a Devario repository is compatible
-    with another distribution.
+    The [official Arch package](https://archlinux.org/packages/extra/x86_64/scx-scheds/files/)
+    provides scheduler binaries, not this guide's catalog tools or service.
+    Arch's separate `scx-tools` package ships a different `scxtui` based on
+    `scx_loader`. Follow the [switching instructions](/sched-ext/docs/usage/)
+    only if your distribution provides the catalog-based tools and supporting
+    files listed below. The [upstream catalog build guide](https://github.com/sched-ext/scx/blob/main/INSTALL.md#the-scheduler-catalog-scxcli-and-scxtui)
+    describes development builds. Do not add Devario repositories to Arch.
 
   </TabItem>
 </Tabs>

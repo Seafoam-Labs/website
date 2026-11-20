@@ -7,6 +7,7 @@ helicoprion is a benchmarking tool for sched_ext. It runs the same workloads wit
 
 ## Install helicoprion
 
+The examples on this page target [helicoprion 0.5.0](https://github.com/Seafoam-Labs/helicoprion/tree/0.5.0).
 Install the [helicoprion release on crates.io](https://crates.io/crates/helicoprion) with Cargo:
 
 ```sh
@@ -31,6 +32,11 @@ scxcli list recommended
 
 If none of the recommended schedulers is installed, use `scxcli list` to find an installed alternative and [pick it by name](#pick-the-schedulers-yourself). If you don't have the switching tools yet, you can still [measure the running scheduler](#measure-the-running-scheduler).
 
+`matrix` also needs compatible JSON from both `scxcli get --json` and
+`scxcli list --json`. Both must report top-level `"version": 2`. If either
+command is unavailable or reports a different schema, use [`run`](#measure-the-running-scheduler)
+without switching schedulers.
+
 ### 2. Run the comparison
 
 Close builds, games and other background jobs. Keep the same power settings throughout the test. This command compares the installed recommendations with the kernel default using the `quick` suite:
@@ -41,7 +47,16 @@ sudo -- "$(command -v helicoprion)" matrix --recommended --simple -o comparison/
 
 The explicit path lets `sudo` find a Cargo installation. Use a new or empty output directory. Before starting, helicoprion prints a time estimate. It runs five rounds by default and [reverses the scheduler order each round](https://github.com/Seafoam-Labs/helicoprion/blob/fbf0b3f011e5e6ea5e1fbf8508d672356772ece0/METHODOLOGY.md#rounds), so the same scheduler does not always go first as the machine warms up.
 
-At the end, helicoprion [restores the previous scheduler selection and service state](https://github.com/Seafoam-Labs/helicoprion/blob/fbf0b3f011e5e6ea5e1fbf8508d672356772ece0/METHODOLOGY.md#restoring-the-previous-state). To stop early, press Ctrl+C once and wait. A second Ctrl+C exits without restoring. If restoration fails, use the recovery commands printed at the start, then check `scxcli get` and `helicoprion info`. If a scheduler will not start, see [sched_ext troubleshooting](/sched-ext/docs/troubleshooting/#a-scheduler-fails-to-start).
+Before switching, `matrix` checks whether it can reconstruct the starting state.
+It can refuse to start when there are active service overrides, runtime-only
+enablement, or a mismatch between the service and the running scheduler. See
+[sched_ext troubleshooting](/sched-ext/docs/troubleshooting/) before retrying.
+
+On completion, error, or the first Ctrl+C, helicoprion
+[attempts and checks restoration](https://github.com/Seafoam-Labs/helicoprion/blob/fbf0b3f011e5e6ea5e1fbf8508d672356772ece0/METHODOLOGY.md#restoring-the-previous-state).
+To stop early, press Ctrl+C once and wait. A second Ctrl+C exits without
+restoring. If restoration fails, use the recovery commands printed at the
+start, then check `scxcli get` and `helicoprion info`.
 
 ### 3. Open the report
 
@@ -92,11 +107,15 @@ helicoprion compare default-vs-lavd/00-default.json default-vs-lavd/01-scx_lavd.
   -o report.html --svg-dir charts/
 ```
 
-To see whether a result repeats, run the same `matrix` command again with a new output directory. For example, repeat the first comparison with `-o comparison-repeat/`, then pass both directories to `sessions`:
+To see whether two sessions agree, run the same `matrix` command again with a new output directory. For example, repeat the first comparison with `-o comparison-repeat/`, then pass both directories to `sessions`:
 
 ```sh
 helicoprion sessions comparison/ comparison-repeat/ -o sessions.html
 ```
+
+Two sessions show whether those runs agree. Use at least five comparable
+sessions to judge how often a result repeats; that is a practical minimum,
+not a statistical guarantee.
 
 `sessions` reports [setup differences that prevent comparison and fields it could not check](https://github.com/Seafoam-Labs/helicoprion/blob/fbf0b3f011e5e6ea5e1fbf8508d672356772ece0/METHODOLOGY.md#comparing-sessions). When the setups match, it shows the results side by side without pooling the runs. To see how much the benchmark varies without a scheduler change, run a separate comparison with `--sched default --sched default`. This A/A check uses six rounds by default. If you set `--rounds` yourself, use an even number.
 

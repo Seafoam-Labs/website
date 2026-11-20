@@ -52,29 +52,30 @@ Open the [Seafoam Labs homepage](https://www.seafoam-labs.org/) and find the
 Devario section. Select **Get the ISO** to download the image and **SHA-256**
 beside it to download the matching checksum. Save both files in the same folder.
 
-Open a terminal in the download folder. The commands below use `2026.10.31`.
-If you downloaded a newer release, use its matching filenames instead.
+Open a terminal in the download folder. In the examples below, replace
+`IMAGE.iso` or `IMAGE.iso.sha256` with the exact name of the file you
+downloaded. Keep the quotes around the filename.
 
 <Tabs>
   <TabItem label="Linux">
     ```sh
-    sha256sum -c devario-2026.10.31-x86_64.iso.sha256
+    sha256sum -c -- "IMAGE.iso.sha256"
     ```
 
-    Continue only if it reports `devario-2026.10.31-x86_64.iso: OK`.
+    Continue only if it reports `OK` for your ISO filename.
 
   </TabItem>
   <TabItem label="macOS">
     ```sh
-    shasum -a 256 -c devario-2026.10.31-x86_64.iso.sha256
+    shasum -a 256 -c -- "IMAGE.iso.sha256"
     ```
 
-    Continue only if it reports `devario-2026.10.31-x86_64.iso: OK`.
+    Continue only if it reports `OK` for your ISO filename.
 
   </TabItem>
   <TabItem label="Windows PowerShell">
     ```powershell
-    Get-FileHash .\devario-2026.10.31-x86_64.iso -Algorithm SHA256
+    Get-FileHash -LiteralPath ".\IMAGE.iso" -Algorithm SHA256
     ```
 
     Open the `.sha256` file in a text editor and compare its entire hash with
