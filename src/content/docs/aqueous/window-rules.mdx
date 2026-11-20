@@ -208,13 +208,13 @@ side, and the fallback fills the output when no anchor matches.
 
 ### Visual, buffer, HDR, and overlay policy
 
-| Field                 | Values and behavior                                            |
-| --------------------- | -------------------------------------------------------------- |
-| `blur`                | Per-window blur eligibility; global blur must also be enabled. |
-| `opacity`             | `0.0` through `1.0`, overriding global/focus opacity.          |
-| `buffer_scale_policy` | `native` or `integer-ceil`.                                    |
-| `hdr_expand`          | Force or suppress Auto HDR highlight expansion.                |
-| `overlay_plane`       | `off` or `prefer`.                                             |
+| Field                 | Values and behavior                                                                |
+| --------------------- | ---------------------------------------------------------------------------------- |
+| `blur`                | Per-window blur eligibility; global blur must also be enabled.                     |
+| `opacity`             | `0.0` through `1.0`, overriding global/focus opacity.                              |
+| `buffer_scale_policy` | `native` or `integer-ceil`.                                                        |
+| `hdr_expand`          | Force or suppress Auto HDR highlight expansion.                                    |
+| `overlay_plane`       | `off` or `prefer`.                                                                 |
 | `keep_render`         | `true` keeps a hidden managed window receiving frame callbacks (v1.0.21 or later). |
 
 `keep_render` does not make a window visible or eligible for capture. It keeps

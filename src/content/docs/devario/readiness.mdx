@@ -13,14 +13,14 @@ that every published image contains the latest changes.
 
 ## Hardware and installation
 
-| Area                   | Current setup                                                                                                                                                    |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CPU                    | x86-64-v3 target for the Devario kernel and image                                                                                                                |
-| Firmware               | BIOS or UEFI for live boot; **64-bit UEFI required for installation**                                                                                            |
-| Secure Boot            | Not configured by the image                                                                                                                                      |
-| Intel and AMD graphics | Mesa and Vulkan drivers are included; check your hardware with the live desktop                                                                                  |
-| NVIDIA graphics        | The separate `nvidia-open-dkms` package supports eligible Turing-and-newer GPUs. Calamares checks the packaged driver's PCI support list before partitioning. |
-| Older NVIDIA GPUs      | The installer source provides a 580 driver path for supported Maxwell/Pascal/Volta GPUs on the installed system, not in the live session. Support depends on the image; Nouveau is blacklisted. |
+| Area                   | Current setup                                                                                                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CPU                    | x86-64-v3 target for the Devario kernel and image                                                                                                                                                                      |
+| Firmware               | BIOS or UEFI for live boot; **64-bit UEFI required for installation**                                                                                                                                                  |
+| Secure Boot            | Not configured by the image                                                                                                                                                                                            |
+| Intel and AMD graphics | Mesa and Vulkan drivers are included; check your hardware with the live desktop                                                                                                                                        |
+| NVIDIA graphics        | The separate `nvidia-open-dkms` package supports eligible Turing-and-newer GPUs. Calamares checks the packaged driver's PCI support list before partitioning.                                                          |
+| Older NVIDIA GPUs      | The installer source provides a 580 driver path for supported Maxwell/Pascal/Volta GPUs on the installed system, not in the live session. Support depends on the image; Nouveau is blacklisted.                        |
 | External GPUs          | Bolt and GPU hotplug support are included. For an NVIDIA eGPU added after an installation without NVIDIA hardware, install a compatible driver explicitly. Test hotplug, displays and suspend/resume on your hardware. |
 
 For per-application GPU selection, Steam launch options and hybrid-laptop

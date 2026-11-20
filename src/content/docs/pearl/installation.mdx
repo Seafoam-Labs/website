@@ -43,7 +43,6 @@ before installing it on an existing desktop.
   <Code code="shelly install standard pearl-git" lang="sh" />
 </Card>
 
-
 Git Pearl uses suffixed commands but shares `~/.config/pearl/` preferences
 with stable. Choose the [Aqueous Git desktop](/aqueous/installation/)
 carefully: one replaces stable Aqueous, the other uses a separate session.
@@ -90,12 +89,12 @@ You can browse the full catalog at
 
 ## Build from a checkout
 
-| Recipe                         | Packages                                                                      | Purpose                                                                |
-| ------------------------------ | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `packaging/arch`               | `pearl`                                                                       | Stable shell built from the published release tag.                     |
+| Recipe                         | Packages                                                                      | Purpose                                                                              |
+| ------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `packaging/arch`               | `pearl`                                                                       | Stable shell built from the published release tag.                                   |
 | `packaging/arch-git`           | `pearl-git`, `pearl-greeter-git`                                              | Split Git build. The shell can coexist with the stable shell; the greeters conflict. |
-| `packaging/arch-darkly-style*` | `pearl-darkly-style` variants                                                 | Optional Qt Darkly application styles.                                 |
-| `packaging/Devario`            | `pearl`, `pearl-greeter`, `pearl-git`, `pearl-greeter-git`, `devario-desktop` | Stable and Git recipes used to build the Devario desktop.              |
+| `packaging/arch-darkly-style*` | `pearl-darkly-style` variants                                                 | Optional Qt Darkly application styles.                                               |
+| `packaging/Devario`            | `pearl`, `pearl-greeter`, `pearl-git`, `pearl-greeter-git`, `devario-desktop` | Stable and Git recipes used to build the Devario desktop.                            |
 
 The [v0.3.11 packaging recipe](https://github.com/Seafoam-Labs/pearl/blob/v0.3.11/packaging/arch/PKGBUILD)
 requires **Zig 0.17.1** and Python 3.14 or newer. For a Git checkout, use the
