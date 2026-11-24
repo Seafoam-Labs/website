@@ -107,6 +107,7 @@ export default defineConfig({
             "devario/package-requests",
             "devario/graphics",
             "devario/platform",
+            "devario/dracut",
             "devario/readiness",
             {
               label: "For organizations",
