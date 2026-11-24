@@ -1,0 +1,28 @@
+/* Sea Glass palette. Each light-dark() pair is light first, dark second. */
+:root[data-palette="sea-glass"] {
+  --sf-canvas: light-dark(#f3f1ec, #252d35);
+  --sf-surface: light-dark(#ccd6dc, #35414b);
+  --sf-text: light-dark(#263039, #f3f1ec);
+  --sf-text-muted: light-dark(#4c5a64, #c6cdd1);
+  --sf-action: light-dark(#252d35, #f0e4cb);
+  --sf-on-action: light-dark(#f3f1ec, #263039);
+  --sf-action-hover: light-dark(#35414b, #f3f1ec);
+  --sf-action-pressed: light-dark(#18232b, #dfd3ba);
+  --sf-link: light-dark(#252d35, #f0e4cb);
+  --sf-focus: light-dark(#252d35, #f0e4cb);
+  --sf-boundary: light-dark(#64717b, #89959c);
+
+  /* Project surfaces share these values in both appearances. */
+  --sf-shelly-surface: #d4c9e0;
+  --sf-starfish-surface: #dec395;
+  --sf-aqueous-surface: #e3c4bf;
+  --sf-pearl-surface: #d4c9e0;
+  --sf-pori-surface: #dec395;
+  --sf-card-border: transparent;
+  --sf-card-ink: #263039;
+  --sf-card-action-hover: #263039;
+  --sf-card-action-pressed: #35414b;
+  --sf-on-card-action: #f3f1ec;
+  --sf-hero-seafoam: var(--sf-text);
+  --sf-hero-labs: var(--sf-text);
+}
