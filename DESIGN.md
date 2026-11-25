@@ -123,6 +123,15 @@ when entering and leaving hover. Press feedback uses 75ms. Navigation disclosure
 and footer appearance triggers use the same color timing. Focus outlines remain
 immediate, and reduced-motion preferences disable these transitions.
 
+Project-card “Learn more” links fill with a shallow wave on hover, rising and
+moving sideways over 360ms before resting fully filled. A single SVG mask reveals
+both the fill and an `aria-hidden` copy of the label so the text keeps its
+contrasting color at the waterline. Leaving hover reverses the transition from
+its current position. Reduced motion makes the fill immediate; touch devices,
+forced colors, and browsers without CSS masking retain the ordinary action
+treatment. Keyboard focus keeps the shared immediate outline. The effect is
+local to `ProjectCard.astro` and uses the existing card action colors.
+
 Use native `disabled` only for an unavailable button, with a visible explanation
 at the call site. Disabled buttons do not receive hover or pressed treatments.
 Navigation links remain usable; do not simulate a disabled link with these styles.
@@ -404,6 +413,22 @@ column and scrolls within the viewport. Compact documentation navigation fills
 the viewport, with a native Close documentation button supplied by
 [Sidebar.astro](src/components/overrides/Sidebar.astro). That override retains
 Starlight's sidebar content, state persistence, and navigation behavior.
+
+## Homepage components
+
+The homepage retains Starlight's configured hero and original Chel image. Its
+scoped layout places the introduction before the mascot on compact screens and
+beside it on desktop. Copy and actions stay left aligned; the compact mascot
+is centered below them. The title uses solid palette colors, followed by the
+approved tagline and one Learn more link to the Wiki. Product-page heroes keep
+their existing presentation.
+
+The homepage uses one [ProjectCard.astro](src/components/ProjectCard.astro) for
+the five explicit project descriptions. Palette roles select each surface;
+the collection owns its responsive columns. Cards have natural content height
+and align actions within desktop rows. Aqueous and Pearl retain their overview
+destinations, as confirmed during the handoff. Heading permalinks can wrap with
+enlarged text instead of widening the page.
 
 ## Typography and icons
 

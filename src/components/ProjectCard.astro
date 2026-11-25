@@ -1,0 +1,135 @@
+---
+import buttonWave from "../assets/images/button-wave.svg?url";
+
+interface Props {
+  title: string;
+  href: string;
+  project: "shelly" | "starfish" | "aqueous" | "pearl" | "pori";
+}
+
+const { title, href, project } = Astro.props;
+---
+
+<article
+  class="project-card not-content"
+  style={{ "--project-surface": `var(--sf-${project}-surface)` }}
+>
+  <h3>{title}</h3>
+  <p>
+    <slot />
+  </p>
+  <a
+    class="sf-action sf-action--card"
+    {href}
+    aria-label={`Learn more about ${title}`}
+  >
+    Learn more
+    <span
+      class="wave-fill"
+      aria-hidden="true"
+      style={{ "--wave-mask": `url("${buttonWave}")` }}
+    >
+      Learn more
+    </span>
+  </a>
+</article>
+
+<style>
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--sf-card-border);
+    border-radius: 20px;
+    background: var(--project-surface);
+    color: var(--sf-card-ink);
+    overflow-wrap: anywhere;
+  }
+  h3 {
+    margin: 0 0 1rem;
+    color: inherit;
+    font-size: 1.625rem;
+    line-height: 1.231;
+  }
+  p {
+    flex: 1;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  a {
+    position: relative;
+    margin-top: 1.5rem;
+  }
+  .wave-fill {
+    display: none;
+  }
+
+  @supports (mask-image: url("")) {
+    @media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+      /* The overlay owns the fill; keep the original label readable above the water. */
+      .project-card a:is(:hover, :active) {
+        border-color: var(--sf-card-ink);
+        background: transparent;
+        color: var(--sf-card-ink);
+      }
+      .wave-fill {
+        position: absolute;
+        inset: -1.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: inherit;
+        border: 1.5px solid transparent;
+        border-radius: inherit;
+        background: var(--sf-card-action-hover);
+        color: var(--sf-on-card-action);
+        pointer-events: none;
+        /* Mask the fill and its label together without moving either one. */
+        mask-image: var(--wave-mask);
+        mask-mode: alpha;
+        /* Keep the crest outside the button at both ends of the transition. */
+        mask-size: 200% 240%;
+        mask-repeat: no-repeat;
+        mask-position: 0% 0%;
+      }
+      a:hover .wave-fill {
+        mask-position: 50% 100%;
+      }
+      a:active .wave-fill {
+        background: var(--sf-card-action-pressed);
+        mask-position: 50% 100%;
+        transition: none;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .wave-fill {
+          transition: mask-position 360ms ease-out;
+        }
+      }
+    }
+  }
+  p :global(code) {
+    font-size: 0.9375em;
+  }
+  @media (width < 24rem) {
+    .project-card {
+      padding: 20px;
+    }
+  }
+  @media (min-width: 64rem) {
+    .project-card {
+      padding: 32px;
+    }
+    h3 {
+      font-size: 1.5rem;
+      line-height: 1.333;
+    }
+    p {
+      font-size: 1.125rem;
+      line-height: 1.556;
+    }
+  }
+</style>
