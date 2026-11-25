@@ -81,9 +81,9 @@ This darkens the fill while preserving its hue and follows future palette
 changes automatically. The label keeps `--sf-on-action` at full opacity;
 check its contrast in every state when changing a palette's base colors.
 
-The older product-page gradients and Devario showcase still use the legacy
-Tailwind colors in `global.css`, so changing the palette does not yet recolor
-every existing treatment.
+The older product-page gradients still use the legacy Tailwind colors in
+`global.css`, so changing the palette does not yet recolor every existing
+treatment. The replacement Devario showcase uses the semantic palette roles.
 
 ### Adding a palette
 
@@ -429,6 +429,57 @@ the collection owns its responsive columns. Cards have natural content height
 and align actions within desktop rows. Aqueous and Pearl retain their overview
 destinations, as confirmed during the handoff. Heading permalinks can wrap with
 enlarged text instead of widening the page.
+
+The homepage Devario feature replaces the previous desktop illustration and
+feature list. Overview is a text link beside the heading, followed by the
+description and the Download ISO and Copy checksum controls. Desktop places
+the enlarged fish alongside this content, with View on GitHub in the upper
+right. Compact layouts wrap the heading and controls as needed, then place
+the fish and GitHub link below the introduction.
+
+The feature title reads DEVARIO in self-hosted Poppins Bold (700) with 0.23em
+letter spacing, scoped to this block. The Latin WOFF2 comes from Google Fonts
+and its OFL license is stored alongside the font in `src/assets/fonts/`.
+The spacing matches the approximately 0.22985em measured from the raster
+wordmark and Poppins's glyph metrics.
+
+Hovering the Devario block or focusing one of its controls reveals a left-to-right
+sRGB gradient through the title and fish together, using the project buttons'
+SVG wave mask and 360ms ease-out transition. Leaving the block reverses the fill.
+The solid title uses the inverse of the wave mask, so it disappears wherever
+the gradient appears instead of leaving a dark or light fringe beneath its edges.
+The sampled visible wordmark endpoints are #5EC4B0 and #0A9CF4; these reproduce the raster
+colors rather than claiming the original design file's gradient stops.
+This branding treatment is an explicitly requested exception to the project's
+gradient-text restriction. Reduced motion makes the fill immediate. Touch,
+forced colors, and browsers without the required CSS retain the solid title
+and monochrome fish; the decorative duplicate stays hidden from assistive technology.
+
+The official Devario logo is used as an alpha mask with black ink in light mode
+and white ink in dark mode, in both palettes. The existing 1253 × 839 PNG matches the
+[upstream logo](https://raw.githubusercontent.com/Seafoam-Labs/devario-os/refs/heads/main/iso/late-airootfs/usr/share/devario/fastfetch/devario-logo.png).
+The mask displays only its top 640 source pixels, retaining the fish and
+excluding the embedded DEVARIO wordmark without modifying the source asset.
+A separate luminance mask intersects that silhouette, keeping the upper fish
+solid and dissolving the lower portion into fine stippling. The static texture
+is shared across themes and palettes; it does not change the logo's geometry.
+The gradient wave sits inside these masks, preserving the silhouette and
+dithering throughout the transition.
+
+## Release checksum
+
+[consts.ts](src/consts.ts) keeps the ISO URL, checksum-file URL, and published
+SHA-256 together while preserving the existing documentation imports. The
+digest for `devario-2026.11.18-x86_64.iso` was verified against its CDN77 checksum file
+on 24 November 2026. Update these values together when changing the release.
+No download size is displayed without verified metadata.
+
+[CopyChecksum.astro](src/components/CopyChecksum.astro) copies the digest through
+the browser clipboard API and reports success only after the write succeeds.
+Its status region exists before the action and does not take focus. There is
+no separate checksum-file link in the homepage card. The digest itself becomes
+available for manual selection when copying fails, the API is unavailable,
+or JavaScript is disabled. The setup documentation retains its checksum-file link.
 
 ## Typography and icons
 
