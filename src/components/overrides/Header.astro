@@ -85,11 +85,7 @@ const currentPath = Astro.url.pathname.endsWith("/")
     const desktopGroups = header.querySelectorAll<HTMLElement>(
       "[data-desktop-navigation]",
     );
-    const searchButton = header.querySelector<HTMLButtonElement>(
-      "button[data-open-modal]",
-    );
-    const searchDialog =
-      header.querySelector<HTMLDialogElement>("site-search dialog");
+    const search = header.querySelector("site-search");
     const sidebar = document.getElementById("starlight__sidebar");
     const sidebarClose =
       sidebar?.querySelector<HTMLButtonElement>(".sidebar-close");
@@ -107,26 +103,23 @@ const currentPath = Astro.url.pathname.endsWith("/")
       if (!(disclosure instanceof HTMLDetailsElement) || !disclosure.open)
         return;
       closeDisclosures(disclosure);
-      searchDialog?.close();
+      search?.dispatchEvent(new Event("site-search-dismiss"));
       if (sidebar?.matches(":popover-open")) sidebar.hidePopover();
     });
 
-    searchDialog?.addEventListener("beforetoggle", (event) => {
-      if (event.newState !== "open") return;
-      const focused = document.activeElement;
-      if (
-        [...disclosures].some((disclosure) => disclosure.contains(focused)) ||
-        sidebar?.contains(focused)
-      ) {
-        searchButton?.focus();
-      }
+    header.addEventListener("site-search-open", () => {
+      header.setAttribute("data-search-open", "");
       closeDisclosures();
       if (sidebar?.matches(":popover-open")) sidebar.hidePopover();
     });
 
+    header.addEventListener("site-search-close", () => {
+      header.removeAttribute("data-search-open");
+    });
+
     sidebar?.addEventListener("beforetoggle", (event) => {
       if (event.newState !== "open") return;
-      searchDialog?.close();
+      search?.dispatchEvent(new Event("site-search-dismiss"));
       if (
         [...disclosures].some((disclosure) =>
           disclosure.contains(document.activeElement),
@@ -152,6 +145,7 @@ const currentPath = Astro.url.pathname.endsWith("/")
 
     // CSS can hide a focused control before ResizeObserver runs.
     document.addEventListener("focusout", (event) => {
+      if (header.hasAttribute("data-search-open")) return;
       const focused = event.target;
       if (!(focused instanceof HTMLElement) || focused.checkVisibility())
         return;
@@ -339,35 +333,9 @@ const currentPath = Astro.url.pathname.endsWith("/")
     margin-inline-start: auto;
   }
 
-  .header-search :global(button[data-open-modal]) {
-    box-sizing: border-box;
-    justify-content: center;
-    inline-size: 44px;
-    min-block-size: 44px;
-    block-size: auto;
-    padding: 8px;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--sf-text);
-  }
-
-  .header-search :global(button[data-open-modal] > :is(span, kbd)) {
-    display: none;
-  }
-
-  .header-search :global(button[data-open-modal] > svg) {
-    inline-size: 20px;
-    block-size: 20px;
-  }
-
-  .header-search :global(button[data-open-modal]:hover) {
-    color: var(--sf-link);
-  }
-
-  .header-search :global(button[data-open-modal]:focus-visible) {
-    outline: 2px solid var(--sf-focus);
-    outline-offset: 3px;
+  .site-header[data-search-open] .header-search {
+    flex: 1;
+    min-inline-size: 0;
   }
 
   .header-socials {
@@ -455,13 +423,13 @@ const currentPath = Astro.url.pathname.endsWith("/")
       font-size: 1.25rem;
     }
 
-    .header-search :global(button[data-open-modal]),
+    .header-search :global(.sf-icon-control),
     .header-socials :global(.social-link) {
       min-inline-size: 3rem;
       min-block-size: 3rem;
     }
 
-    .header-search :global(button[data-open-modal] svg),
+    .header-search :global(.sf-icon-control svg),
     .header-socials :global(svg) {
       inline-size: 1.5rem;
       block-size: 1.5rem;
@@ -523,6 +491,13 @@ const currentPath = Astro.url.pathname.endsWith("/")
         transition: box-shadow 200ms ease;
       }
     }
+  }
+
+  .site-header[data-search-open] > :global(.navigation-disclosure),
+  .site-header[data-search-open] .home-link,
+  .site-header[data-search-open] .page-links,
+  .site-header[data-search-open] .site-menu--trailing {
+    display: none;
   }
 
   :global(:root) {

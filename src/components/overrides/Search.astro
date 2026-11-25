@@ -1,0 +1,471 @@
+---
+import { Icon } from "@astrojs/starlight/components";
+import config from "virtual:starlight/user-config";
+import project from "virtual:starlight/project-context";
+import "../../styles/search.css";
+
+const label = Astro.locals.t("search.label");
+const isEnglish = Astro.locals.starlightRoute.lang.startsWith("en");
+const placeholder = isEnglish ? "Search the site" : label;
+const translations = {
+  ...Object.fromEntries(
+    Object.entries(Astro.locals.t.all())
+      .filter(([key]) => key.startsWith("pagefind."))
+      .map(([key, value]) => [key.replace("pagefind.", ""), value]),
+  ),
+  placeholder,
+  clear_search: isEnglish
+    ? "Clear search"
+    : Astro.locals.t("pagefind.clear_search"),
+};
+const bundlePath = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/pagefind/`;
+const pagefindConfig =
+  typeof config.pagefind === "object" ? config.pagefind : {};
+const searchPage = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/search/`;
+const isSearchPage =
+  Astro.url.pathname.replace(/\/$/, "") === searchPage.replace(/\/$/, "");
+---
+
+{import.meta.env.PROD && !isSearchPage && (
+  <link rel="stylesheet" href={`${bundlePath}pagefind-ui.css`} />
+)}
+{isSearchPage ? (
+  <a
+    class="sf-icon-control"
+    href="#page-search-input"
+    aria-label={label}
+    aria-keyshortcuts="Control+K Meta+K"
+  >
+    <Icon name="magnifier" />
+  </a>
+) : (
+  <site-search>
+    <button
+      class="sf-icon-control"
+      data-search-open
+      aria-label={label}
+      aria-expanded="false"
+      aria-controls="site-search-interface"
+      aria-keyshortcuts="Control+K Meta+K"
+      hidden
+    >
+      <Icon name="magnifier" />
+    </button>
+    <div class="search-interface" id="site-search-interface" hidden>
+      <template data-search-clear-icon>
+        <Icon name="close" />
+      </template>
+      <label for="site-search-input" class="sr-only">
+        {label}
+      </label>
+      <div
+        id="starlight__search"
+        data-bundle-path={bundlePath}
+        data-translations={JSON.stringify(translations)}
+        data-config={JSON.stringify(pagefindConfig)}
+        data-strip-trailing-slash={
+          project.trailingSlash === "never" ? "" : undefined
+        }
+      >
+        {import.meta.env.DEV && (
+          <input id="site-search-input" {placeholder} readonly />
+        )}
+      </div>
+      <button
+        class="sf-icon-control"
+        type="button"
+        data-search-submit
+        aria-label={label}
+      >
+        <Icon name="magnifier" />
+      </button>
+      <p class="search-feedback" hidden>
+        {import.meta.env.DEV && Astro.locals.t("search.devWarning")}
+      </p>
+      <a class="search-all-results" data-search-all href={searchPage} hidden>
+        View all results
+      </a>
+    </div>
+    <p class="sr-only" role="status" aria-atomic="true"></p>
+  </site-search>
+)}
+
+<script>
+  import { createPagefindSearch } from "../../utils/pagefind";
+
+  class SiteSearch extends HTMLElement {
+    connectedCallback() {
+      const openButton =
+        this.querySelector<HTMLButtonElement>("[data-search-open]");
+      const submitButton = this.querySelector<HTMLButtonElement>(
+        "[data-search-submit]",
+      );
+      const clearIcon = this.querySelector<HTMLTemplateElement>(
+        "[data-search-clear-icon]",
+      );
+      const searchInterface =
+        this.querySelector<HTMLElement>(".search-interface");
+      const container = this.querySelector<HTMLElement>("#starlight__search");
+      const feedback = this.querySelector<HTMLElement>(".search-feedback");
+      const status = this.querySelector<HTMLElement>("[role='status']");
+      const allResultsLink =
+        this.querySelector<HTMLAnchorElement>("[data-search-all]");
+      if (
+        !openButton ||
+        !submitButton ||
+        !clearIcon ||
+        !searchInterface ||
+        !container ||
+        !feedback ||
+        !status ||
+        !allResultsLink
+      )
+        return;
+
+      let ready = import.meta.env.DEV;
+      let loading = false;
+      let drawer: HTMLElement | null = null;
+      let fieldAnimation: Animation | undefined;
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      );
+
+      const updateAllResultsLink = (query: string) => {
+        const url = new URL(allResultsLink.href);
+        if (query.trim()) url.searchParams.set("q", query.trim());
+        else url.searchParams.delete("q");
+        allResultsLink.href = url.href;
+      };
+
+      const showAllResults = () => {
+        const input = container.querySelector("input");
+        const query = input?.value.trim();
+        if (!query) {
+          input?.focus();
+          return;
+        }
+        updateAllResultsLink(query);
+        location.assign(allResultsLink.href);
+      };
+
+      const animateField = (opening: boolean) => {
+        if (fieldAnimation) {
+          fieldAnimation.onfinish = null;
+          fieldAnimation.cancel();
+          fieldAnimation = undefined;
+        }
+        if (!ready || reducedMotion.matches) return;
+
+        fieldAnimation = container.animate(
+          { opacity: opening ? [0, 1] : [1, 0] },
+          {
+            duration: opening ? 140 : 105,
+            easing: "ease-out",
+          },
+        );
+        return fieldAnimation;
+      };
+
+      const positionResults = () => {
+        if (!this.hasAttribute("data-open")) return;
+        const viewport = window.visualViewport;
+        const viewportTop = viewport?.offsetTop ?? 0;
+        const viewportLeft = viewport?.offsetLeft ?? 0;
+        const width = viewport?.width ?? innerWidth;
+        const height = viewport?.height ?? innerHeight;
+        const bounds = searchInterface.getBoundingClientRect();
+        const top = Math.max(bounds.bottom + 8, viewportTop + 8);
+        const panelWidth = Math.min(640, width - 32);
+        const left = Math.max(
+          viewportLeft + 16,
+          Math.min(bounds.left, viewportLeft + width - panelWidth - 16),
+        );
+        this.style.setProperty("--search-top", `${top}px`);
+        this.style.setProperty("--search-left", `${left}px`);
+        this.style.setProperty("--search-width", `${panelWidth}px`);
+        this.style.setProperty(
+          "--search-height",
+          `${Math.max(0, viewportTop + height - top - 8)}px`,
+        );
+
+        // Keep the full-results link reachable when the viewport or keyboard leaves little room.
+        this.removeAttribute("data-preview-limited");
+        if (
+          drawer?.matches(":popover-open") &&
+          drawer.getBoundingClientRect().height > viewportTop + height - top - 8
+        ) {
+          this.setAttribute("data-preview-limited", "");
+          if (
+            drawer
+              .querySelector(".pagefind-ui__results")
+              ?.contains(document.activeElement)
+          )
+            allResultsLink.focus();
+        }
+      };
+
+      const close = (restoreFocus = false) => {
+        if (!this.hasAttribute("data-open")) return;
+        this.removeAttribute("data-open");
+        this.setAttribute("data-closing", "");
+        searchInterface.inert = true;
+        openButton.hidden = false;
+        openButton.setAttribute("aria-expanded", "false");
+        drawer?.hidePopover();
+        if (restoreFocus) openButton.focus();
+
+        // Restore navigation after the field fades out, without delaying keyboard focus.
+        const finishClose = () => {
+          searchInterface.hidden = true;
+          this.removeAttribute("data-closing");
+          this.dispatchEvent(new Event("site-search-close", { bubbles: true }));
+        };
+        const animation = animateField(false);
+        if (animation) animation.onfinish = finishClose;
+        else finishClose();
+      };
+
+      const updateResults = () => {
+        if (!drawer) return;
+        // Pagefind inserts its result area after the first query.
+        if (drawer.lastElementChild !== allResultsLink)
+          drawer.append(allResultsLink);
+        if (
+          this.hasAttribute("data-open") &&
+          !drawer.classList.contains("pagefind-ui__hidden")
+        ) {
+          drawer.showPopover();
+          positionResults();
+        } else {
+          drawer.hidePopover();
+        }
+        const message =
+          drawer.querySelector(".pagefind-ui__message")?.textContent ?? "";
+        if (status.textContent !== message) status.textContent = message;
+      };
+
+      const initialize = async () => {
+        if (ready || loading) return;
+        loading = true;
+        feedback.hidden = false;
+        feedback.textContent = "Loading search…";
+        status.textContent = feedback.textContent;
+        try {
+          await createPagefindSearch(
+            container,
+            {
+              pageSize: 3,
+              showSubResults: false,
+              excerptLength: 15,
+            },
+            clearIcon,
+          );
+          const input = container.querySelector("input");
+          if (input) {
+            input.id = "site-search-input";
+            input.addEventListener("input", () =>
+              updateAllResultsLink(input.value),
+            );
+          }
+          drawer = container.querySelector<HTMLElement>(".pagefind-ui__drawer");
+          if (drawer) {
+            drawer.popover = "manual";
+            drawer.append(allResultsLink);
+            allResultsLink.hidden = false;
+            new MutationObserver(updateResults).observe(drawer, {
+              attributes: true,
+              attributeFilter: ["class"],
+              childList: true,
+              subtree: true,
+              characterData: true,
+            });
+          }
+          ready = true;
+          feedback.hidden = true;
+          status.textContent = "";
+          if (this.hasAttribute("data-open")) {
+            animateField(true);
+            if (document.activeElement === submitButton) input?.focus();
+          }
+        } catch (error) {
+          feedback.textContent =
+            "Search could not load. Reload this page to try again.";
+          status.textContent = feedback.textContent;
+          console.error("Unable to initialize site search.", error);
+        } finally {
+          loading = false;
+        }
+      };
+
+      const open = () => {
+        this.removeAttribute("data-closing");
+        this.setAttribute("data-open", "");
+        openButton.hidden = true;
+        openButton.setAttribute("aria-expanded", "true");
+        searchInterface.inert = false;
+        searchInterface.hidden = false;
+        this.dispatchEvent(new Event("site-search-open", { bubbles: true }));
+        searchInterface.scrollIntoView({ block: "nearest" });
+        positionResults();
+        (container.querySelector("input") ?? submitButton).focus();
+        if (import.meta.env.DEV) feedback.hidden = false;
+        updateResults();
+        animateField(true);
+        void initialize();
+      };
+
+      openButton.addEventListener("click", open);
+      submitButton.addEventListener("click", showAllResults);
+      this.addEventListener("site-search-dismiss", () => close());
+      this.addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key === "Enter" &&
+            !event.isComposing &&
+            event.target instanceof HTMLInputElement
+          ) {
+            event.preventDefault();
+            showAllResults();
+            return;
+          }
+          if (event.key !== "Escape" || !this.hasAttribute("data-open")) return;
+          event.preventDefault();
+          event.stopPropagation();
+          close(true);
+        },
+        true,
+      );
+      document.addEventListener("keydown", (event) => {
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          event.key.toLowerCase() === "k"
+        ) {
+          event.preventDefault();
+          if (this.hasAttribute("data-open")) close(true);
+          else open();
+        }
+      });
+      document.addEventListener("pointerdown", (event) => {
+        if (event.target instanceof Node && !this.contains(event.target))
+          close();
+      });
+      this.addEventListener("focusout", (event) => {
+        if (
+          event.relatedTarget instanceof Node &&
+          !this.contains(event.relatedTarget)
+        )
+          close();
+      });
+      this.addEventListener("click", (event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest(".pagefind-ui__search-clear")
+        ) {
+          updateAllResultsLink("");
+          container.querySelector("input")?.focus();
+        }
+      });
+      window.addEventListener("resize", positionResults);
+      window.addEventListener("scroll", positionResults, { passive: true });
+      window.visualViewport?.addEventListener("resize", positionResults);
+      window.visualViewport?.addEventListener("scroll", positionResults);
+      new ResizeObserver(positionResults).observe(searchInterface);
+      openButton.hidden = false;
+    }
+  }
+
+  customElements.define("site-search", SiteSearch);
+</script>
+
+<style>
+  site-search {
+    display: block;
+    position: relative;
+    min-width: 0;
+  }
+  [hidden] {
+    display: none;
+  }
+  .search-interface:not([hidden]) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  #starlight__search {
+    flex: 1;
+    min-width: 0;
+  }
+  .search-interface > button {
+    flex: none;
+  }
+  site-search[data-closing] > [data-search-open] {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 0;
+    transform: translateY(-50%);
+  }
+  site-search[data-closing] :is([data-search-submit], .search-feedback) {
+    visibility: hidden;
+  }
+  .search-feedback {
+    position: fixed;
+    inset: var(--search-top) auto auto var(--search-left);
+    width: var(--search-width);
+    max-height: var(--search-height);
+    margin: 0;
+    padding: 16px;
+    overflow: auto;
+    border: 1.5px solid var(--sf-boundary);
+    border-radius: 24px;
+    background: var(--sf-surface);
+    color: var(--sf-text);
+    white-space: pre-line;
+  }
+  #starlight__search .search-all-results {
+    display: flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    color: var(--sf-link);
+    font-size: 1rem;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  #starlight__search .search-all-results:focus-visible {
+    outline: 2px solid var(--sf-focus);
+    outline-offset: 2px;
+  }
+</style>
+
+<style is:global>
+  #starlight__search .pagefind-ui__drawer {
+    display: block;
+    position: fixed;
+    inset: var(--search-top) auto auto var(--search-left);
+    box-sizing: border-box;
+    width: var(--search-width);
+    max-width: none;
+    margin: 0;
+    padding: 16px;
+    overflow: visible;
+    border: 1.5px solid var(--sf-boundary);
+    border-radius: 24px;
+    background: var(--sf-surface);
+    color: var(--sf-text);
+  }
+  #starlight__search .pagefind-ui__drawer:not(:popover-open) {
+    display: none;
+  }
+  #starlight__search .pagefind-ui__button {
+    display: none;
+  }
+  site-search[data-preview-limited] #starlight__search .pagefind-ui__drawer {
+    max-height: var(--search-height);
+    overflow: auto;
+    scroll-padding: 4px;
+  }
+  site-search[data-preview-limited] .pagefind-ui__results {
+    display: none;
+  }
+</style>
