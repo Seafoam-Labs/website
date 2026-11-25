@@ -65,7 +65,7 @@ export default defineConfig({
         {
           icon: "patreon",
           label: "Patreon",
-          href: "https://www.patreon.com/cw/SeafoamLabs",
+          href: "https://www.patreon.com/cw/SeafoamLabs/membership",
         },
         {
           icon: "fluxer",
