@@ -74,7 +74,6 @@ New components consume these roles rather than hard-coded theme colors. Keep
 link and focus roles distinct even when their values match. Sea Glass assigns
 amethyst to Shelly and Pearl, honey to Starfish and Pori, and rose to Aqueous;
 Classic uses the canvas with a card border. These choices belong to the palette.
-
 Filled action states derive from each palette's normal fill: hover mixes 90%
 of `--sf-action` with 10% black, and press mixes 80% with 20% black, in sRGB.
 This darkens the fill while preserving its hue and follows future palette
@@ -465,6 +464,49 @@ solid and dissolving the lower portion into fine stippling. The static texture
 is shared across themes and palettes; it does not change the logo's geometry.
 The gradient wave sits inside these masks, preserving the silhouette and
 dithering throughout the transition.
+
+The shared site footer uses the approved Seafoam Shore v2 artwork: daylight in
+light mode and twilight in dark mode, for both Classic and Sea Glass. Links,
+the appearance control, copyright, and separate CDN77 sponsorship and JetBrains
+support credits are real content above the illustration. The original shellheart
+identifies the brand. Pages with Starlight's documentation sidebar retain the
+compact Wiki footer. Starlight's metadata and pagination remain on all pages.
+
+[SiteFooter.astro](src/components/SiteFooter.astro) owns the shared footer.
+The [PageFrame override](src/components/overrides/PageFrame.astro) places it
+after the page content, outside the reading column and main landmark, on pages
+without a documentation sidebar. Its gutters match the homepage at each breakpoint.
+
+The shared footer groups Explore and Community beside the brand. A single
+Projects link returns to the homepage's project section; the header menu retains
+the individual project links. Sponsor and supporter credits share the next row.
+A final utility row places copyright beside a visibly labeled Appearance control,
+separated from the credits by one horizontal rule. The navigation and credits
+stack on narrow screens, and the utility row wraps without clipping its controls.
+The shared footer enables the labeled appearance trigger; documentation keeps
+the compact icon trigger and the same preference menu behavior.
+
+The panoramic artwork is used at every viewport width. It scales from 1080px to
+its native 2172px width, preserving its aspect ratio. Narrower screens clip the
+sides around the shell, starfish, and pearl cluster, whose center is 75% across
+the image. The horizontal offset is clamped to the image edges so wider screens
+reveal more of the scene without introducing blank space. Clipping is confined
+to the decorative artwork; footer links and controls remain outside it.
+
+Beyond 2172px, a CSS transparency mask softens both outer edges into the active
+page background. The fade grows with the side gutters up to 12rem. Responsive
+WebP exports live in `public/images/shoreline/`; their `sizes` hints describe the
+full rendered image width, including the cropped portion. Negative top margins
+compensate for the image's transparent upper area. The illustration does not
+intercept pointer input and is omitted from print.
+
+The homepage frame lets the illustration span the viewport while its hero,
+project content, and footer links share a 77.5rem maximum width. The former
+resource cards and standalone Powered by block are removed. Their useful
+destinations and credit remain in the footer or Wiki; the package repository
+is still linked from the Wiki introduction. The footer distinguishes CDN77 under
+"Sponsored by" from JetBrains under "Supported by" and retains the JetBrains
+subscription attribution and trademark notice.
 
 ## Release checksum
 
