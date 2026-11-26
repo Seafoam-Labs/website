@@ -1,0 +1,95 @@
+---
+title: Choose a monitor for an XWayland game
+description: Use Pearl Settings to make an XWayland game open on a chosen monitor without editing TOML.
+sidebar:
+  label: Choose a game monitor
+  order: 9.5
+---
+
+import { Image } from "astro:assets";
+import displays from "../../../assets/screenshots/aqueous/xwayland-monitor-displays.webp";
+import rule from "../../../assets/screenshots/aqueous/xwayland-monitor-rule.webp";
+
+Use a window rule to open an XWayland game on the same monitor even when your pointer is on another screen.
+You can create and save the rule in Pearl Settings without editing a configuration file.
+Open **Displays** and **Rules** from the sidebar; if your version groups those pages under **Aqueous**, open that group first.
+
+## Find the game and monitor
+
+1. **Find the game's X11 class.** If you don't already know it, launch the game and run this read-only command:
+
+   ```sh
+   aqueousctl inspect --rule
+   ```
+
+   Find the block with the game's window title, not Steam's or a launcher's, and copy just the value after `class =`, without the quotes.
+   `steam_app_123456` is an example.
+   If the game has an `app_id` instead of a `class`, it is using native Wayland and this X11-class rule won't match.
+
+2. **Find the monitor's connector.** Open **Pearl Settings → Displays** and click **Identify**.
+   Note the connector shown on the monitor you want, such as `DP-1` or `HDMI-A-1`.
+   Use the connector, not the display number.
+
+<figure>
+  <Image
+    src={displays}
+    alt="Pearl Settings Displays page with the Identify button and numbered display tiles labeled with their connectors."
+  />
+  <figcaption>
+    Use your own monitor's connector; these are test displays.
+  </figcaption>
+</figure>
+
+## Create and save the rule
+
+1. Open **Rules** from the Pearl Settings sidebar.
+   Under **Window rules**, click **Add rule**.
+   If a rule already matches this game specifically, use **Edit rule** on that rule instead; later rules do not add settings to the first match.
+2. In **Condition or scope**, choose **X11 class** and click **Add condition**.
+   Paste the class exactly as reported, including case.
+3. In **Setting**, choose **Output connector** and click **Add setting**.
+   Enter the connector from **Displays**.
+   For a new rule, leave other settings unset so the game opens on that monitor's active workspace.
+4. Click **Save rule** to stage the rule.
+   Back on **Rules**, click **Review & apply**, check the pending changes, then click **Apply all Aqueous changes**.
+   The review includes drafts from other Aqueous pages, too.
+
+<Image
+  src={rule}
+  alt="Add window rule dialog with X11 class steam_app_123456 and Output connector HEADLESS-2 filled in, ready to save."
+/>
+
+## Check the result
+
+Quit the game completely, then relaunch it with the pointer on the other monitor.
+It should open on the chosen monitor.
+If that monitor is disconnected or disabled, Aqueous falls back to normal placement.
+
+If it still opens on the wrong screen, check the exact class and connector, then look for an earlier rule that also matches.
+Rules run top to bottom and only the first match applies.
+Use **Move earlier** if needed, then **Review & apply** the order change before making other edits.
+
+## Use one rule for several games
+
+Use `steam_app_*` as the **X11 class** if the games you want to catch report classes beginning with `steam_app_`.
+This is not a setting for all XWayland games; it only matches those classes.
+Keep any per-game exceptions above the broader rule.
+
+## Undo the change
+
+On **Rules**, open the rule with **Edit rule**.
+If you created it just for this purpose, click **Delete rule**.
+If you edited an existing rule, restore its previous connector, or **Remove** just the **Output connector** setting if you added it, then click **Save rule**.
+Use **Review & apply** and confirm the change, then relaunch the game to check.
+
+For manual settings, see the [TOML example](/aqueous/window-rules/#open-an-xwayland-game-on-a-specific-monitor).
+If the game is on the right screen but looks blurry, see
+[troubleshoot soft text](/aqueous/compatibility/#troubleshoot-soft-text).
+
+<details id="sources">
+  <summary>Sources</summary>
+
+- [Zoey’s tutorial request](https://github.com/Seafoam-Labs/Aqueous/issues/151#issuecomment-7138710872) and [Aqueous window-rule behavior](https://github.com/Seafoam-Labs/Aqueous/blob/ef746352ec3907ca051ebb4ea4fc3dc147bbb6b7/docs/rules.md).
+- Pearl Settings: [display identification](https://github.com/Seafoam-Labs/pearl/blob/a0ac7cc47a4e73a5ab80d7feb63dc841bc994f19/src/desktop/aqueous_display_setup.zig), [rule editor](https://github.com/Seafoam-Labs/pearl/blob/a0ac7cc47a4e73a5ab80d7feb63dc841bc994f19/src/settings/window_rules_view.zig) and [review and save](https://github.com/Seafoam-Labs/pearl/blob/a0ac7cc47a4e73a5ab80d7feb63dc841bc994f19/src/desktop/aqueous_settings.zig).
+
+</details>
