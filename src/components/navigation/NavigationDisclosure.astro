@@ -1,0 +1,234 @@
+---
+interface Props {
+  align?: "start" | "end";
+}
+
+const { align = "start" } = Astro.props;
+---
+
+<details class="navigation-disclosure not-content" data-align={align}>
+  <summary class="disclosure-trigger sf-nav-link">
+    <slot name="trigger" />
+  </summary>
+  <div class="disclosure-panel">
+    <slot />
+  </div>
+</details>
+
+<script>
+  for (const disclosure of document.querySelectorAll<HTMLDetailsElement>(
+    ".navigation-disclosure",
+  )) {
+    const trigger = disclosure.querySelector("summary");
+    const panel = disclosure.querySelector<HTMLElement>(".disclosure-panel");
+    if (!trigger || !panel || !("showPopover" in panel)) continue;
+
+    const header = disclosure.closest("[data-navigation-header]") ?? disclosure;
+    const desktop = window.matchMedia("(min-width: 64rem)");
+
+    // Add the top-layer enhancement here so native details still work without JavaScript.
+    panel.popover = "manual";
+
+    const positionPanel = () => {
+      if (!disclosure.open) return;
+
+      const viewport = window.visualViewport;
+      const viewportTop = viewport?.offsetTop ?? 0;
+      const viewportLeft = viewport?.offsetLeft ?? 0;
+      const viewportHeight = viewport?.height ?? window.innerHeight;
+      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const gutter = Number.parseFloat(
+        getComputedStyle(panel).getPropertyValue("--viewport-gutter"),
+      );
+      const headerBounds = header.getBoundingClientRect();
+      const layout = getComputedStyle(header)
+        .getPropertyValue("--sf-navigation-layout")
+        .trim();
+      const alignToTrigger = layout ? layout === "desktop" : desktop.matches;
+      const anchorBounds = alignToTrigger
+        ? trigger.getBoundingClientRect()
+        : headerBounds;
+      let top = Math.max(headerBounds.bottom + 12, viewportTop + gutter);
+      // A short viewport needs room for readable rows, even when the capsule wraps.
+      const useViewport = viewportTop + viewportHeight - top - gutter < 240;
+      const verticalGutter = useViewport ? 8 : gutter;
+      if (useViewport) top = viewportTop + verticalGutter;
+      panel.toggleAttribute("data-viewport-panel", useViewport);
+
+      panel.style.maxWidth = `${viewportWidth - gutter * 2}px`;
+      const availableHeight = viewportTop + viewportHeight - top;
+      let maxHeight = Math.max(0, availableHeight - verticalGutter);
+      if (!useViewport) {
+        const contentHeight =
+          panel.scrollHeight + panel.offsetHeight - panel.clientHeight;
+        // Use spare bottom clearance when the full list fits without scrolling.
+        if (contentHeight <= availableHeight) {
+          maxHeight = Math.max(maxHeight, contentHeight);
+        }
+      }
+      panel.style.maxHeight = `${maxHeight}px`;
+      const panelWidth = panel.getBoundingClientRect().width;
+      let left = anchorBounds.left;
+      if (disclosure.dataset.align === "end") {
+        left = anchorBounds.right - panelWidth;
+      }
+      panel.style.left = `${Math.max(
+        viewportLeft + gutter,
+        Math.min(left, viewportLeft + viewportWidth - panelWidth - gutter),
+      )}px`;
+      panel.style.top = `${top}px`;
+      if (top < headerBounds.bottom && document.activeElement === trigger) {
+        panel.querySelector("a")?.focus();
+      }
+    };
+
+    const updateDisclosure = () => {
+      // Let the owner reveal a translated header before measuring its popup.
+      disclosure.dispatchEvent(
+        new CustomEvent("navigation-disclosure-toggle", {
+          bubbles: true,
+          detail: { open: disclosure.open },
+        }),
+      );
+      panel.togglePopover(disclosure.open);
+      positionPanel();
+    };
+
+    disclosure.addEventListener("toggle", updateDisclosure);
+    if (disclosure.open) updateDisclosure();
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && disclosure.open) {
+        event.preventDefault();
+        disclosure.open = false;
+        trigger.focus();
+      }
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (
+        disclosure.open &&
+        event.target instanceof Node &&
+        !disclosure.contains(event.target)
+      ) {
+        disclosure.open = false;
+      }
+    });
+
+    document.addEventListener("focusin", (event) => {
+      if (
+        disclosure.open &&
+        event.target instanceof Node &&
+        !disclosure.contains(event.target)
+      ) {
+        disclosure.open = false;
+      }
+    });
+
+    const headerResize = new ResizeObserver(positionPanel);
+    headerResize.observe(header, { box: "border-box" });
+    headerResize.observe(trigger, { box: "border-box" });
+    window.addEventListener("resize", positionPanel);
+    window.addEventListener("scroll", positionPanel, { passive: true });
+    window.visualViewport?.addEventListener("resize", positionPanel);
+    window.visualViewport?.addEventListener("scroll", positionPanel);
+  }
+</script>
+
+<style>
+  .navigation-disclosure {
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .disclosure-trigger {
+    box-sizing: border-box;
+    justify-content: center;
+    gap: 0.5rem;
+    min-inline-size: 2.75rem;
+    padding: 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    line-height: 1.5;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .disclosure-trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .disclosure-trigger :global(svg) {
+    flex: none;
+  }
+
+  .disclosure-trigger:hover {
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .disclosure-trigger:hover {
+      background: var(--sf-action);
+      color: var(--sf-on-action);
+    }
+  }
+
+  details[open] > summary {
+    background: var(--sf-action);
+    color: var(--sf-on-action);
+  }
+
+  .disclosure-trigger:active {
+    background: var(--sf-action-pressed);
+    color: var(--sf-on-action);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .disclosure-trigger {
+      transition:
+        background-color 140ms ease-out,
+        color 140ms ease-out;
+    }
+
+    .disclosure-trigger:active {
+      transition-duration: 75ms;
+    }
+  }
+
+  .disclosure-panel {
+    --viewport-gutter: var(--sf-navigation-gutter, 16px);
+
+    box-sizing: border-box;
+    inline-size: 22.5rem;
+    max-inline-size: 100%;
+    margin-block-start: 0.75rem;
+    padding: 1rem;
+    border: 1.5px solid var(--sf-boundary);
+    border-radius: 1.5rem;
+    background: var(--sf-surface);
+    color: var(--sf-text);
+  }
+
+  .disclosure-panel[popover] {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 1rem;
+  }
+
+  .disclosure-panel[data-viewport-panel] {
+    padding: 8px;
+    border-radius: 24px;
+    scroll-padding-block: 8px;
+  }
+
+  @media (min-width: 64rem) {
+    .disclosure-panel {
+      --viewport-gutter: var(--sf-navigation-gutter, 24px);
+    }
+  }
+</style>

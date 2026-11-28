@@ -2,8 +2,9 @@
 import Default from "@astrojs/starlight/components/Footer.astro";
 import { Image } from "astro:assets";
 import shellyChelAvif from "../../assets/images/shelly-chel.avif";
+import SitePreferences from "../SitePreferences.astro";
 
-const { siteTitle } = Astro.locals.starlightRoute;
+const { hasSidebar, siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
 
 const links = [
   {
@@ -25,38 +26,68 @@ const links = [
   <slot />
 </Default>
 
-<div class="mt-12 flex flex-col items-center justify-between border-t border-(--sl-color-gray-6) pt-8 text-(length:--sl-text-sm) text-(--sl-color-gray-3) sm:mt-16 sm:flex-row sm:justify-center sm:pt-12">
-  <span class="mt-6 mb-2 sm:mt-auto sm:mb-auto">
-    © {new Date().getFullYear()} {siteTitle}
-  </span>
-  <a
-    class="order-last text-center text-(--sl-color-gray-5) select-none sm:order-0 sm:mx-6"
-    href={shellyChelAvif.src}
-  >
-    <Image
-      class="inline-block rounded-full text-transparent"
-      src={shellyChelAvif}
-      alt="Shelly Chel"
-      height={48}
-      width={48}
-      layout="fixed"
-    />
-  </a>
-  <nav class="order-first flex flex-wrap gap-x-2 sm:order-0">
-    {links.map((link, index) => (
-      <>
-        {index === 0 ? (
-          ""
-        ) : (
-          <span class="text-(--sl-color-gray-5) select-none">·</span>
-        )}
-        <a
-          class="text-(--sl-color-accent) no-underline hover:underline"
-          href={link.href}
-        >
-          {link.title}
-        </a>
-      </>
-    ))}
-  </nav>
-</div>
+{hasSidebar && (
+  <div class="mt-12 flex flex-col items-center justify-between border-t border-(--sl-color-gray-6) pt-8 text-(length:--sl-text-sm) text-(--sl-color-gray-3) sm:mt-16 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6 sm:pt-12">
+    <span class="mt-6 mb-2 sm:mt-auto sm:mb-auto">
+      © {new Date().getFullYear()} {siteTitle}
+    </span>
+    <a
+      class="sf-link order-last inline-flex rounded-full text-center text-(--sl-color-gray-5) select-none sm:order-0 sm:mx-6"
+      href={siteTitleHref}
+    >
+      <Image
+        class="inline-block rounded-full text-transparent"
+        src={shellyChelAvif}
+        alt={`${siteTitle} home`}
+        height={48}
+        width={48}
+        layout="fixed"
+      />
+    </a>
+    <nav class="order-first flex flex-wrap items-center gap-x-2 sm:order-0">
+      {links.map((link, index) => (
+        <span class="flex items-center gap-x-2">
+          {index > 0 && (
+            <span
+              aria-hidden="true"
+              class="text-(--sl-color-gray-5) select-none"
+            >
+              ·
+            </span>
+          )}
+          <a
+            class="text-(--sl-color-accent) no-underline hover:underline"
+            href={link.href}
+          >
+            {link.title}
+          </a>
+        </span>
+      ))}
+    </nav>
+    <SitePreferences />
+  </div>
+)}
+
+<style>
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: 2.75rem;
+    padding-block: 0.5rem;
+    color: var(--sf-link);
+    text-decoration: none;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  nav a:hover {
+    color: var(--sf-link-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  nav a:focus-visible {
+    outline: 2px solid var(--sf-focus);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+</style>

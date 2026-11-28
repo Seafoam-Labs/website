@@ -1,0 +1,371 @@
+---
+import { Icon } from "@astrojs/starlight/components";
+import themeIcon from "../assets/icons/starfish-pearl.svg";
+import { featureFlags } from "../config/features";
+import { appearanceOptions, paletteOptions } from "../data/appearance";
+
+interface Props {
+  showLabel?: boolean;
+}
+
+const { showLabel = false } = Astro.props;
+---
+
+<site-preferences hidden>
+  <details>
+    <summary
+      class:list={{ "summary-labeled": showLabel }}
+      aria-label={showLabel ? undefined : "Choose appearance"}
+      title={showLabel ? undefined : "Appearance"}
+    >
+      <span
+        class="preference-icon"
+        style={{ "--preference-icon": `url("${themeIcon.src}")` }}
+        aria-hidden="true"
+      ></span>
+      {showLabel && (
+        <>
+          <span>Appearance</span>
+          <Icon name="down-caret" size="1.25rem" class="preference-chevron" />
+        </>
+      )}
+    </summary>
+    <div class="preference-panel" popover="manual">
+      <fieldset>
+        <legend>Theme</legend>
+        {appearanceOptions.map(({ value, label }) => (
+          <label>
+            <input
+              type="radio"
+              name="appearance"
+              value={value}
+              checked={value === "auto"}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
+      </fieldset>
+      {featureFlags.enableCustomPalettes && (
+        <fieldset>
+          <legend>Color palette</legend>
+          {paletteOptions.map(({ value, label }) => (
+            <label>
+              <input
+                type="radio"
+                name="palette"
+                value={value}
+                checked={value === "classic"}
+              />
+              <span>{label}</span>
+            </label>
+          ))}
+        </fieldset>
+      )}
+    </div>
+  </details>
+  <p class="preference-status" role="status" aria-atomic="true"></p>
+</site-preferences>
+
+<script>
+  class SitePreferences extends HTMLElement {
+    connectedCallback() {
+      const root = document.documentElement;
+      for (const input of this.querySelectorAll<HTMLInputElement>("input")) {
+        const selected =
+          input.name === "appearance"
+            ? root.dataset.appearance
+            : root.dataset.palette;
+        input.checked = input.value === selected;
+      }
+
+      const disclosure = this.querySelector("details");
+      const trigger = this.querySelector("summary");
+      const panel = this.querySelector<HTMLElement>(".preference-panel");
+      if (!disclosure || !trigger || !panel) return;
+
+      const closeDisclosure = (restoreFocus = false) => {
+        disclosure.open = false;
+        if (restoreFocus) trigger.focus();
+      };
+
+      const positionPanel = () => {
+        const viewport = window.visualViewport;
+        const viewportTop = viewport?.offsetTop ?? 0;
+        const viewportLeft = viewport?.offsetLeft ?? 0;
+        const viewportHeight = viewport?.height ?? window.innerHeight;
+        const viewportWidth = viewport?.width ?? window.innerWidth;
+        const triggerBounds = trigger.getBoundingClientRect();
+        const gutter = 24;
+        const gap = 12;
+        const spaceAbove = triggerBounds.top - viewportTop - gutter - gap;
+        const spaceBelow =
+          viewportTop + viewportHeight - triggerBounds.bottom - gutter - gap;
+        // Footer menus prefer opening upward; use the roomier side on a short viewport.
+        const openAbove = spaceAbove >= spaceBelow;
+        panel.style.maxHeight = `${Math.max(0, openAbove ? spaceAbove : spaceBelow)}px`;
+        panel.style.maxWidth = `${viewportWidth - gutter * 2}px`;
+        const panelBounds = panel.getBoundingClientRect();
+        const left = Math.max(
+          viewportLeft + gutter,
+          Math.min(
+            triggerBounds.right - panelBounds.width,
+            viewportLeft + viewportWidth - panelBounds.width - gutter,
+          ),
+        );
+        const top = openAbove
+          ? triggerBounds.top - gap - panelBounds.height
+          : triggerBounds.bottom + gap;
+        panel.style.left = `${left}px`;
+        panel.style.top = `${top}px`;
+      };
+
+      // The top layer lets the footer menu escape Starlight's isolated content pane.
+      disclosure.addEventListener("toggle", () => {
+        if (disclosure.open) {
+          panel.showPopover();
+          positionPanel();
+        } else {
+          panel.hidePopover();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && disclosure.open) {
+          event.preventDefault();
+          closeDisclosure(true);
+        }
+      });
+
+      document.addEventListener("pointerdown", (event) => {
+        if (
+          disclosure.open &&
+          event.target instanceof Node &&
+          !disclosure.contains(event.target)
+        ) {
+          closeDisclosure();
+        }
+      });
+
+      this.addEventListener("focusout", (event) => {
+        // Label clicks can briefly blur the trigger before focusing their radio.
+        if (
+          disclosure.open &&
+          event.relatedTarget instanceof Node &&
+          !disclosure.contains(event.relatedTarget)
+        ) {
+          closeDisclosure();
+        }
+      });
+
+      const repositionOpenPanel = () => {
+        if (disclosure.open) positionPanel();
+      };
+      window.addEventListener("resize", repositionOpenPanel);
+      window.addEventListener("scroll", repositionOpenPanel, { passive: true });
+      window.visualViewport?.addEventListener("resize", repositionOpenPanel);
+      window.visualViewport?.addEventListener("scroll", repositionOpenPanel);
+      this.hidden = false;
+    }
+  }
+
+  customElements.define("site-preferences", SitePreferences);
+</script>
+
+<style>
+  site-preferences:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block: 1rem;
+    color: var(--sf-text);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .summary-labeled {
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    border: 1.5px solid currentColor;
+    border-radius: 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .summary-labeled .preference-icon,
+  .summary-labeled :global(.preference-chevron) {
+    flex-shrink: 0;
+  }
+
+  details[open] > summary :global(.preference-chevron) {
+    transform: rotate(180deg);
+  }
+
+  summary:hover,
+  details[open] > summary {
+    color: var(--sf-on-action);
+    background: var(--sf-action);
+  }
+
+  summary:active {
+    background: var(--sf-action-pressed);
+    color: var(--sf-on-action);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    summary {
+      transition:
+        background-color 140ms ease-out,
+        color 140ms ease-out;
+    }
+
+    summary:active {
+      transition-duration: 75ms;
+    }
+  }
+
+  /* Arrow keys can move radio focus without matching :focus-visible in WebKit. */
+  summary:focus-visible,
+  label:focus-within {
+    outline: 2px solid var(--sf-focus);
+    outline-offset: 3px;
+  }
+
+  label:focus-within {
+    outline-offset: -2px;
+  }
+
+  label:focus-within:hover,
+  label:focus-within:active {
+    outline-color: var(--sf-on-action);
+  }
+
+  .preference-icon {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: currentColor;
+    mask: var(--preference-icon) center / contain no-repeat;
+    mask-mode: alpha;
+  }
+
+  .preference-panel {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    width: 22.5rem;
+    max-width: calc(100vw - 3rem);
+    padding: 1rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1.5px solid var(--sf-boundary);
+    border-radius: 1.5rem;
+    background: var(--sf-surface);
+    color: var(--sf-text);
+  }
+
+  fieldset {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  fieldset + fieldset {
+    margin-block-start: 1rem;
+  }
+
+  legend {
+    margin-block-end: 0.5rem;
+    padding-inline: 0.75rem;
+    font-weight: 600;
+  }
+
+  label {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    min-height: 3.25rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  label:hover {
+    background: var(--sf-action);
+    color: var(--sf-on-action);
+  }
+
+  label:active {
+    background: var(--sf-action-pressed);
+    color: var(--sf-on-action);
+  }
+
+  input {
+    appearance: none;
+    cursor: inherit;
+    color: inherit;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    outline: none;
+  }
+
+  input:checked {
+    background: currentColor;
+    box-shadow: inset 0 0 0 3px var(--sf-surface);
+  }
+
+  label:hover input:checked {
+    box-shadow: inset 0 0 0 3px var(--sf-action);
+  }
+
+  label:active input:checked {
+    box-shadow: inset 0 0 0 3px var(--sf-action-pressed);
+  }
+
+  label:has(input:checked) span {
+    font-weight: 600;
+  }
+
+  @media (forced-colors: active) {
+    .preference-icon {
+      forced-color-adjust: none;
+      background-color: ButtonText;
+    }
+
+    input {
+      appearance: auto;
+    }
+  }
+
+  .preference-status {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--sf-text-muted);
+    max-width: 30ch;
+  }
+</style>

@@ -20,6 +20,7 @@ export default defineConfig({
       },
       logo: {
         src: "./src/assets/images/shellheart-small.webp",
+        replacesTitle: true,
       },
       favicon: "/favicon.png",
       head: [
@@ -229,8 +230,14 @@ export default defineConfig({
       },
       customCss: ["./src/styles/global.css"],
       components: {
+        ThemeProvider: "./src/components/overrides/ThemeProvider.astro",
+        ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
         Header: "./src/components/overrides/Header.astro",
+        Search: "./src/components/overrides/Search.astro",
+        MobileMenuToggle: "./src/components/overrides/MobileMenuToggle.astro",
+        Sidebar: "./src/components/overrides/Sidebar.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
+        PageFrame: "./src/components/overrides/PageFrame.astro",
         SocialIcons: "./src/components/overrides/SocialIcons.astro",
         Footer: "./src/components/overrides/Footer.astro",
       },

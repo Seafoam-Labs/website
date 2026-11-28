@@ -1,0 +1,50 @@
+---
+import { Icon } from "@astrojs/starlight/components";
+import MenuLink from "./MenuLink.astro";
+import NavigationDisclosure from "./NavigationDisclosure.astro";
+import { projectPages } from "../../data/navigation";
+
+const currentPath = Astro.url.pathname.endsWith("/")
+  ? Astro.url.pathname
+  : `${Astro.url.pathname}/`;
+---
+
+<NavigationDisclosure>
+  <span class="projects-trigger" slot="trigger">
+    <span class="projects-label">Projects</span>
+    <Icon name="down-caret" size="32px" />
+  </span>
+  <ul class="projects-list">
+    {projectPages.map(({ href, label, description }) => (
+      <li>
+        <MenuLink {href} {label} {description} current={href === currentPath} />
+      </li>
+    ))}
+  </ul>
+</NavigationDisclosure>
+
+<style>
+  .projects-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .projects-label {
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+  }
+
+  :global(details[open] > summary) .projects-trigger :global(svg) {
+    transform: rotate(180deg);
+  }
+
+  .projects-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>

@@ -60,6 +60,7 @@ Images can be added to `src/assets/` and embedded in Markdown with a relative li
 When styling components, prefer to use the theme variables from
 [Starlight's `props.css`](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) instead
 of Tailwind CSS classes whenever possible. This helps maintain consistency with the design scheme.
+See [DESIGN.md](DESIGN.md) for palettes, typography, and appearance controls.
 
 **Conceptual Note:** There is a separation between "content" (Markdown files in `src/content/`) and "pages" (Astro
 components in `src/pages/`). Content is for writing documentation, blog and RSS updates, while pages are for
@@ -80,6 +81,7 @@ All commands are run from the root of the project, from a terminal:
 - `pnpm run format` to format code with Prettier
 - `pnpm run lint` to lint code with ESLint
 - `pnpm run check` to run Astro's type checking diagnostics
+- `pnpm run test:theme` to run appearance preference tests
 
 <!-- Separator -->
 

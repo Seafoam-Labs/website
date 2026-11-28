@@ -1,134 +1,780 @@
 ---
-// See https://github.com/withastro/starlight/blob/main/packages/starlight/components/Header.astro to get latest version
-
 import config from "virtual:starlight/user-config";
 import LanguageSelect from "virtual:starlight/components/LanguageSelect";
 import Search from "virtual:starlight/components/Search";
 import SiteTitle from "virtual:starlight/components/SiteTitle";
 import SocialIcons from "virtual:starlight/components/SocialIcons";
-import ThemeSelect from "virtual:starlight/components/ThemeSelect";
+import ProjectsMenu from "../navigation/ProjectsMenu.astro";
+import SiteMenu from "../navigation/SiteMenu.astro";
+import { sitePages } from "../../data/navigation";
 
-/**
- * Render the `Search` component if Pagefind is enabled or the default search component has been overridden.
- */
 const shouldRenderSearch =
   config.pagefind ||
   config.components.Search !== "@astrojs/starlight/components/Search.astro";
-
-const pages = [
-  {
-    title: "Devario",
-    href: "/devario/overview/",
-  },
-  {
-    title: "Wiki",
-    href: "/welcome/",
-  },
-  {
-    title: "Blog",
-    href: "/blog/",
-  },
-  {
-    title: "About",
-    href: "/about/",
-  },
-];
+const { hasSidebar, siteTitleHref } = Astro.locals.starlightRoute;
+const isHomepage = Astro.url.pathname === "/";
+const currentPath = Astro.url.pathname.endsWith("/")
+  ? Astro.url.pathname
+  : `${Astro.url.pathname}/`;
 ---
 
-<div class="header">
-  <div class="title-wrapper sl-flex">
-    <SiteTitle />
-  </div>
-  <div class="sl-flex print:hidden">
-    <div class="flex items-center gap-6 sm:gap-8">
-      <nav class="inline-flex gap-7 max-[28rem]:hidden">
-        {pages.map((page) => (
-          <a
-            class="text-base font-semibold text-(--sl-color-text) no-underline hover:text-(--sl-color-text-accent)"
-            href={page.href}
-          >
-            {page.title}
-          </a>
-        ))}
-      </nav>
-      {shouldRenderSearch && <Search />}
+<div class="header-content" data-docs={hasSidebar ? "" : undefined}>
+  <nav
+    class="site-header"
+    data-navigation-header
+    data-homepage={isHomepage ? "" : undefined}
+    aria-label="Primary"
+  >
+    <div class="site-menu site-menu--leading">
+      <SiteMenu includeProjects />
     </div>
-  </div>
-  <div class="sl-hidden md:sl-flex right-group print:hidden">
-    <div class="sl-flex social-icons">
+    <SiteTitle />
+    <a
+      class="home-link sf-nav-link"
+      href={siteTitleHref}
+      aria-current={siteTitleHref === currentPath ? "page" : undefined}
+      data-desktop-navigation
+    >
+      Home
+    </a>
+    <ProjectsMenu />
+    <div class="page-links" data-desktop-navigation>
+      {sitePages.map(({ href, label }) => (
+        <a
+          class="sf-nav-link"
+          {href}
+          aria-current={href === currentPath ? "page" : undefined}
+        >
+          {label}
+        </a>
+      ))}
+    </div>
+    {shouldRenderSearch && (
+      <div class="header-search">
+        <Search />
+      </div>
+    )}
+    <div class="header-socials" data-desktop-navigation>
       <SocialIcons />
     </div>
-    <ThemeSelect />
-    <LanguageSelect />
-  </div>
+    <div class="site-menu site-menu--trailing">
+      <SiteMenu />
+    </div>
+    {config.isMultilingual && <LanguageSelect />}
+  </nav>
 </div>
 
+<script>
+  import {
+    clampScrollY,
+    createHeaderScrollState,
+    overlapsHeader,
+    updateHeaderScrollState,
+    wikiSidebarTop,
+  } from "../../utils/header-scroll";
+
+  for (const header of document.querySelectorAll<HTMLElement>(".site-header")) {
+    const frame = header.closest<HTMLElement>(".page > .header");
+    const siteTriggers = [
+      ...header.querySelectorAll<HTMLElement>(
+        ".site-menu > .navigation-disclosure > summary",
+      ),
+    ];
+    const logoLink = header.querySelector<HTMLAnchorElement>(".site-title");
+    const projectsDisclosure = header.querySelector<HTMLDetailsElement>(
+      ":scope > .navigation-disclosure",
+    );
+    const projectsTrigger = projectsDisclosure?.querySelector("summary");
+    if (!frame || siteTriggers.length === 0 || !logoLink) continue;
+
+    const disclosures = header.querySelectorAll<HTMLDetailsElement>(
+      ".navigation-disclosure",
+    );
+    const desktopGroups = header.querySelectorAll<HTMLElement>(
+      "[data-desktop-navigation]",
+    );
+    const search = header.querySelector("site-search");
+    const sidebar = document.getElementById("starlight__sidebar");
+    const sidebarClose =
+      sidebar?.querySelector<HTMLButtonElement>(".sidebar-close");
+    const docsButton =
+      document.querySelector<HTMLButtonElement>(".docs-menu-toggle");
+    const headerContent = header.closest<HTMLElement>(".header-content");
+    const root = document.documentElement;
+    const autoHideViewport = window.matchMedia(
+      "screen and (min-width: 72rem) and (height > 32rem)",
+    );
+    let autoHideEnabled = false;
+    let headerHeight = frame.getBoundingClientRect().height;
+    let safeAreaTop = 0;
+    let capsuleBounds = { top: 0, right: 0, bottom: 0, left: 0 };
+    let scrollState = createHeaderScrollState(window.scrollY);
+    const activePointers = new Set<number>();
+    let pendingUpdate = 0;
+    let needsMeasurement = false;
+
+    const closeDisclosures = (except?: HTMLDetailsElement) => {
+      for (const disclosure of disclosures) {
+        if (disclosure !== except) disclosure.open = false;
+      }
+    };
+
+    header.addEventListener("navigation-disclosure-toggle", (event) => {
+      const disclosure = event.target;
+      if (!(disclosure instanceof HTMLDetailsElement)) return;
+      if (disclosure.open) {
+        closeDisclosures(disclosure);
+        search?.dispatchEvent(new Event("site-search-dismiss"));
+        if (sidebar?.matches(":popover-open")) sidebar.hidePopover();
+      }
+      updateScrollState(true, disclosure.open);
+    });
+
+    header.addEventListener("site-search-open", () => {
+      header.setAttribute("data-search-open", "");
+      closeDisclosures();
+      if (sidebar?.matches(":popover-open")) sidebar.hidePopover();
+      updateScrollState(true, true);
+    });
+
+    header.addEventListener("site-search-close", () => {
+      header.removeAttribute("data-search-open");
+      updateScrollState(true);
+    });
+
+    sidebar?.addEventListener("beforetoggle", (event) => {
+      if (event.newState !== "open") return;
+      search?.dispatchEvent(new Event("site-search-dismiss"));
+      if (
+        [...disclosures].some((disclosure) =>
+          disclosure.contains(document.activeElement),
+        )
+      )
+        docsButton?.focus();
+      closeDisclosures();
+    });
+
+    const focusDesktopCounterpart = (focused: Element | null) => {
+      const destination = focused?.closest("a")?.href;
+      const counterpart = [
+        ...header.querySelectorAll<HTMLAnchorElement>(
+          "a[data-desktop-navigation], [data-desktop-navigation] a",
+        ),
+      ].find((link) => link.href === destination);
+      (counterpart ?? logoLink).focus();
+    };
+
+    const focusSiteMenu = () => {
+      siteTriggers.find((trigger) => trigger.checkVisibility())?.focus();
+    };
+
+    // CSS can hide a focused control before ResizeObserver runs.
+    document.addEventListener("focusout", (event) => {
+      if (header.hasAttribute("data-search-open")) return;
+      const focused = event.target;
+      if (!(focused instanceof HTMLElement) || focused.checkVisibility())
+        return;
+
+      if (
+        focused.closest(".site-projects") &&
+        projectsTrigger?.checkVisibility()
+      ) {
+        projectsTrigger.focus();
+      } else if (
+        focused.closest(".site-menu") ||
+        focused === logoLink ||
+        projectsDisclosure?.contains(focused)
+      ) {
+        if (siteTriggers.some((trigger) => trigger.checkVisibility())) {
+          focusSiteMenu();
+        } else {
+          focusDesktopCounterpart(focused);
+        }
+      } else if ([...desktopGroups].some((group) => group.contains(focused))) {
+        focusSiteMenu();
+      } else if (focused === docsButton || focused === sidebarClose) {
+        const sidebarLink =
+          sidebar?.querySelector<HTMLAnchorElement>('a[aria-current="page"]') ??
+          sidebar?.querySelector("a");
+        sidebarLink?.focus();
+      } else if (sidebar?.contains(focused) && !sidebar.checkVisibility()) {
+        docsButton?.focus();
+      }
+    });
+
+    let navigationLayout = getComputedStyle(header)
+      .getPropertyValue("--sf-navigation-layout")
+      .trim();
+    const updateScrollState = (immediate = false, reveal = false) => {
+      const maxScrollY = root.scrollHeight - root.clientHeight;
+      const scrollY = clampScrollY(window.scrollY, maxScrollY);
+      const focused = document.activeElement;
+      const headerFocused = focused instanceof Node && header.contains(focused);
+      const externalFocus =
+        focused instanceof HTMLElement &&
+        focused !== document.body &&
+        focused !== root &&
+        !headerFocused;
+      const interactionActive =
+        headerFocused ||
+        activePointers.size > 0 ||
+        header.hasAttribute("data-search-open") ||
+        [...disclosures].some((disclosure) => disclosure.open);
+
+      if (reveal) scrollState = createHeaderScrollState(scrollY);
+      const scrollInput = {
+        enabled: autoHideEnabled,
+        scrollY,
+        maxScrollY,
+        headerHeight,
+        interactionActive,
+        focusOverlaps: false,
+      };
+      const proposedState = updateHeaderScrollState(scrollState, scrollInput);
+      const scrollOffset = Math.min(scrollY, headerHeight);
+      // Test the position we intend to show, including an attached bar's scroll offset.
+      const focusOverlaps = Boolean(
+        autoHideEnabled &&
+        !reveal &&
+        externalFocus &&
+        overlapsHeader(
+          focused.getBoundingClientRect(),
+          capsuleBounds,
+          proposedState.attached ? scrollOffset : 0,
+        ),
+      );
+      if (focusOverlaps) {
+        scrollState = updateHeaderScrollState(scrollState, {
+          ...scrollInput,
+          focusOverlaps: true,
+        });
+      } else {
+        scrollState = proposedState;
+      }
+
+      if (!autoHideEnabled || focusOverlaps || !activePointers.size) {
+        header.style.removeProperty("transform");
+      }
+      frame.style.setProperty("--sf-header-scroll", `${scrollOffset}px`);
+      frame.toggleAttribute("data-scrolled", scrollOffset > 0);
+      frame.toggleAttribute(
+        "data-header-attached",
+        autoHideEnabled && scrollState.attached,
+      );
+      frame.toggleAttribute(
+        "data-header-instant",
+        autoHideEnabled &&
+          (immediate ||
+            scrollState.attached ||
+            focusOverlaps ||
+            interactionActive),
+      );
+      frame.toggleAttribute(
+        "data-header-hidden",
+        autoHideEnabled && scrollState.hidden,
+      );
+      if (autoHideEnabled && sidebar) {
+        root.style.setProperty(
+          "--sf-wiki-sidebar-top",
+          `${wikiSidebarTop(headerHeight, safeAreaTop, scrollY)}px`,
+        );
+      }
+    };
+    const updateHeader = (resetScroll = false) => {
+      const nextLayout = getComputedStyle(header)
+        .getPropertyValue("--sf-navigation-layout")
+        .trim();
+      if (navigationLayout !== nextLayout) {
+        const focused = document.activeElement;
+        const focusedMenu = focused?.closest(".site-menu");
+        for (const disclosure of disclosures) {
+          if (!disclosure.querySelector("summary")?.checkVisibility())
+            disclosure.open = false;
+        }
+        if (
+          focused?.closest(".site-projects") &&
+          projectsTrigger?.checkVisibility()
+        ) {
+          projectsTrigger.focus();
+        } else if (nextLayout === "desktop") {
+          if (focusedMenu) focusDesktopCounterpart(focused);
+        } else if (
+          (focusedMenu && !focusedMenu.checkVisibility()) ||
+          (focused === logoLink && !logoLink.checkVisibility()) ||
+          (projectsDisclosure?.contains(focused) &&
+            !projectsDisclosure.checkVisibility()) ||
+          [...desktopGroups].some((group) => group.contains(focused))
+        ) {
+          focusSiteMenu();
+        }
+        navigationLayout = nextLayout;
+      }
+      if (docsButton?.checkVisibility()) {
+        document.documentElement.style.setProperty(
+          "--sf-docs-control-height",
+          docsButton.getBoundingClientRect().height + "px",
+        );
+      }
+      headerHeight = frame.getBoundingClientRect().height;
+      const nextAutoHideEnabled = autoHideViewport.matches;
+      if (resetScroll || autoHideEnabled !== nextAutoHideEnabled) {
+        scrollState = createHeaderScrollState(
+          clampScrollY(window.scrollY, root.scrollHeight - root.clientHeight),
+        );
+      }
+      autoHideEnabled = nextAutoHideEnabled;
+      if (headerContent) {
+        const contentStyle = getComputedStyle(headerContent);
+        safeAreaTop =
+          Number.parseFloat(
+            contentStyle.getPropertyValue("--sf-header-safe-top"),
+          ) || 0;
+        const bounds = header.getBoundingClientRect();
+        const top =
+          headerContent.getBoundingClientRect().top +
+          Number.parseFloat(contentStyle.paddingTop);
+        // Measure the shown position even while the capsule is translated away.
+        capsuleBounds = {
+          top,
+          bottom: top + bounds.height,
+          left: bounds.left,
+          right: bounds.right,
+        };
+      }
+      root.style.setProperty("--sl-nav-height", `${headerHeight}px`);
+      root.toggleAttribute("data-scroll-header", autoHideEnabled);
+      if (!autoHideEnabled) root.style.removeProperty("--sf-wiki-sidebar-top");
+      updateScrollState(true);
+    };
+
+    const scheduleUpdate = (measure = false) => {
+      needsMeasurement ||= measure;
+      if (pendingUpdate) return;
+      pendingUpdate = requestAnimationFrame(() => {
+        pendingUpdate = 0;
+        if (needsMeasurement) {
+          needsMeasurement = false;
+          updateHeader();
+        } else {
+          updateScrollState();
+        }
+      });
+    };
+
+    document.addEventListener("focusin", () => updateScrollState(true));
+    document.addEventListener("focusout", () => {
+      // A blur without a new focus target still releases the interaction hold.
+      queueMicrotask(() => updateScrollState(true));
+    });
+    header.addEventListener("pointerdown", (event) => {
+      // Keep the pressed control under the pointer until the browser picks its release target.
+      if (autoHideEnabled && !activePointers.size) {
+        header.style.transform = getComputedStyle(header).transform;
+      }
+      activePointers.add(event.pointerId);
+      updateScrollState(true, true);
+    });
+    const releasePointer = (event: PointerEvent) => {
+      activePointers.delete(event.pointerId);
+      updateScrollState(true);
+    };
+    document.addEventListener("pointerup", releasePointer);
+    document.addEventListener("pointercancel", releasePointer);
+    window.addEventListener("blur", () => {
+      activePointers.clear();
+      updateScrollState(true);
+    });
+
+    // Apply measured spacing after resize delivery; it can change the frame's size.
+    const headerResize = new ResizeObserver(() => scheduleUpdate(true));
+    headerResize.observe(frame, { box: "border-box" });
+    if (docsButton) headerResize.observe(docsButton, { box: "border-box" });
+    window.addEventListener("scroll", () => scheduleUpdate(), {
+      passive: true,
+    });
+    window.addEventListener("resize", () => scheduleUpdate(true));
+    window.addEventListener("pageshow", () => updateHeader(true));
+    autoHideViewport.addEventListener("change", () => updateHeader(true));
+    updateHeader();
+  }
+</script>
+
 <style>
-  @layer starlight.core {
-    .header {
-      display: flex;
-      gap: var(--sl-nav-gap);
-      justify-content: space-between;
-      align-items: center;
-      height: 100%;
-    }
+  .header-content {
+    --sf-header-safe-top: env(safe-area-inset-top, 0px);
 
-    .title-wrapper {
-      /* Prevent long titles overflowing and covering the search and menu buttons on narrow viewports. */
-      overflow: clip;
-      /* Avoid clipping focus ring around link inside title wrapper. */
-      padding: 0.25rem;
-      margin: -0.25rem;
-      min-width: 0;
-    }
+    padding: calc(0.25rem + var(--sf-header-safe-top))
+      max(16px, env(safe-area-inset-right)) 0.25rem
+      max(16px, env(safe-area-inset-left));
+    background: var(--sf-canvas);
+    pointer-events: auto;
+  }
 
-    .right-group,
-    .social-icons {
-      gap: 1rem;
-      align-items: center;
+  .site-header :global(.projects-trigger) {
+    padding-block: 0;
+  }
+
+  .site-header {
+    --sf-navigation-layout: compact;
+    --sf-navigation-gutter: 16px;
+
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    max-inline-size: 77.5rem;
+    min-block-size: 4rem;
+    margin-inline: auto;
+    padding: 8px;
+    border-radius: 999px;
+    background: var(--sf-surface);
+    color: var(--sf-text);
+    pointer-events: auto;
+  }
+
+  .site-header :global(.site-title) {
+    box-sizing: border-box;
+    flex: none;
+    justify-content: center;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    padding: 4px;
+    border-radius: 999px;
+  }
+
+  .site-header :global(.site-title img) {
+    inline-size: 32px;
+    block-size: 32px;
+  }
+
+  .site-header :global(.site-title:focus-visible) {
+    outline: 2px solid var(--sf-focus);
+    outline-offset: 3px;
+  }
+
+  .site-header :global(.disclosure-trigger) {
+    gap: 8px;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    padding: 0.5rem;
+  }
+
+  .home-link,
+  .page-links,
+  .header-socials {
+    display: none;
+    align-items: center;
+  }
+
+  .page-links {
+    gap: inherit;
+  }
+
+  .home-link,
+  .page-links a {
+    padding-inline: 1rem;
+    font-weight: 600;
+  }
+
+  .home-link:hover,
+  .page-links a:hover,
+  .home-link[aria-current="page"],
+  .page-links a[aria-current="page"] {
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .home-link:hover,
+    .page-links a:hover {
+      color: var(--sf-nav-link-hover);
     }
-    .social-icons::after {
+  }
+
+  .header-search {
+    margin-inline-start: auto;
+  }
+
+  .site-header[data-search-open] .header-search {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  .header-socials {
+    gap: 1rem;
+  }
+
+  .header-socials::before {
+    content: "";
+    inline-size: 1px;
+    block-size: 1.5rem;
+    background: var(--sf-boundary);
+  }
+
+  .site-menu {
+    min-inline-size: 0;
+  }
+
+  .site-menu--leading {
+    display: none;
+  }
+
+  .site-menu :global(svg) {
+    inline-size: 20px;
+    block-size: 20px;
+  }
+
+  @media (width < 50rem) {
+    .header-content[data-docs] {
+      padding-block-end: calc(var(--sf-docs-control-height, 44px) + 24px);
+    }
+  }
+
+  @media screen and (min-width: 72rem) and (height > 32rem) {
+    /* The backdrop occupies the header's reserved space and scrolls with the page. */
+    :global(:root[data-scroll-header] .page)::before {
       content: "";
-      height: 2rem;
-      border-inline-end: 1px solid var(--sl-color-gray-5);
+      flex: none;
+      height: var(--sl-nav-height);
+      background: var(--sf-surface);
+    }
+
+    :global(:root[data-scroll-header] .page > .main-frame) {
+      padding-top: 0;
+    }
+
+    :global(:root[data-scroll-header]) .header-content {
+      background: transparent;
+      pointer-events: none;
+    }
+
+    :global(
+        :root[data-scroll-header]
+          .header[data-scrolled]:not([data-header-attached])
+      )
+      .site-header {
+      box-shadow: var(--sl-shadow-sm);
+    }
+
+    :global(.header[data-header-hidden]:not([data-header-attached]))
+      .site-header {
+      transform: translateY(calc(-1 * (var(--sl-nav-height) + 16px)));
+    }
+
+    :global(.header[data-header-attached]) .site-header {
+      transform: translateY(calc(-1 * var(--sf-header-scroll, 0px)));
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      :global(:root[data-scroll-header]) .site-header {
+        transition: transform 150ms ease-out;
+      }
+    }
+
+    :global(.header[data-header-instant]) .site-header,
+    :global(:root[data-scroll-header]) .site-header:focus-within {
+      transition: none;
+    }
+
+    :global(:root[data-scroll-header]) .site-header:focus-within {
+      transform: none;
+    }
+
+    :global(:root[data-scroll-header] .page > .sidebar .sidebar-pane) {
+      inset-block-start: var(--sf-wiki-sidebar-top);
+      scroll-padding-block-start: calc(var(--sl-nav-height) + 8px);
+    }
+
+    :global(:root[data-scroll-header][data-has-sidebar] .right-sidebar) {
+      top: var(--sf-wiki-sidebar-top);
+      height: calc(100dvh - var(--sf-wiki-sidebar-top));
+      padding-top: 0;
+      scroll-padding-block-start: calc(var(--sl-nav-height) + 8px);
+    }
+  }
+
+  @container site-navigation (min-width: 24rem) {
+    .site-header {
+      padding-inline: 12px;
+    }
+  }
+
+  @container site-navigation (width < 22.5rem) {
+    .site-header {
+      --sf-navigation-layout: narrow;
+    }
+
+    .site-header :global(.site-title),
+    .site-header > :global(.navigation-disclosure),
+    .site-menu--trailing {
+      display: none;
+    }
+
+    .site-menu--leading {
+      display: block;
+    }
+  }
+
+  @container site-navigation (min-width: 64rem) {
+    .header-content {
+      padding-inline: max(24px, env(safe-area-inset-left))
+        max(24px, env(safe-area-inset-right));
+    }
+
+    .site-header {
+      --sf-navigation-layout: desktop;
+      --sf-navigation-gutter: 24px;
+
+      gap: 1rem;
+      padding-inline: 2rem;
+    }
+
+    .site-header :global(.site-title img) {
+      inline-size: 2.5rem;
+      block-size: 2.5rem;
+    }
+
+    .home-link,
+    .page-links,
+    .header-socials {
+      display: flex;
+    }
+
+    .home-link,
+    .page-links a {
+      min-block-size: 3rem;
+      font-size: 1.25rem;
+    }
+
+    .header-search :global(.sf-icon-control),
+    .header-socials :global(.social-link) {
+      min-inline-size: 3rem;
+      min-block-size: 3rem;
+    }
+
+    .header-search :global(.sf-icon-control svg),
+    .header-socials :global(svg) {
+      inline-size: 1.5rem;
+      block-size: 1.5rem;
+    }
+
+    .header-search :global(#starlight__search input) {
+      font-size: 1.25rem;
+    }
+
+    .site-menu {
+      display: none;
+    }
+  }
+
+  @container site-navigation (min-width: 80rem) {
+    .header-content {
+      background: var(--sf-surface);
+    }
+  }
+
+  .site-header[data-search-open] > :global(.navigation-disclosure),
+  .site-header[data-search-open] .home-link,
+  .site-header[data-search-open] .page-links,
+  .site-header[data-search-open] .site-menu--trailing {
+    display: none;
+  }
+
+  :global(:root) {
+    --sl-nav-height: calc(4.5rem + env(safe-area-inset-top));
+  }
+
+  :global(.page > .header) {
+    container: site-navigation / inline-size;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  @media (width < 50rem) {
+    :global(:root[data-has-sidebar]) {
+      --sl-nav-height: calc(8.5rem + env(safe-area-inset-top));
+    }
+  }
+
+  @media (scripting: none) {
+    :global(.page > .header) {
+      position: static;
+    }
+
+    :global(.main-frame) {
+      padding-top: var(--sl-mobile-toc-height);
+    }
+
+    .header-content[data-docs] {
+      padding-block-end: 0;
+    }
+  }
+
+  @media (max-height: 32rem) {
+    :global(.page > .header) {
+      position: static;
+    }
+
+    :global(.page > .main-frame) {
+      padding-top: 0;
+    }
+
+    :global(:root[data-has-sidebar]) {
+      scroll-padding-top: 1.5rem;
+    }
+
+    :global(mobile-starlight-toc nav) {
+      position: static;
+    }
+
+    :global(mobile-starlight-toc .dropdown) {
+      max-height: none;
+    }
+
+    :global(.page > .sidebar .sidebar-pane) {
+      inset-block: 0;
+      scroll-padding-block: 50px 8px;
+    }
+
+    :global(.right-sidebar) {
+      position: sticky;
+      top: 0;
+      height: auto;
+      max-height: 100svh;
+      padding-top: 0;
     }
 
     @media (min-width: 50rem) {
-      :global(:root[data-has-sidebar]) {
-        --__sidebar-pad: calc(2 * var(--sl-nav-pad-x));
-      }
-      :global(:root:not([data-has-toc])) {
-        --__toc-width: 0rem;
-      }
-      .header {
-        --__sidebar-width: max(
-          0rem,
-          var(--sl-content-inline-start, 0rem) - var(--sl-nav-pad-x)
-        );
-        --__main-column-fr: calc(
-          (
-              100% + var(--__sidebar-pad, 0rem) -
-                var(--__toc-width, var(--sl-sidebar-width)) -
-                (2 * var(--__toc-width, var(--sl-nav-pad-x))) -
-                var(--sl-content-inline-start, 0rem) - var(--sl-content-width)
-            ) /
-            2
-        );
+      :global(.page:has(.header-content[data-docs])) {
         display: grid;
-        grid-template-columns:
-          minmax(
-            /* 1 (site title): runs up until the main content column’s left edge or the width of the title, whichever is the largest  */
-              calc(
-                var(--__sidebar-width) +
-                  max(0rem, var(--__main-column-fr) - var(--sl-nav-gap))
-              ),
-            auto
-          )
-          /* 2 (search box): all free space that is available. */
-          1fr
-          /* 3 (right items): use the space that these need. */
-          auto;
-        align-content: center;
+        grid-template-columns: var(--sl-sidebar-width) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+      }
+
+      :global(.page > .header) {
+        grid-column: 1 / -1;
+      }
+
+      :global(.page > .sidebar) {
+        grid-column: 1;
+        grid-row: 2;
+        min-width: 0;
+      }
+
+      :global(.page > .sidebar .sidebar-pane) {
+        position: sticky;
+        top: 0;
+        max-height: 100svh;
+        width: 100%;
+      }
+
+      :global(.page:has(.header-content[data-docs]) > .main-frame) {
+        grid-column: 2;
+        grid-row: 2;
+        padding-inline-start: 0;
       }
     }
   }
